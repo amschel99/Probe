@@ -1,31 +1,33 @@
 import "./globals.css";
 
 import type { Metadata } from "next";
-import { Instrument_Serif, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { Toaster } from "sonner";
 
 import { Providers } from "./providers";
 
-// Instrument Serif for headlines, Inter Tight for reading, JetBrains Mono for
-// labels, buttons and readouts.
-const display = Instrument_Serif({
-  subsets: ["latin"],
+// Fonts are committed (app/fonts, Latin subset, OFL) and loaded locally so the
+// build never depends on reaching Google Fonts. Instrument Serif for headlines,
+// Inter Tight for reading, JetBrains Mono for labels, buttons and readouts.
+const display = localFont({
+  src: [
+    { path: "./fonts/InstrumentSerif-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/InstrumentSerif-Italic.woff2", weight: "400", style: "italic" },
+  ],
   display: "swap",
   variable: "--font-instrument-serif",
-  weight: "400",
-  style: ["normal", "italic"],
 });
-const sans = Inter_Tight({
-  subsets: ["latin"],
+const sans = localFont({
+  src: "./fonts/InterTight-Variable.woff2",
+  weight: "300 600",
   display: "swap",
   variable: "--font-inter-tight",
-  weight: ["300", "400", "500", "600"],
 });
-const mono = JetBrains_Mono({
-  subsets: ["latin"],
+const mono = localFont({
+  src: "./fonts/JetBrainsMono-Variable.woff2",
+  weight: "400 500",
   display: "swap",
   variable: "--font-jetbrains",
-  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
