@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 48" fill="none" role="img" aria-label="Probe">
-  <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6F82FF"/><stop offset="0.5" stop-color="#2238FF"/><stop offset="1" stop-color="#1424B8"/></linearGradient></defs>
-  <rect width="48" height="48" rx="10" fill="url(#pg)"/>
-  <path d="M13 38V12h9.5a9.5 9.5 0 0 1 0 19H13" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="22.5" cy="21.5" r="3" fill="#FFFFFF"/>
-  <path d="M38 13a11 11 0 0 1 0 17" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round"/>
-  <text x="60" y="34" font-family="Tektur, ui-sans-serif, system-ui, sans-serif" font-size="28" font-weight="800" letter-spacing="-0.5" fill="#080C1F">probe</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 172 48" fill="none" role="img" aria-label="Probe">
+  <circle cx="24" cy="27" r="7" fill="#C8963E"/>
+  <ellipse cx="24" cy="27" rx="19" ry="7" transform="rotate(-18 24 27)" stroke="#111211" stroke-width="1.6"/>
+  <path d="M24 20V6" stroke="#111211" stroke-width="1.6"/>
+  <circle cx="24" cy="5" r="2.4" fill="#111211"/>
+  <circle cx="41.2" cy="21.6" r="2.2" fill="#111211"/>
+  <text x="54" y="35" font-family="'Instrument Serif', Georgia, serif" font-size="34" letter-spacing="-0.5" fill="#111211">Probe</text>
 </svg>

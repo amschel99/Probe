@@ -204,7 +204,7 @@ export default function BuilderPage() {
         // public /f/<slug> page — so what you see here matches what visitors see
         // (no "themed form on a different-coloured page" mismatch).
         <div
-          className="rounded-2xl border border-probe-200 overflow-hidden py-10 px-4"
+          className="rounded-[2px] border border-probe-200 overflow-hidden py-10 px-4"
           style={{ background: form.theme.config.background }}
         >
           <FormRenderer
@@ -246,7 +246,7 @@ export default function BuilderPage() {
                     title={
                       storageOff ? "Configure R2 storage to enable file uploads" : undefined
                     }
-                    className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm hover:bg-probe-50 text-left disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    className="w-full flex items-center gap-2 px-2 py-2 rounded-[2px] text-sm hover:bg-probe-50 text-left disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                   >
                     <span className="w-5 text-center font-mono text-[12px] text-probe-500">{t.emoji}</span>
                     <span>{t.label}</span>
@@ -279,7 +279,7 @@ export default function BuilderPage() {
             <div className="mt-4 pt-4 border-t border-probe-100 space-y-1">
               <button
                 onClick={() => duplicateMutation.mutate({ id })}
-                className="w-full text-left text-sm py-1 px-2 rounded-lg hover:bg-probe-50"
+                className="w-full text-left text-sm py-1 px-2 rounded-[2px] hover:bg-probe-50"
               >
                 Duplicate form
               </button>
@@ -289,7 +289,7 @@ export default function BuilderPage() {
                     deleteForm.mutate({ id });
                   }
                 }}
-                className="w-full text-left text-sm py-1 px-2 rounded-lg hover:bg-red-50 text-red-700"
+                className="w-full text-left text-sm py-1 px-2 rounded-[2px] hover:bg-red-50 text-red-700"
               >
                 Delete form
               </button>
@@ -328,7 +328,7 @@ export default function BuilderPage() {
             </DndContext>
 
             {form.fields.length === 0 && (
-              <div className="text-center py-12 border-2 border-dashed border-probe-200 rounded-xl">
+              <div className="text-center py-12 border-2 border-dashed border-probe-200 rounded-[2px]">
                 <p className="text-probe-700">Add fields from the left panel.</p>
               </div>
             )}
@@ -382,7 +382,7 @@ function SortableField({
       ref={setNodeRef}
       style={style}
       onClick={onSelect}
-      className={`flex items-center gap-2 p-3 rounded-xl border ${
+      className={`flex items-center gap-2 p-3 rounded-[2px] border ${
         selected ? "border-probe-500 ring-2 ring-probe-500" : "border-probe-200"
       } bg-surface cursor-pointer`}
     >
@@ -811,7 +811,7 @@ function FormSettings({
               Add option/rating scores above. Define outcomes by score range:
             </p>
             {scoring.outcomes.map((o, i) => (
-              <div key={i} className="space-y-1 border border-probe-100 rounded-lg p-2">
+              <div key={i} className="space-y-1 border border-probe-100 rounded-[2px] p-2">
                 <div className="flex gap-2">
                   <input
                     type="number"

@@ -7,7 +7,7 @@ export default function BuilderLoading() {
         <div className="h-5 w-40 rounded bg-probe-100" />
         <div className="flex gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-9 w-24 rounded-lg bg-probe-100" />
+            <div key={i} className="h-9 w-24 rounded-[2px] bg-probe-100" />
           ))}
         </div>
       </div>
@@ -20,7 +20,7 @@ export default function BuilderLoading() {
         <div className="card space-y-3">
           <div className="h-7 w-1/2 rounded bg-probe-100" />
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-16 rounded-xl bg-probe-100" />
+            <div key={i} className="h-16 rounded-[2px] bg-probe-100" />
           ))}
         </div>
         <div className="card space-y-3">

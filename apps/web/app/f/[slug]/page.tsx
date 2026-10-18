@@ -100,7 +100,7 @@ export default async function PublicFormPage({
         href="/"
         target="_blank"
         rel="noreferrer"
-        className="fixed bottom-4 right-4 rounded-lg border border-black/10 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm hover:text-neutral-900"
+        className="fixed bottom-4 right-4 rounded-[2px] border border-black/10 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm hover:text-neutral-900"
       >
         Made with <span className="font-bold">Probe</span>
       </a>

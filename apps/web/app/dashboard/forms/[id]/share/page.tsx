@@ -76,7 +76,7 @@ export default function SharePage() {
         {/* QR code */}
         <div className="card flex flex-col items-center gap-4">
           <div className="self-start text-xs font-bold uppercase text-probe-700">QR code</div>
-          <div ref={qrWrapRef} className="bg-surface p-3 rounded-lg border border-probe-200">
+          <div ref={qrWrapRef} className="bg-surface p-3 rounded-[2px] border border-probe-200">
             <QRCodeCanvas value={url} size={192} marginSize={1} />
           </div>
           <button onClick={downloadQr} className="btn btn-primary text-sm w-full justify-center">
@@ -93,7 +93,7 @@ export default function SharePage() {
           <p className="text-sm text-probe-700">
             Paste this into any HTML page to embed the form inline.
           </p>
-          <pre className="bg-probe-900 text-probe-50 p-3 rounded-lg text-xs overflow-x-auto">
+          <pre className="bg-probe-900 text-probe-50 p-3 rounded-[2px] text-xs overflow-x-auto">
             {embed}
           </pre>
           <button onClick={() => copy(embed)} className="btn btn-ghost text-sm">

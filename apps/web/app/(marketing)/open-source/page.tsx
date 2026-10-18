@@ -20,7 +20,7 @@ export default function OpenSourcePage() {
           <div className="font-bold mt-2">Star on GitHub</div>
           <div className="text-sm text-probe-700">It actually helps. Algorithms care about this stuff.</div>
         </a>
-        <a href={donateUrl} target="_blank" rel="noreferrer" className="card bg-probe-500 text-white hover:shadow-md transition-shadow">
+        <a href={donateUrl} target="_blank" rel="noreferrer" className="card bg-probe-900 text-probe-50 hover:shadow-md transition-shadow">
           <div className="text-2xl">☕</div>
           <div className="font-bold mt-2">Send a tip</div>
           <div className="text-sm opacity-90">Optional. Nothing is gated.</div>

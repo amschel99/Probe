@@ -43,7 +43,7 @@ export default async function TemplatesPage() {
                 is designed to read on `surface`, not directly on `background`
                 (which is dark for some themes, e.g. Windows Vista). */}
             <div
-              className="rounded-xl p-5 mb-4"
+              className="rounded-[2px] p-5 mb-4"
               style={{
                 background: t.config.background,
                 fontFamily: t.config.fontFamily,
@@ -51,7 +51,7 @@ export default async function TemplatesPage() {
               }}
             >
               <div
-                className="rounded-lg p-4"
+                className="rounded-[2px] p-4"
                 style={{
                   background: t.config.surface,
                   color: t.config.text,

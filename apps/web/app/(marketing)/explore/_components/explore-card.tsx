@@ -86,13 +86,13 @@ export function ExploreCard({ form }: { form: ExploreFormItem }) {
           aria-hidden="true"
         >
           <span
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-2xl shadow-sm"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[2px] text-2xl shadow-sm"
             style={titleChipStyle}
           >
             {emoji}
           </span>
           <span
-            className="min-w-0 flex-1 truncate rounded-lg px-3 py-2 text-sm font-semibold shadow-sm"
+            className="min-w-0 flex-1 truncate rounded-[2px] px-3 py-2 text-sm font-semibold shadow-sm"
             style={titleChipStyle}
           >
             {form.title}

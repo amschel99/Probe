@@ -2,8 +2,8 @@
 export default function ResponsesLoading() {
   return (
     <div className="space-y-6 animate-pulse" aria-busy="true" aria-label="Loading responses…">
-      <div className="h-10 w-80 rounded-xl bg-probe-100" />
-      <div className="h-8 w-40 rounded-lg bg-probe-100" />
+      <div className="h-10 w-80 rounded-[2px] bg-probe-100" />
+      <div className="h-8 w-40 rounded-[2px] bg-probe-100" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="card">

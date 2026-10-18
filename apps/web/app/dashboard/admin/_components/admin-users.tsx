@@ -105,7 +105,7 @@ export function AdminUsers({ currentUserId }: { currentUserId: string | undefine
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full uppercase ${
                           isAdmin
-                            ? "bg-probe-500 text-white"
+                            ? "bg-probe-900 text-probe-50"
                             : "bg-probe-100 text-probe-700"
                         }`}
                       >

@@ -8,7 +8,7 @@ import { DashboardNav } from "./_components/dashboard-nav";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-30 border-b border-probe-200 bg-probe-50/80 backdrop-blur-md">
+      <header className="sticky top-0 z-30 border-b border-probe-200 bg-[var(--color-surface)]/90 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <Link href="/dashboard" className="display text-lg font-bold">
             <Logo />

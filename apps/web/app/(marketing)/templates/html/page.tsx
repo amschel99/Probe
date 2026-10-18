@@ -57,7 +57,7 @@ export default function HtmlTemplatesPage() {
         <ol className="grid md:grid-cols-5 gap-4 mt-6 list-none">
           {STEPS.map((step, i) => (
             <li key={step.title} className="text-sm">
-              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-probe-500 text-white font-bold text-xs">
+              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-probe-900 text-probe-50 font-bold text-xs">
                 {i + 1}
               </div>
               <div className="font-semibold mt-2 text-probe-900">{step.title}</div>
@@ -74,7 +74,7 @@ export default function HtmlTemplatesPage() {
           return (
             <div key={t.slug} className="card flex flex-col">
               {/* Live, non-interactive preview of the actual file */}
-              <div className="relative rounded-xl overflow-hidden border border-probe-200 bg-probe-50 h-64">
+              <div className="relative rounded-[2px] overflow-hidden border border-probe-200 bg-probe-50 h-64">
                 <iframe
                   src={file}
                   title={`${t.name} preview`}

@@ -153,7 +153,7 @@ export function SubmissionsTab({ formId }: { formId: string }) {
                   {open && (
                     <tr className="bg-probe-50">
                       <td colSpan={columns.length + 1} className="px-2 pb-4">
-                        <dl className="grid sm:grid-cols-[12rem_1fr] gap-x-4 gap-y-2 rounded-lg border border-probe-200 bg-white p-4">
+                        <dl className="grid sm:grid-cols-[12rem_1fr] gap-x-4 gap-y-2 rounded-[2px] border border-probe-200 bg-white p-4">
                           {Object.keys(payload).map((k) => (
                             <Fragment key={k}>
                               <dt className="text-xs font-semibold uppercase text-probe-700 pt-0.5">

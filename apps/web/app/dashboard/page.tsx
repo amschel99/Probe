@@ -44,7 +44,7 @@ export default function DashboardHome() {
               <li key={f.id}>
                 <Link
                   href={`/dashboard/forms/${f.id}`}
-                  className="flex items-center justify-between p-2 rounded-lg hover:bg-probe-50"
+                  className="flex items-center justify-between p-2 rounded-[2px] hover:bg-probe-50"
                 >
                   <div>
                     <div className="font-semibold">{f.title}</div>
@@ -76,7 +76,7 @@ export default function DashboardHome() {
               <li key={f.id}>
                 <Link
                   href={`/dashboard/endpoint-forms/${f.id}`}
-                  className="flex items-center justify-between p-2 rounded-lg hover:bg-probe-50"
+                  className="flex items-center justify-between p-2 rounded-[2px] hover:bg-probe-50"
                 >
                   <div>
                     <div className="font-semibold">

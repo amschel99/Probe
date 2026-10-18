@@ -4,49 +4,49 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Cybercore identity — icy silver-blue paper, cobalt cyber blue, chrome.
-     The ramp keeps its old roles (50 page, 100 fills, 200 borders, 500 accent,
+  /* Paper & ink. Warm stone hairlines, rust for emphasis, gold for signal.
+     The ramp keeps its roles (50 page, 100 fills, 200 hairlines, 500 accent,
      700 muted text, 900 ink) so every screen re-skins from these tokens. */
-  --color-probe-50: #EEF1F8;   /* page background — icy silver-blue */
-  --color-probe-100: #E2E7F3;  /* subtle fills / hover */
-  --color-probe-200: #C6CEE2;  /* borders / dividers */
-  --color-probe-500: #2238FF;  /* cyber blue accent (AA as text and as button bg) */
-  --color-probe-700: #48537A;  /* muted text */
-  --color-probe-900: #080C1F;  /* ink */
-  --color-surface: #FFFFFF;    /* card/input surface — flips in dark mode */
-  --color-cyan: #0091B3;       /* secondary signal accent */
+  --color-probe-50: #F7F4EE;   /* page */
+  --color-probe-100: #F2EDE5;  /* paper fills */
+  --color-probe-200: #E6DFD1;  /* hairlines */
+  --color-probe-500: #8A2B18;  /* rust — links, focus, emphasis */
+  --color-probe-700: #5F6462;  /* muted text */
+  --color-probe-900: #111211;  /* ink */
+  --color-surface: #FFFFFF;
+  --color-gold: #C8963E;       /* signal */
+  --color-body: #3B3F3E;       /* long-form text */
 
-  --font-sans: var(--font-instrument, "Instrument Sans"), system-ui, -apple-system,
+  --font-sans: var(--font-inter-tight, "Inter Tight"), system-ui, -apple-system,
     "Segoe UI", sans-serif;
-  --font-display: var(--font-tektur, "Tektur"), var(--font-sans);
+  --font-display: var(--font-instrument-serif, "Instrument Serif"), Georgia, serif;
   --font-mono: var(--font-jetbrains, "JetBrains Mono"), ui-monospace, "SFMono-Regular",
     Menlo, monospace;
 }
 
-html {
-  background-color: var(--color-probe-50);
-  /* Faint dot grid, like graph paper on an old CRT. */
-  background-image: radial-gradient(
-    color-mix(in srgb, var(--color-probe-900) 10%, transparent) 1px,
-    transparent 1px
-  );
-  background-size: 22px 22px;
-  color: var(--color-probe-900);
+@layer base {
+  html {
+    background: var(--color-probe-50);
+    color: var(--color-probe-900);
+  }
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  /* Instrument Serif ships one weight; never fake a bold. */
+  h1, h2, .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-synthesis: none;
+    letter-spacing: -0.022em;
+    line-height: 1.04;
+  }
+  h3 { font-weight: 600; letter-spacing: -0.01em; }
+  ::selection { background: var(--color-probe-900); color: #fff; }
+  :focus-visible { outline: 2px solid var(--color-probe-500); outline-offset: 3px; }
 }
-body {
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-h1, h2, h3, .display {
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  line-height: 1.08;
-}
-.display { font-weight: 800; }
-::selection { background: var(--color-probe-500); color: #fff; }
 
 /* Form renderer applies CSS variables from the theme config */
 [data-probe-form] {
@@ -280,207 +280,125 @@ h1, h2, h3, .display {
 }
 
 /* ── App chrome design system ───────────────────────────────────────────
-   Cybercore primitives: bevelled chrome buttons, early-software windows,
-   tight 6–8px radii, cyber-blue focus rings. Independent of the per-theme
+   Square, hairline, no shadows. Buttons speak mono. Layered as components so
+   Tailwind utilities can still override them. Independent of the per-theme
    [data-probe-form] system above. */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 1.2;
-  border: 1px solid transparent;
-  cursor: pointer;
-  user-select: none;
-  transition: filter 0.15s ease, background-color 0.15s ease, border-color 0.15s ease,
-    box-shadow 0.2s ease, transform 0.05s ease;
-}
-.btn:active { transform: translateY(1px); }
-.btn:focus-visible {
-  outline: 2px solid var(--color-probe-500);
-  outline-offset: 2px;
-}
-.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 11px 18px;
+    border-radius: 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    border: 1px solid transparent;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* Glossy cyber-blue key: top highlight, darker base, soft blue glow. */
-.btn-primary {
-  color: #fff;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--color-probe-500) 72%, #fff) 0%,
-    var(--color-probe-500) 48%,
-    color-mix(in srgb, var(--color-probe-500) 82%, #000) 100%
-  );
-  border-color: color-mix(in srgb, var(--color-probe-500) 70%, #000);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 8px 22px -10px var(--color-probe-500);
-}
-.btn-primary:hover:not(:disabled) {
-  filter: brightness(1.08) saturate(1.05);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 10px 30px -8px var(--color-probe-500);
-}
+  .btn-primary {
+    background: var(--color-probe-900);
+    color: var(--color-probe-50);
+    border-color: var(--color-probe-900);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-probe-500);
+    border-color: var(--color-probe-500);
+    color: #fff;
+  }
 
-/* Brushed-chrome secondary key. */
-.btn-ghost {
-  color: var(--color-probe-900);
-  background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-probe-100) 100%);
-  border-color: var(--color-probe-200);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 1px 2px rgba(8, 12, 31, 0.06);
-}
-.btn-ghost:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--color-probe-500) 45%, var(--color-probe-200));
-}
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-probe-900);
+    border-color: var(--color-probe-900);
+  }
+  .btn-ghost:hover:not(:disabled) { background: var(--color-probe-900); color: var(--color-probe-50); }
 
-.input {
-  width: 100%;
-  padding: 10px 12px;
-  background: var(--color-surface);
-  color: var(--color-probe-900);
-  border: 1px solid var(--color-probe-200);
-  border-radius: 6px;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 1.4;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-.input::placeholder { color: color-mix(in srgb, var(--color-probe-700) 70%, transparent); }
-.input:hover { border-color: color-mix(in srgb, var(--color-probe-500) 30%, var(--color-probe-200)); }
-.input:focus {
-  outline: none;
-  border-color: var(--color-probe-500);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-probe-500) 22%, transparent);
-}
-textarea.input { resize: vertical; }
+  .input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--color-surface);
+    color: var(--color-probe-900);
+    border: 1px solid #DCD3C3;
+    border-radius: 2px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .input::placeholder { color: #9AA09E; }
+  .input:hover { border-color: #C9BFAD; }
+  .input:focus {
+    outline: none;
+    border-color: var(--color-probe-900);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-probe-900) 10%, transparent);
+  }
+  textarea.input { resize: vertical; }
 
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-probe-200);
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 1px 2px rgba(8, 12, 31, 0.05),
-    0 12px 32px -22px rgba(8, 12, 31, 0.35);
-}
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-probe-200);
+    border-radius: 2px;
+    padding: 20px;
+  }
 
-.label {
-  display: block;
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 6px;
-  color: var(--color-probe-900);
-}
-.help { color: var(--color-help, #5A658C); font-size: 13px; margin-top: 4px; line-height: 1.4; }
-.error { color: #D11F3A; font-size: 13px; margin-top: 4px; font-weight: 500; }
+  .label {
+    display: block;
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: var(--color-probe-900);
+  }
+  .help { color: var(--color-help, #5F6462); font-size: 13px; margin-top: 4px; line-height: 1.45; }
+  .error { color: #B42318; font-size: 13px; margin-top: 4px; font-weight: 500; }
 
-/* Small mono caps label: section kickers, readouts, window titles. */
-.kicker {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-probe-500);
-}
-
-/* ── Windows: early-OS chrome for marketing + empty states ─────────────── */
-.window {
-  background: var(--color-surface);
-  border: 1px solid var(--color-probe-200);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 24px 60px -30px rgba(8, 12, 31, 0.45),
-    0 0 0 1px color-mix(in srgb, var(--color-probe-900) 3%, transparent);
-}
-.window-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 30px;
-  padding: 0 10px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: var(--color-probe-700);
-  background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-probe-100) 100%);
-  border-bottom: 1px solid var(--color-probe-200);
-}
-.window-bar .window-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* Square title-bar buttons (min / max / close), drawn not emoji. */
-.window-btns { display: flex; gap: 4px; }
-.window-btns > span {
-  width: 11px;
-  height: 11px;
-  border-radius: 2px;
-  border: 1px solid var(--color-probe-200);
-  background: linear-gradient(180deg, var(--color-surface), var(--color-probe-100));
-}
-.window-btns > span:last-child {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--color-probe-500) 60%, #fff), var(--color-probe-500));
-  border-color: color-mix(in srgb, var(--color-probe-500) 70%, #000);
-}
-
-/* Silver chrome type for the biggest moments only. */
-.chrome-text {
-  background: linear-gradient(
-    180deg,
-    var(--color-probe-900) 0%,
-    color-mix(in srgb, var(--color-probe-900) 55%, var(--color-probe-50)) 52%,
-    var(--color-probe-900) 53%,
-    color-mix(in srgb, var(--color-probe-900) 80%, var(--color-probe-500)) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  /* Spaced mono caps: kickers, table heads, readouts. */
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-probe-500);
+  }
 }
 
 /* ── Motion ─────────────────────────────────────────────────────────────── */
-@keyframes probe-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-@keyframes probe-twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.8) rotate(0deg); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
+@keyframes probe-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 @keyframes probe-blink { 50% { opacity: 0; } }
-@keyframes probe-marquee { to { transform: translateX(-50%); } }
-@keyframes probe-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-@keyframes probe-ping { 0% { transform: scale(0.6); opacity: 0.8; } 100% { transform: scale(2.4); opacity: 0; } }
-.anim-float { animation: probe-float 6s ease-in-out infinite; }
-.anim-twinkle { animation: probe-twinkle 3.2s ease-in-out infinite; }
+@keyframes probe-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes probe-spin { to { transform: rotate(360deg); } }
+.anim-in { opacity: 0; animation: probe-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards; }
 .anim-blink { animation: probe-blink 1.1s steps(1) infinite; }
-.anim-marquee { animation: probe-marquee 38s linear infinite; }
-.anim-in { opacity: 0; animation: probe-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) forwards; }
-.anim-ping { animation: probe-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.anim-pulse { animation: probe-pulse 2.4s ease-in-out infinite; }
+.anim-spin-slow { transform-box: fill-box; transform-origin: center; animation: probe-spin 90s linear infinite; }
 @media (prefers-reduced-motion: reduce) {
-  .anim-float, .anim-twinkle, .anim-blink, .anim-marquee, .anim-ping { animation: none; }
   .anim-in { opacity: 1; animation: none; }
+  .anim-blink, .anim-pulse, .anim-spin-slow { animation: none; }
 }
 
-/* ── Dark mode: deep space ──────────────────────────────────────────────
-   Toggled by next-themes adding `.dark` to <html> (the default). The
-   per-theme [data-probe-form] system is independent — a user's form keeps
-   its own theme colors. */
+/* ── Dark mode: ink ─────────────────────────────────────────────────────
+   Toggled by next-themes adding `.dark` to <html>. Gold takes over as the
+   accent. The per-theme [data-probe-form] system is independent. */
 .dark {
-  --color-probe-50: #04060D;   /* page background — deep space */
-  --color-probe-100: #0D1222;  /* hover fills */
-  --color-probe-200: #1D2643;  /* borders / dividers */
-  --color-probe-500: #4C63FF;  /* cyber blue (white text AA on it) */
-  --color-probe-700: #9AA5C9;  /* muted text */
-  --color-probe-900: #E9EDFF;  /* ink */
-  --color-surface: #0A0E1B;    /* card / input surface */
-  --color-cyan: #6EF2FF;
-  --color-help: #8E99BE;
+  --color-probe-50: #111211;
+  --color-probe-100: #1A1C1B;
+  --color-probe-200: #2C2F2D;
+  --color-probe-500: #C8963E;
+  --color-probe-700: #9AA09E;
+  --color-probe-900: #F2EDE5;
+  --color-surface: #161817;
+  --color-body: #C9CCCA;
+  --color-help: #9AA09E;
 }
-.dark .btn-ghost,
-.dark .card,
-.dark .window { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 18px 50px -28px rgba(0, 0, 0, 0.9); }
-.dark .window-bar { background: linear-gradient(180deg, #121931 0%, #0B1020 100%); }
-.dark .window-btns > span:not(:last-child) { background: linear-gradient(180deg, #1D2643, #0F1528); }
-/* Kickers in cyan on dark — the blue is too dim as small text there. */
-.dark .kicker { color: var(--color-cyan); }
-.dark .chrome-text {
-  background: linear-gradient(180deg, #FFFFFF 0%, #C9D2F2 45%, #7C88B4 52%, #E9EDFF 70%, #9FB0FF 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-}
+.dark .input { border-color: #3A3D3B; }
+.dark .input:hover { border-color: #4A4E4B; }
+.dark .btn-primary:hover:not(:disabled) { color: #111211; }
 html.dark { color-scheme: dark; }

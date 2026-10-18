@@ -102,11 +102,11 @@ export default function EndpointFormDetail() {
         <div className="space-y-4">
           <div className="card">
             <div className="text-xs font-bold uppercase text-probe-700 mb-1">Endpoint URL</div>
-            <code className="block bg-probe-900 text-probe-50 p-3 rounded-lg text-xs">{endpoint}</code>
+            <code className="block bg-probe-900 text-probe-50 p-3 rounded-[2px] text-xs">{endpoint}</code>
           </div>
           <div className="card">
             <div className="text-xs font-bold uppercase text-probe-700 mb-1">Access key (public)</div>
-            <code className="block bg-probe-900 text-probe-50 p-3 rounded-lg text-xs">
+            <code className="block bg-probe-900 text-probe-50 p-3 rounded-[2px] text-xs">
               {form.accessKey}
             </code>
             <p className="help">
@@ -226,8 +226,8 @@ export function ContactForm() {
           <button
             key={s}
             onClick={() => setSnippet(s)}
-            className={`px-3 py-1 rounded-lg text-sm ${
-              snippet === s ? "bg-probe-900 text-white" : "bg-probe-100 text-probe-900"
+            className={`px-3 py-1 rounded-[2px] text-sm ${
+              snippet === s ? "bg-probe-900 text-probe-50" : "bg-probe-100 text-probe-900"
             }`}
           >
             {s.toUpperCase()}
@@ -243,7 +243,7 @@ export function ContactForm() {
           Copy
         </button>
       </div>
-      <pre className="bg-probe-900 text-probe-50 p-4 rounded-xl overflow-x-auto text-xs">
+      <pre className="bg-probe-900 text-probe-50 p-4 rounded-[2px] overflow-x-auto text-xs">
         {content}
       </pre>
     </div>

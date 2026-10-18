@@ -124,7 +124,7 @@ function NewFormForm() {
                 key={t.id}
                 type="button"
                 onClick={() => setValue("themeId", t.id, { shouldValidate: true })}
-                className={`text-left p-2 rounded-xl border ${
+                className={`text-left p-2 rounded-[2px] border ${
                   selectedThemeId === t.id ? "border-probe-500 ring-2 ring-probe-500" : "border-probe-200"
                 }`}
                 style={{ background: t.config.background, fontFamily: t.config.fontFamily }}
@@ -133,7 +133,7 @@ function NewFormForm() {
                     read on `surface`, not on the page `background` (which can be
                     dark, e.g. Windows Vista → unreadable otherwise). */}
                 <div
-                  className="rounded-lg px-3 py-2"
+                  className="rounded-[2px] px-3 py-2"
                   style={{
                     background: t.config.surface,
                     color: t.config.text,

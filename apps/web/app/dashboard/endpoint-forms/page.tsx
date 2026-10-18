@@ -36,7 +36,7 @@ export default function EndpointFormsListPage() {
         <ul className="divide-y divide-probe-100">
           {data?.items.map((f) => (
             <li key={f.id} className="py-3">
-              <Link href={`/dashboard/endpoint-forms/${f.id}`} className="flex items-center justify-between hover:bg-probe-50 p-2 rounded-lg">
+              <Link href={`/dashboard/endpoint-forms/${f.id}`} className="flex items-center justify-between hover:bg-probe-50 p-2 rounded-[2px]">
                 <div>
                   <div className="font-semibold flex items-center gap-2">
                     {f.title}

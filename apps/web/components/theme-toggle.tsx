@@ -21,7 +21,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={mounted ? `Switch to ${isDark ? "light" : "dark"} mode` : "Toggle theme"}
       title="Toggle theme"
-      className={`grid h-9 w-9 place-items-center btn-ghost rounded-md border text-probe-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-probe-500 ${className}`}
+      className={`grid h-9 w-9 place-items-center border border-probe-200 text-probe-900 hover:border-probe-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-probe-500 ${className}`}
     >
       {/* aria-hidden: the button's aria-label conveys the action */}
       <svg aria-hidden viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">

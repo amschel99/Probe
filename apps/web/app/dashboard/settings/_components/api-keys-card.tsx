@@ -45,7 +45,7 @@ export function ApiKeysCard() {
       </p>
 
       {created && (
-        <div className="rounded-lg border border-probe-200 bg-probe-50 p-3 space-y-2">
+        <div className="rounded-[2px] border border-probe-200 bg-probe-50 p-3 space-y-2">
           <div className="text-sm font-semibold">
             Copy your new key now — it won&apos;t be shown again.
           </div>
