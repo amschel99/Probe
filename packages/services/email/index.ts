@@ -41,12 +41,18 @@ export async function sendEmail(input: SendEmailInput): Promise<void> {
     return;
   }
   const from = input.from ?? env.RESEND_FROM;
-  await client.emails.send({
+  // Resend reports API failures (unverified domain, bad sender…) in `error`
+  // rather than throwing — surface them so they reach the logs.
+  const { error } = await client.emails.send({
     from,
     to: input.to,
     subject: input.subject,
     html: input.html,
   });
+  if (error) {
+    console.error(`[email] Resend rejected "${input.subject}" (from ${from}):`, error);
+    throw new Error(`Email send failed: ${error.message}`);
+  }
 }
 
 export const TEMPLATES = {
