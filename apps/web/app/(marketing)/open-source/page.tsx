@@ -8,32 +8,32 @@ export default function OpenSourcePage() {
 
   return (
     <section className="max-w-3xl mx-auto px-6 py-20">
-      <h1 className="display text-5xl font-bold text-chai-900">Free. Forever. No gotcha.</h1>
-      <p className="text-lg text-chai-700 mt-6">
-        ChaiForm is open source. Fork it, self-host it, break it, fix it. If it saves you time, buy
-        Saad a chai.
+      <h1 className="display text-5xl font-bold text-probe-900">Free. Forever. No gotcha.</h1>
+      <p className="text-lg text-probe-700 mt-6">
+        Probe is open source. Fork it, self-host it, break it, fix it. Built on the MIT-licensed
+        ChaiForm project.
       </p>
 
       <div className="grid sm:grid-cols-2 gap-4 mt-10">
         <a href={githubUrl} target="_blank" rel="noreferrer" className="card hover:shadow-md transition-shadow">
           <div className="text-2xl">⭐</div>
           <div className="font-bold mt-2">Star on GitHub</div>
-          <div className="text-sm text-chai-700">It actually helps. Algorithms care about this stuff.</div>
+          <div className="text-sm text-probe-700">It actually helps. Algorithms care about this stuff.</div>
         </a>
-        <a href={donateUrl} target="_blank" rel="noreferrer" className="card bg-chai-500 text-white hover:shadow-md transition-shadow">
+        <a href={donateUrl} target="_blank" rel="noreferrer" className="card bg-probe-500 text-white hover:shadow-md transition-shadow">
           <div className="text-2xl">☕</div>
-          <div className="font-bold mt-2">Buy me a chai — ₹99</div>
-          <div className="text-sm opacity-90">Razorpay payment link. No login. No card store. Just chai.</div>
+          <div className="font-bold mt-2">Send a tip</div>
+          <div className="text-sm opacity-90">Optional. Nothing is gated.</div>
         </a>
         <a href={twitterUrl} target="_blank" rel="noreferrer" className="card hover:shadow-md transition-shadow">
           <div className="text-2xl">𝕏</div>
           <div className="font-bold mt-2">Follow on X</div>
-          <div className="text-sm text-chai-700">Where ChaiForm gets roasted before it ships.</div>
+          <div className="text-sm text-probe-700">Where Probe gets roasted before it ships.</div>
         </a>
         <a href={linkedinUrl} target="_blank" rel="noreferrer" className="card hover:shadow-md transition-shadow">
           <div className="text-2xl">💼</div>
           <div className="font-bold mt-2">LinkedIn</div>
-          <div className="text-sm text-chai-700">For the polite version of the same content.</div>
+          <div className="text-sm text-probe-700">For the polite version of the same content.</div>
         </a>
       </div>
 
@@ -41,9 +41,9 @@ export default function OpenSourcePage() {
         <h2 className="display text-2xl font-bold mb-4">Everything. Included. Always.</h2>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-chai-200">
+            <tr className="border-b border-probe-200">
               <th className="text-left py-2 font-semibold">Feature</th>
-              <th className="text-right py-2 font-semibold">ChaiForm</th>
+              <th className="text-right py-2 font-semibold">Probe</th>
             </tr>
           </thead>
           <tbody>
@@ -61,16 +61,16 @@ export default function OpenSourcePage() {
               ["Webhooks (signed)", "✓"],
               ["Self-host with Kamal", "✓"],
             ].map(([feature, value]) => (
-              <tr key={feature} className="border-b border-chai-100">
+              <tr key={feature} className="border-b border-probe-100">
                 <td className="py-2">{feature}</td>
-                <td className="py-2 text-right text-chai-500 font-bold">{value}</td>
+                <td className="py-2 text-right text-probe-500 font-bold">{value}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <p className="mt-12 text-chai-700 text-sm">
+      <p className="mt-12 text-probe-700 text-sm">
         Looking for the docs?{" "}
         <Link href="/docs" className="underline">
           API reference

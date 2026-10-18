@@ -21,7 +21,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={mounted ? `Switch to ${isDark ? "light" : "dark"} mode` : "Toggle theme"}
       title="Toggle theme"
-      className={`grid h-9 w-9 place-items-center rounded-lg border border-chai-200 text-chai-900 transition-colors hover:bg-chai-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-chai-500 ${className}`}
+      className={`grid h-9 w-9 place-items-center rounded-lg border border-probe-200 text-probe-900 transition-colors hover:bg-probe-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-probe-500 ${className}`}
     >
       {/* aria-hidden: the button's aria-label conveys the action */}
       <span aria-hidden className="text-base leading-none">

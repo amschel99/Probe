@@ -85,7 +85,7 @@ export function FormRenderer(props: FormRendererProps) {
   const firstInteractionAt = useRef<number | null>(null);
   const formTopRef = useRef<HTMLDivElement | null>(null);
 
-  const draftKey = props.slug && !props.isPreview ? `chaiform:draft:${props.slug}` : null;
+  const draftKey = props.slug && !props.isPreview ? `probe:draft:${props.slug}` : null;
 
   // Restore a saved draft + apply URL prefill once, after mount (avoids SSR
   // hydration mismatch — the server render is always the empty form).
@@ -212,7 +212,7 @@ export function FormRenderer(props: FormRendererProps) {
 
   if (done) {
     return (
-      <div data-chai-form style={applyThemeVars(props.theme)} className="max-w-xl mx-auto p-10 text-center">
+      <div data-probe-form style={applyThemeVars(props.theme)} className="max-w-xl mx-auto p-10 text-center">
         <div className="text-5xl mb-4">{outcome ? "🎉" : "☕"}</div>
         <h2 className="display text-2xl font-bold mb-2">{outcome?.title ?? "Submission received"}</h2>
         <p style={{ color: "var(--form-text-muted)" }}>
@@ -227,7 +227,7 @@ export function FormRenderer(props: FormRendererProps) {
 
   return (
     <form
-      data-chai-form
+      data-probe-form
       style={applyThemeVars(props.theme)}
       onSubmit={handleSubmit}
       className="max-w-xl mx-auto p-8 space-y-6"
@@ -297,7 +297,7 @@ export function FormRenderer(props: FormRendererProps) {
         const Caption = grouped ? "legend" : "label";
 
         return (
-          <Wrapper key={field.id} className="chai-field">
+          <Wrapper key={field.id} className="probe-field">
             <Caption className="label" style={{ color: "var(--form-text)" }} {...(grouped ? {} : { htmlFor: field.id })}>
               {pipeText(field.label, values)}
               {field.required && (
@@ -307,7 +307,7 @@ export function FormRenderer(props: FormRendererProps) {
               )}
             </Caption>
             {field.helpText && (
-              <p id={helpId} className="chai-help" style={{ color: "var(--form-text-muted)" }}>
+              <p id={helpId} className="probe-help" style={{ color: "var(--form-text-muted)" }}>
                 {pipeText(field.helpText, values)}
               </p>
             )}
@@ -339,7 +339,7 @@ export function FormRenderer(props: FormRendererProps) {
       {/* Navigation */}
       <div className="flex items-center gap-3">
         {isMultiPage && safePageIndex > 0 && (
-          <button type="button" className="chai-btn-secondary" onClick={() => goTo(safePageIndex - 1)}>
+          <button type="button" className="probe-btn-secondary" onClick={() => goTo(safePageIndex - 1)}>
             Back
           </button>
         )}
@@ -411,7 +411,7 @@ function FieldInput({
       return <input {...a11y} type="time" value={(value as string) ?? ""} onChange={(e) => onChange(e.target.value)} />;
     case "checkbox":
       return (
-        <label className="chai-option chai-option--inline" data-selected={Boolean(value)}>
+        <label className="probe-option probe-option--inline" data-selected={Boolean(value)}>
           <input {...a11y} type="checkbox" checked={Boolean(value)} onChange={(e) => onChange(e.target.checked)} />
           <span>{field.placeholder || "Yes"}</span>
         </label>
@@ -453,7 +453,7 @@ function FieldInput({
       return (
         <div className="space-y-2" role="radiogroup" {...groupA11y}>
           {(cfg.options ?? []).map((o) => (
-            <label key={o.value} className="chai-option" data-selected={value === o.value}>
+            <label key={o.value} className="probe-option" data-selected={value === o.value}>
               <input type="radio" name={id} checked={value === o.value} onChange={() => onChange(o.value)} />
               <span>{o.label}</span>
             </label>
@@ -465,7 +465,7 @@ function FieldInput({
       return (
         <div className="space-y-2" role="group" {...groupA11y}>
           {(cfg.options ?? []).map((o) => (
-            <label key={o.value} className="chai-option" data-selected={arr.includes(o.value)}>
+            <label key={o.value} className="probe-option" data-selected={arr.includes(o.value)}>
               <input
                 type="checkbox"
                 checked={arr.includes(o.value)}
@@ -509,7 +509,7 @@ function RatingInput({
           onClick={() => onChange(n)}
           aria-label={`${n} of ${max}${label ? ` — ${label}` : ""}`}
           aria-pressed={value >= n}
-          className="chai-rating-btn"
+          className="probe-rating-btn"
           style={{
             background: value >= n ? "var(--form-accent)" : "var(--form-surface)",
             color: value >= n ? "var(--form-accent-text)" : "var(--form-text)",
@@ -552,7 +552,7 @@ function LinearScaleInput({
             key={n}
             onClick={() => onChange(n)}
             aria-pressed={value === n}
-            className="chai-rating-btn"
+            className="probe-rating-btn"
             style={{
               background: value === n ? "var(--form-accent)" : "var(--form-surface)",
               color: value === n ? "var(--form-accent-text)" : "var(--form-text)",
@@ -603,16 +603,16 @@ function RankingInput({
   return (
     <ol className="space-y-2">
       {order.map((v, i) => (
-        <li key={v} className="chai-option" style={{ cursor: "default" }}>
+        <li key={v} className="probe-option" style={{ cursor: "default" }}>
           <span className="tabular-nums" style={{ color: "var(--form-text-muted)", minWidth: 20 }}>
             {i + 1}.
           </span>
           <span>{labelOf(v)}</span>
           <span className="flex gap-1">
-            <button type="button" className="chai-rank-btn" aria-label="Move up" disabled={i === 0} onClick={() => move(i, -1)}>
+            <button type="button" className="probe-rank-btn" aria-label="Move up" disabled={i === 0} onClick={() => move(i, -1)}>
               ↑
             </button>
-            <button type="button" className="chai-rank-btn" aria-label="Move down" disabled={i === order.length - 1} onClick={() => move(i, 1)}>
+            <button type="button" className="probe-rank-btn" aria-label="Move down" disabled={i === order.length - 1} onClick={() => move(i, 1)}>
               ↓
             </button>
           </span>
@@ -708,7 +708,7 @@ function SignaturePad({ value, onChange }: { value: string; onChange: (v: string
           cursor: "crosshair",
         }}
       />
-      <button type="button" className="chai-btn-secondary mt-2" onClick={clear}>
+      <button type="button" className="probe-btn-secondary mt-2" onClick={clear}>
         Clear signature
       </button>
     </div>
@@ -800,7 +800,7 @@ function FileUploadInput({
           <span className="text-xs" style={{ color: "var(--form-text-muted)" }}>
             {formatBytes(value.size)}
           </span>
-          <button type="button" className="chai-btn-secondary" onClick={clear}>
+          <button type="button" className="probe-btn-secondary" onClick={clear}>
             Remove
           </button>
         </div>

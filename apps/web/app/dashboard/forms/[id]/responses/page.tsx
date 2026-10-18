@@ -51,7 +51,7 @@ function renderCell(v: unknown, publicBaseUrl: string | null) {
   if (isFileValue(v) && publicBaseUrl) {
     const href = `${publicBaseUrl}/${v.key.replace(/^\/+/, "")}`;
     return (
-      <a href={href} target="_blank" rel="noreferrer" className="text-chai-600 underline">
+      <a href={href} target="_blank" rel="noreferrer" className="text-probe-600 underline">
         {v.name}
       </a>
     );
@@ -173,7 +173,7 @@ export default function ResponsesPage() {
   };
   const hasFilters = Boolean(from || to || search);
 
-  if (!formQuery.data) return <p className="text-chai-700">Loading…</p>;
+  if (!formQuery.data) return <p className="text-probe-700">Loading…</p>;
 
   const a = analyticsQuery.data;
   const stats = [
@@ -190,7 +190,7 @@ export default function ResponsesPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="text-xs text-chai-700">
+          <div className="text-xs text-probe-700">
             <Link href={`/dashboard/forms/${id}`} className="hover:underline">
               {formQuery.data.title}
             </Link>
@@ -198,7 +198,7 @@ export default function ResponsesPage() {
           <h1 className="display text-3xl font-bold">Responses</h1>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-chai-700">Export:</span>
+          <span className="text-xs text-probe-700">Export:</span>
           {(["csv", "xlsx", "pdf"] as const).map((fmt) => (
             <a
               key={fmt}
@@ -217,9 +217,9 @@ export default function ResponsesPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {stats.map((s) => (
           <div key={s.label} className="card">
-            <div className="text-xs uppercase tracking-wide text-chai-700">{s.label}</div>
+            <div className="text-xs uppercase tracking-wide text-probe-700">{s.label}</div>
             <div className="display text-2xl font-bold mt-1">{s.value}</div>
-            <div className="text-xs text-chai-700 mt-0.5">{s.sub}</div>
+            <div className="text-xs text-probe-700 mt-0.5">{s.sub}</div>
           </div>
         ))}
       </div>
@@ -227,7 +227,7 @@ export default function ResponsesPage() {
       {/* Controls */}
       <div className="card flex flex-wrap items-end gap-3">
         <label className="text-sm">
-          <div className="text-xs text-chai-700 mb-1">From</div>
+          <div className="text-xs text-probe-700 mb-1">From</div>
           <input
             type="date"
             className="input"
@@ -240,7 +240,7 @@ export default function ResponsesPage() {
           />
         </label>
         <label className="text-sm">
-          <div className="text-xs text-chai-700 mb-1">To</div>
+          <div className="text-xs text-probe-700 mb-1">To</div>
           <input
             type="date"
             className="input"
@@ -253,7 +253,7 @@ export default function ResponsesPage() {
           />
         </label>
         <label className="text-sm flex-1 min-w-[200px]">
-          <div className="text-xs text-chai-700 mb-1">Search</div>
+          <div className="text-xs text-probe-700 mb-1">Search</div>
           <input
             type="search"
             className="input"
@@ -290,11 +290,11 @@ export default function ResponsesPage() {
                   <div key={e.label} className="text-sm">
                     <div className="flex justify-between mb-0.5">
                       <span className="truncate pr-2">{e.label}</span>
-                      <span className="text-chai-700 tabular-nums">{e.count}</span>
+                      <span className="text-probe-700 tabular-nums">{e.count}</span>
                     </div>
-                    <div className="h-2 rounded-full bg-chai-100 overflow-hidden">
+                    <div className="h-2 rounded-full bg-probe-100 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-chai-500"
+                        className="h-full rounded-full bg-probe-500"
                         style={{ width: `${max > 0 ? (e.count / max) * 100 : 0}%` }}
                       />
                     </div>
@@ -310,7 +310,7 @@ export default function ResponsesPage() {
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-chai-200 text-xs uppercase text-chai-700">
+            <tr className="border-b border-probe-200 text-xs uppercase text-probe-700">
               <th className="text-left p-2 whitespace-nowrap">When</th>
               <th className="text-left p-2">Email</th>
               {fields.slice(0, 4).map((f) => (
@@ -328,7 +328,7 @@ export default function ResponsesPage() {
               return (
                 <Fragment key={r.id}>
                   <tr
-                    className="border-b border-chai-100 hover:bg-chai-50/60 cursor-pointer"
+                    className="border-b border-probe-100 hover:bg-probe-50/60 cursor-pointer"
                     onClick={() => setExpanded(isOpen ? null : r.id)}
                   >
                     <td className="p-2 whitespace-nowrap">{fmtDate(r.createdAt)}</td>
@@ -351,18 +351,18 @@ export default function ResponsesPage() {
                     </td>
                   </tr>
                   {isOpen && (
-                    <tr className="bg-chai-50/60 border-b border-chai-100">
+                    <tr className="bg-probe-50/60 border-b border-probe-100">
                       <td colSpan={fields.slice(0, 4).length + 3} className="p-4">
                         <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
                           {fields.map((f) => (
                             <div key={f.id} className="flex flex-col">
-                              <dt className="text-xs uppercase text-chai-700">{f.label}</dt>
+                              <dt className="text-xs uppercase text-probe-700">{f.label}</dt>
                               <dd className="break-words">{renderCell(byField.get(f.id), publicBaseUrl)}</dd>
                             </div>
                           ))}
                           {r.completionTime != null && (
                             <div className="flex flex-col">
-                              <dt className="text-xs uppercase text-chai-700">Time to complete</dt>
+                              <dt className="text-xs uppercase text-probe-700">Time to complete</dt>
                               <dd>{fmtDuration(r.completionTime)}</dd>
                             </div>
                           )}
@@ -377,15 +377,15 @@ export default function ResponsesPage() {
         </table>
 
         {filtered.length === 0 && (
-          <p className="text-center text-chai-700 py-12">
+          <p className="text-center text-probe-700 py-12">
             {hasFilters ? "No responses match these filters." : "No responses yet."}
           </p>
         )}
 
         {/* Pagination */}
         {pageCount > 1 && (
-          <div className="flex items-center justify-between pt-3 mt-3 border-t border-chai-100 text-sm">
-            <span className="text-chai-700">
+          <div className="flex items-center justify-between pt-3 mt-3 border-t border-probe-100 text-sm">
+            <span className="text-probe-700">
               {safePage * PAGE_SIZE + 1}–{Math.min((safePage + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
             </span>
             <div className="flex gap-2">

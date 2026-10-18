@@ -16,6 +16,17 @@ function getClient(): Resend | null {
   return resend;
 }
 
+/** True when RESEND_API_KEY is set; otherwise sendEmail() is a no-op. */
+export function isEmailConfigured(): boolean {
+  return !!env.RESEND_API_KEY;
+}
+
+/** The bare address from RESEND_FROM ("Probe <noreply@x.com>" → "noreply@x.com"). */
+export function senderAddress(): string {
+  const match = env.RESEND_FROM.match(/<([^>]+)>/);
+  return (match?.[1] ?? env.RESEND_FROM).trim();
+}
+
 export interface SendEmailInput {
   to: string;
   subject: string;
@@ -40,7 +51,7 @@ export async function sendEmail(input: SendEmailInput): Promise<void> {
 
 export const TEMPLATES = {
   welcome: (name: string) => ({
-    subject: "Welcome to ChaiForm",
+    subject: "Welcome to Probe",
     html: `
       <h1>Welcome, ${name}.</h1>
       <p>You built nothing yet. That's fine. Here's how to start:</p>
@@ -49,7 +60,7 @@ export const TEMPLATES = {
         <li>Add some fields.</li>
         <li>Share the link.</li>
       </ol>
-      <p>— ChaiForm 🍵</p>
+      <p>— Probe</p>
     `,
   }),
   formNotification: (opts: { formTitle: string; viewUrl: string }) => ({
@@ -63,7 +74,7 @@ export const TEMPLATES = {
     subject: `Got it. Thanks for filling out "${opts.formTitle}"`,
     html: `
       <p>${opts.successMessage}</p>
-      <p>— ChaiForm</p>
+      <p>— Probe</p>
     `,
   }),
 } as const;

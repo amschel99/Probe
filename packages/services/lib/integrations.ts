@@ -108,14 +108,14 @@ async function deliverDiscord(args: DeliverArgs, config: DiscordIntegrationConfi
   }));
 
   const body = {
-    username: "ChaiForm",
+    username: "Probe",
     embeds: [
       {
         title: `New response · ${args.formTitle}`.slice(0, 256),
         color: 0xb8722e,
         fields: embedFields,
         timestamp: new Date().toISOString(),
-        footer: { text: "ChaiForm" },
+        footer: { text: "Probe" },
       },
     ],
   };

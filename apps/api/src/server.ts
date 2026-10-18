@@ -17,6 +17,7 @@ import { serverRouter, createContext, auth } from "@repo/trpc/server";
 import { db, schema, eq, sql } from "@repo/database";
 import {
   sendEmail,
+  senderAddress,
   verifyCaptcha,
   decryptSecret,
   deliverResponseToIntegrations,
@@ -285,7 +286,7 @@ async function submitHandler(req: Request, res: ExpressResponse) {
   res.setHeader("X-RateLimit-Limit", String(limit));
   res.setHeader("X-RateLimit-Remaining", String(remaining));
   res.setHeader("X-RateLimit-Reset", String(reset));
-  if (!success) return submitJsonError(res, 429, "RATE_LIMITED", "Slow down, chai's not that hot");
+  if (!success) return submitJsonError(res, 429, "RATE_LIMITED", "Too many submissions — slow down");
 
   // Honeypot — silently accept + drop
   const honeypot = payload.botcheck;
@@ -383,7 +384,7 @@ async function submitHandler(req: Request, res: ExpressResponse) {
     const html = `
       <p>You received a new submission via <strong>${escapeHtml(form.title)}</strong>:</p>
       ${renderPayloadHtml(persisted)}
-      <p style="margin-top:24px;color:#888;font-size:12px">— ChaiForm 🍵</p>
+      <p style="margin-top:24px;color:#888;font-size:12px">— Probe</p>
     `;
 
     const recipients = [form.recipientEmail, ...(settings?.notifyEmails ?? [])];
@@ -394,7 +395,7 @@ async function submitHandler(req: Request, res: ExpressResponse) {
           subject,
           html,
           from: submitterEmail
-            ? `${submitterName ?? "ChaiForm"} <noreply@developedbysaad.com>`
+            ? `${submitterName ?? "Probe"} <${senderAddress()}>`
             : undefined,
         }),
       ),
@@ -408,8 +409,8 @@ async function submitHandler(req: Request, res: ExpressResponse) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-ChaiForm-Signature": `sha256=${signature}`,
-          "User-Agent": "ChaiForm-Webhook/1.0",
+          "X-Probe-Signature": `sha256=${signature}`,
+          "User-Agent": "Probe-Webhook/1.0",
         },
         body,
       }).catch((err) => console.error("[submit] webhook delivery failed:", err));
@@ -444,7 +445,7 @@ async function submitHandler(req: Request, res: ExpressResponse) {
 app.post("/submit", (req, res) => {
   submitHandler(req, res).catch((err) => {
     console.error("[submit] unhandled error:", err);
-    if (!res.headersSent) submitJsonError(res, 500, "INTERNAL_SERVER_ERROR", "Something brewed wrong");
+    if (!res.headersSent) submitJsonError(res, 500, "INTERNAL_SERVER_ERROR", "Something went wrong");
   });
 });
 
@@ -458,7 +459,7 @@ app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 /* 5. Health                                                                  */
 /* -------------------------------------------------------------------------- */
 app.get("/", (_req, res) => {
-  return res.json({ name: "chaiform-api", status: "ok", chai: "☕" });
+  return res.json({ name: "probe-api", status: "ok" });
 });
 
 app.get("/health", (_req, res) => {
@@ -473,7 +474,7 @@ async function verifyAccessKeyHandler(req: Request, res: ExpressResponse) {
 
   const page = (heading: string, body: string, status: 200 | 400 | 404 = 200) => {
     res.status(status).type("html").send(
-      `<!doctype html><html><head><meta charset="utf-8"><title>${heading} — ChaiForm</title>
+      `<!doctype html><html><head><meta charset="utf-8"><title>${heading} — Probe</title>
       <style>
         body { font: 16px/1.5 system-ui, sans-serif; background:#FBF5EC; color:#3B2A1A; display:flex; min-height:100vh; align-items:center; justify-content:center; padding:24px; margin:0; }
         .card { background:#fff; padding:48px; border-radius:16px; max-width:480px; box-shadow:0 8px 32px rgba(0,0,0,0.08); text-align:center }
@@ -486,7 +487,7 @@ async function verifyAccessKeyHandler(req: Request, res: ExpressResponse) {
   if (!token)
     return page(
       "Link not found",
-      `<p>This verification link is missing its token. <a href="${env.PUBLIC_APP_URL}">Go to ChaiForm</a></p>`,
+      `<p>This verification link is missing its token. <a href="${env.PUBLIC_APP_URL}">Go to Probe</a></p>`,
       404,
     );
 
@@ -497,7 +498,7 @@ async function verifyAccessKeyHandler(req: Request, res: ExpressResponse) {
   if (!ver)
     return page(
       "Link not found",
-      `<p>This verification link doesn't exist. <a href="${env.PUBLIC_APP_URL}">Go to ChaiForm</a></p>`,
+      `<p>This verification link doesn't exist. <a href="${env.PUBLIC_APP_URL}">Go to Probe</a></p>`,
       404,
     );
   if (ver.usedAt)
@@ -505,7 +506,7 @@ async function verifyAccessKeyHandler(req: Request, res: ExpressResponse) {
   if (ver.expiresAt < new Date())
     return page(
       "Link expired",
-      `<p>This verification link has expired. Open your endpoint form in ChaiForm and click <strong>Resend verification</strong>.</p>`,
+      `<p>This verification link has expired. Open your endpoint form in Probe and click <strong>Resend verification</strong>.</p>`,
       400,
     );
 
@@ -527,7 +528,7 @@ async function verifyAccessKeyHandler(req: Request, res: ExpressResponse) {
   });
 
   return page(
-    "Verified ☕",
+    "Verified ✓",
     `<p>You'll now receive submissions at <strong>${ver.recipientEmail}</strong>.</p><p style="margin-top:24px"><a href="${env.PUBLIC_APP_URL}/dashboard/endpoint-forms">Go to dashboard</a></p>`,
     200,
   );
@@ -645,7 +646,7 @@ function toCsv(ds: ExportDataset): string {
 async function toXlsx(ds: ExportDataset): Promise<Uint8Array> {
   const ExcelJS = (await import("exceljs")).default;
   const wb = new ExcelJS.Workbook();
-  wb.creator = "ChaiForm";
+  wb.creator = "Probe";
   wb.created = ds.generatedAt;
   const ws = wb.addWorksheet("Responses", {
     views: [{ state: "frozen", ySplit: 1 }],
@@ -827,7 +828,7 @@ app.get("/forms/:formId/export.:format", (req, res) => {
 function buildOpenApiDocument(): Record<string, unknown> {
   try {
     return generateOpenApiDocument(serverRouter, {
-      title: "ChaiForm API",
+      title: "Probe API",
       version: "1.0.0",
       baseUrl: env.PUBLIC_APP_URL + "/api",
     }) as unknown as Record<string, unknown>;
@@ -842,9 +843,9 @@ function buildOpenApiDocument(): Record<string, unknown> {
 const FALLBACK_OPENAPI: Record<string, unknown> = {
   openapi: "3.0.3",
   info: {
-    title: "ChaiForm API",
+    title: "Probe API",
     version: "1.0.0",
-    description: "Open source form builder. Type-safe tRPC API. Fuelled by chai. ☕",
+    description: "Open source form builder. Type-safe tRPC API. Self-hosted.",
   },
   servers: [{ url: env.PUBLIC_APP_URL }],
   paths: {
@@ -940,7 +941,7 @@ if (DOCS_DIST) {
       .status(200)
       .type("html")
       .send(
-        `<!doctype html><meta charset="utf-8"><title>ChaiForm docs</title>` +
+        `<!doctype html><meta charset="utf-8"><title>Probe docs</title>` +
           `<body style="font-family:system-ui;max-width:42rem;margin:4rem auto;padding:0 1rem">` +
           `<h1>📚 Docs site not built</h1>` +
           `<p>Run <code>pnpm --filter @repo/docs build</code> to generate the documentation site, then reload.</p>` +

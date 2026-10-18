@@ -1,15 +1,15 @@
 <!doctype html>
 <!--
-  ChaiForm template — Feedback widget
+  Probe template — Feedback widget
   ────────────────────────────────────────────────────────────────────────
   HOW TO USE THIS FILE
-  1. Get an access key: sign up at https://chaiforms.developedbysaad.com →
+  1. Get an access key: sign up at https://probe.riftfi.com →
      Dashboard → Endpoint Forms → New. Enter a name + your website, then
      VERIFY the email we send you (submissions won't deliver until you do).
   2. Replace YOUR_ACCESS_KEY below with the key from your dashboard.
-  3. (Self-hosting ChaiForm? Change the form's `action` to your own /submit URL.)
+  3. (Self-hosting Probe? Change the form's `action` to your own /submit URL.)
   4. Drop this file on any host — Netlify, GitHub Pages, your own server.
-  5. Feedback lands in your inbox AND your ChaiForm dashboard. Done.
+  5. Feedback lands in your inbox AND your Probe dashboard. Done.
   ────────────────────────────────────────────────────────────────────────
 -->
 <html lang="en">
@@ -52,7 +52,7 @@
       <h1>How did we do? 💬</h1>
       <p class="lede">Your feedback shapes what we build next.</p>
 
-      <form id="chaiform" action="https://chaiforms.developedbysaad.com/submit" method="POST">
+      <form id="probe" action="https://probe.riftfi.com/submit" method="POST">
         <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY" />
         <input type="hidden" name="subject" value="New feedback" />
         <input class="hp" type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" />
@@ -77,11 +77,11 @@
         <div class="err" id="err">Something went wrong. Please try again.</div>
       </form>
 
-      <p class="note">Powered by <a href="https://chaiforms.developedbysaad.com">ChaiForm</a></p>
+      <p class="note">Powered by <a href="https://probe.riftfi.com">Probe</a></p>
     </main>
 
     <script>
-      const form = document.getElementById("chaiform");
+      const form = document.getElementById("probe");
       const ok = document.getElementById("ok");
       const err = document.getElementById("err");
       form.addEventListener("submit", async (e) => {

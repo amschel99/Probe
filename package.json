@@ -1,8 +1,8 @@
 {
-  "name": "chaiforms",
+  "name": "probe",
   "version": "0.1.0",
   "private": true,
-  "description": "ChaiForm — open source form builder fuelled entirely by chai.",
+  "description": "Probe — open source form builder and entirely yours.",
   "packageManager": "pnpm@9.12.0",
   "scripts": {
     "build": "turbo run build",
@@ -15,6 +15,7 @@
     "db:migrate": "turbo run db:migrate",
     "db:push": "pnpm --filter @repo/database db:push",
     "db:seed": "pnpm --filter @repo/database db:seed",
+    "db:themes": "pnpm --filter @repo/database db:themes",
     "db:studio": "pnpm --filter @repo/database db:studio"
   },
   "devDependencies": {

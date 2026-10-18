@@ -28,11 +28,11 @@ export default async function PublicFormPage({
     if (code === "NOT_FOUND") return notFound();
     if (code === "PRECONDITION_FAILED") {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-chai-50 p-6">
+        <div className="min-h-screen flex items-center justify-center bg-probe-50 p-6">
           <div className="card text-center max-w-md">
             <div className="text-3xl mb-4">🫖</div>
             <h1 className="display text-2xl font-bold">This form is closed.</h1>
-            <p className="text-chai-700 mt-2">It either expired or hit its response limit.</p>
+            <p className="text-probe-700 mt-2">It either expired or hit its response limit.</p>
           </div>
         </div>
       );
@@ -44,11 +44,11 @@ export default async function PublicFormPage({
 
   if (result.passwordRequired) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-chai-50 p-6">
+      <div className="min-h-screen flex items-center justify-center bg-probe-50 p-6">
         <form className="card max-w-md w-full">
           <div className="text-3xl mb-2">🔒</div>
           <h1 className="display text-xl font-bold">Password required</h1>
-          <p className="text-chai-700 text-sm mt-1 mb-4">
+          <p className="text-probe-700 text-sm mt-1 mb-4">
             This form is password protected.
           </p>
           <input

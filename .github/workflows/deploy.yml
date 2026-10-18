@@ -48,15 +48,15 @@ jobs:
       KAMAL_REGISTRY_USERNAME: ${{ secrets.KAMAL_REGISTRY_USERNAME }}
       KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
 
-      KAMAL_SERVICE: ${{ vars.KAMAL_SERVICE || 'chaiforms' }}
+      KAMAL_SERVICE: ${{ vars.KAMAL_SERVICE || 'probe' }}
       KAMAL_IMAGE: ${{ vars.KAMAL_IMAGE }}
       KAMAL_DEPLOY_HOST: ${{ secrets.KAMAL_DEPLOY_HOST }}
       KAMAL_SERVER_HOST: ${{ secrets.KAMAL_SERVER_HOST }}
 
       APP_PORT: ${{ vars.APP_PORT || '3000' }}
 
-      POSTGRES_USER: ${{ vars.POSTGRES_USER || 'chaiforms' }}
-      POSTGRES_DB: ${{ vars.POSTGRES_DB || 'chaiforms_production' }}
+      POSTGRES_USER: ${{ vars.POSTGRES_USER || 'probe' }}
+      POSTGRES_DB: ${{ vars.POSTGRES_DB || 'probe_production' }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
       # DATABASE_URL is composed inside .kamal/secrets from the Postgres creds
@@ -67,7 +67,7 @@ jobs:
       UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
 
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-      RESEND_FROM: ${{ vars.RESEND_FROM || 'ChaiForm <noreply@developedbysaad.com>' }}
+      RESEND_FROM: ${{ vars.RESEND_FROM || 'Probe <noreply@riftfi.com>' }}
 
       # Public, build-time only — consumed by config/deploy.yml `builder.args`
       # (Next inlines them into the client bundle). NOT runtime secrets.
@@ -75,7 +75,7 @@ jobs:
       NEXT_PUBLIC_GITHUB_URL: ${{ secrets.NEXT_PUBLIC_GITHUB_URL }}
       NEXT_PUBLIC_TWITTER_URL: ${{ secrets.NEXT_PUBLIC_TWITTER_URL }}
       NEXT_PUBLIC_LINKEDIN_URL: ${{ secrets.NEXT_PUBLIC_LINKEDIN_URL }}
-      NEXT_PUBLIC_ENABLE_CHAI_NUDGE: ${{ vars.NEXT_PUBLIC_ENABLE_CHAI_NUDGE || 'true' }}
+      NEXT_PUBLIC_ENABLE_CHAI_NUDGE: ${{ vars.NEXT_PUBLIC_ENABLE_CHAI_NUDGE || 'false' }}
 
       # Optional integration secrets — resolved by .kamal/secrets via ${VAR:-}.
       # Unset = the feature stays "unavailable"; the deploy still succeeds.
@@ -190,7 +190,7 @@ jobs:
             # --reuse, Kamal boots a fresh container that composes DATABASE_URL
             # from the CURRENT secret — the same source db-reset-password uses —
             # so the two always agree.
-            migrate)       kamal app exec "pnpm --filter @repo/database exec drizzle-kit push --force" ;;
+            migrate)       kamal app exec "sh -c 'pnpm --filter @repo/database exec drizzle-kit push --force && pnpm --filter @repo/database db:themes'" ;;
             seed)          kamal app exec "pnpm --filter @repo/database db:seed" ;;
             db-reset-password)
               # Postgres applies POSTGRES_PASSWORD only on the FIRST init of an
@@ -273,9 +273,9 @@ jobs:
             root@${{ secrets.KAMAL_SERVER_HOST }} \
             bash -s -- "${{ github.event.inputs.action }}" <<'HEREDOC' || echo "::warning::Failed to connect"
           ACTION="$1"
-          CONTAINER=$(docker ps -qf "name=chaiforms-web" | head -1)
+          CONTAINER=$(docker ps -qf "name=probe-web" | head -1)
           if [ -z "$CONTAINER" ]; then
-            echo "::warning::No running chaiforms-web container found"
+            echo "::warning::No running probe-web container found"
             docker ps --format "table {{.Names}}\t{{.Status}}" || true
             exit 0
           fi

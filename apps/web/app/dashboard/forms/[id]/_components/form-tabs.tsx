@@ -37,7 +37,7 @@ export function FormTabs({ id, responseCount, action }: FormTabsProps) {
     <div className="flex flex-wrap items-center justify-between gap-3">
       <nav
         aria-label="Form sections"
-        className="inline-flex items-center gap-1 rounded-xl border border-chai-200 bg-surface p-1 shadow-sm"
+        className="inline-flex items-center gap-1 rounded-xl border border-probe-200 bg-surface p-1 shadow-sm"
       >
         {tabs.map((tab) => {
           const active = tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
@@ -48,10 +48,10 @@ export function FormTabs({ id, responseCount, action }: FormTabsProps) {
               aria-current={active ? "page" : undefined}
               className={cn(
                 "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chai-500 focus-visible:ring-offset-1",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-probe-500 focus-visible:ring-offset-1",
                 active
-                  ? "bg-chai-500 text-white shadow-sm"
-                  : "text-chai-700 hover:bg-chai-100 hover:text-chai-900",
+                  ? "bg-probe-500 text-white shadow-sm"
+                  : "text-probe-700 hover:bg-probe-100 hover:text-probe-900",
               )}
             >
               {tab.label}

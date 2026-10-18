@@ -22,14 +22,14 @@ export function IntegrationsAdmin() {
     <div className="space-y-4">
       <div>
         <h2 className="display text-xl font-bold">Integrations</h2>
-        <p className="text-chai-700 text-sm mt-1">
+        <p className="text-probe-700 text-sm mt-1">
           Platform-wide feature flags. When an integration is unavailable, set the
           required environment variables and restart to enable it.
         </p>
       </div>
 
       <div className="card overflow-x-auto">
-        {query.isLoading && <p className="text-chai-700 py-4">Loading…</p>}
+        {query.isLoading && <p className="text-probe-700 py-4">Loading…</p>}
         {query.isError && (
           <p className="text-red-600 py-4">
             Failed to load integrations: {query.error.message}
@@ -37,7 +37,7 @@ export function IntegrationsAdmin() {
         )}
 
         {!query.isLoading && !query.isError && (
-          <div className="divide-y divide-chai-100">
+          <div className="divide-y divide-probe-100">
             {items.map((it) => (
               <div
                 key={it.key}
@@ -46,7 +46,7 @@ export function IntegrationsAdmin() {
                 <div className="min-w-0">
                   <div className="font-semibold text-sm">{it.name}</div>
                   {it.available ? (
-                    <div className="text-xs text-chai-700">
+                    <div className="text-xs text-probe-700">
                       {it.enabled
                         ? "Enabled — form owners can connect it."
                         : "Available but disabled."}

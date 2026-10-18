@@ -1,9 +1,9 @@
 ---
 title: "Architecture"
-description: "How ChaiForm is built: request lifecycle, auth, integrations, uploads, and more."
+description: "How Probe is built: request lifecycle, auth, integrations, uploads, and more."
 ---
 
-How ChaiForm is put together: the monorepo, the request flow, the auth model, and the way it ships.
+How Probe is put together: the monorepo, the request flow, the auth model, and the way it ships.
 
 ---
 
@@ -26,7 +26,7 @@ In **prod**: `next start` serves the SPA pages, RSC payloads, and API routes (wh
 
 | Layer       | What's there                                                            |
 | ----------- | ----------------------------------------------------------------------- |
-| DNS         | One A record → `chaiforms.developedbysaad.com`                         |
+| DNS         | One A record → `probe.riftfi.com`                         |
 | TLS + proxy | `kamal-proxy` on the host; Let's Encrypt cert; routes by `Host:` header |
 | Container   | One Docker image. One Node process. Next.js on port 3000.              |
 | Inside it   | Next.js pages + `/api/[[...path]]` catch-all forwards to Hono           |
@@ -39,7 +39,7 @@ This is the single-origin pattern: one DNS record, one TLS cert, one container, 
 ## Repo layout
 
 ```
-chai-form/
+probe/
 ├── apps/
 │   └── web/                         Next.js 14 App Router
 │       ├── app/
@@ -104,7 +104,7 @@ Better Auth owns sessions and persists them in the same Postgres database via th
 | Surface              | Mechanism                                                          |
 | -------------------- | ------------------------------------------------------------------ |
 | Email + password     | Better Auth `emailAndPassword` — bcrypt cost 12, autoSignIn enabled |
-| Session cookie       | `chaiform.session_token`, `HttpOnly`, `SameSite: lax`, `Secure` in prod |
+| Session cookie       | `probe.session_token`, `HttpOnly`, `SameSite: lax`, `Secure` in prod |
 | Session length       | 7-day sliding window, refreshed on activity                       |
 | Logout               | DELETE `/api/auth/sign-out` clears the row + cookie                |
 | Server-side guard    | tRPC `protectedProcedure` reads ctx.user; throws `UNAUTHORIZED`    |
@@ -237,7 +237,7 @@ Switching themes is a single CSS variable swap — no rerender required, SSR-saf
 
 Two surfaces:
 
-1. **Hosted forms** at `/f/[slug]` — full ChaiForm UI, themed. Iframe-embeddable on a per-form basis.
+1. **Hosted forms** at `/f/[slug]` — full Probe UI, themed. Iframe-embeddable on a per-form basis.
 2. **Endpoint forms** — no UI; the user POSTs to `/api/submit` from their own HTML. Designed for freelance client sites that already have a form and just want a "form to email" backend. Full security model and abuse mitigations are documented in `plan/todo.md` under "Endpoint forms".
 
 ## Performance budget
@@ -278,7 +278,7 @@ The seed (`pnpm db:seed`) is idempotent — wipes the demo user's forms and re-c
 
 ## AI form generation
 
-Users bring their own Anthropic API key — ChaiForm bears no AI cost.
+Users bring their own Anthropic API key — Probe bears no AI cost.
 
 **Key management**: The key is submitted via Dashboard → Settings → AI form generation. On save, it is encrypted with AES-256-GCM (key derived via HKDF-SHA256 from `BETTER_AUTH_SECRET` + a per-user salt) and stored on the `users` table. The plaintext key is only decrypted server-side at generation time and is never logged or returned to the client. Clearing the key wipes the ciphertext.
 
@@ -324,7 +324,7 @@ A `file_upload` field type backed by presigned R2 uploads.
 
 **Flow**:
 1. The form renderer requests a presigned upload URL from the API (`trpc.public.presignUpload`).
-2. The browser uploads the file directly to R2 using the presigned URL (PUT request) — the file never transits the ChaiForm server.
+2. The browser uploads the file directly to R2 using the presigned URL (PUT request) — the file never transits the Probe server.
 3. On successful upload, the browser stores the resulting `R2_PUBLIC_BASE_URL/<key>` in the field value.
 4. On form submit, the URL is stored in `response_values` like any other field value.
 
@@ -340,7 +340,7 @@ Contextual "buy me a chai" prompts that appear in the dashboard footer and as to
 
 **Gate**: Controlled entirely by the build-time variable `NEXT_PUBLIC_ENABLE_CHAI_NUDGE`. When `false` (the default), no nudge UI is rendered — the code paths are present but the component returns null. When `true`, the nudge is shown with a link to `NEXT_PUBLIC_RAZORPAY_DONATE_LINK`.
 
-**Self-host behaviour**: Self-hosters who clone the repo get `NEXT_PUBLIC_ENABLE_CHAI_NUDGE=false` by default, so their users will never see a donate link pointing at the original author's account. The hosted instance at `chaiforms.developedbysaad.com` sets it to `true` via a build arg in `config/deploy.yml`.
+**Self-host behaviour**: Self-hosters who clone the repo get `NEXT_PUBLIC_ENABLE_CHAI_NUDGE=false` by default, so their users will never see a donate link pointing at the original author's account. The hosted instance at `probe.riftfi.com` sets it to `true` via a build arg in `config/deploy.yml`.
 
 **Build-time note**: Because this is a `NEXT_PUBLIC_*` variable, changing it requires a new Docker build, not just a container restart. In `config/deploy.yml`, `builder.args` passes it through to the Dockerfile `ARG`/`ENV` declarations so Kamal handles this automatically on each `deploy`.
 
@@ -350,7 +350,7 @@ Contextual "buy me a chai" prompts that appear in the dashboard footer and as to
 
 Static, self-contained HTML pages available at `/templates/html` for download.
 
-**Files**: Four templates live in `apps/web/public/form-templates/` — `contact.html`, `newsletter.html`, `waitlist.html`, `feedback.html`. They are plain HTML files with inline CSS and a `<form>` pointing at `https://chaiforms.developedbysaad.com/api/submit`. The access key placeholder (`YOUR_ACCESS_KEY`) must be replaced by the user after downloading.
+**Files**: Four templates live in `apps/web/public/form-templates/` — `contact.html`, `newsletter.html`, `waitlist.html`, `feedback.html`. They are plain HTML files with inline CSS and a `<form>` pointing at `https://probe.riftfi.com/api/submit`. The access key placeholder (`YOUR_ACCESS_KEY`) must be replaced by the user after downloading.
 
 **No account required to download**: The gallery page is public. Users only need an account when they want to generate an access key (Dashboard → Endpoint Forms → New) so submissions actually deliver.
 
@@ -360,4 +360,4 @@ Static, self-contained HTML pages available at `/templates/html` for download.
 
 ---
 
-— *Made by Saad · [x.com/developedbysaad](https://x.com/developedbysaad)*
+— *Probe is based on [ChaiForm](https://github.com/developedbysaad) by Saad (MIT).*

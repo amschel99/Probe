@@ -3,12 +3,12 @@
 @theme {
   /* Warm cream/terracotta identity — tuned for a clean, intentional feel
      with WCAG-AA contrast on the cream surface. */
-  --color-chai-50: #FBF6EF;   /* app background — soft warm cream */
-  --color-chai-100: #F3E9DB;  /* subtle fills / hover */
-  --color-chai-200: #E4D6C2;  /* borders / dividers */
-  --color-chai-500: #AD5614;  /* confident terracotta accent (AA on cream + as button bg) */
-  --color-chai-700: #7E3D0F;  /* muted/strong text, hover accent */
-  --color-chai-900: #2E2117;  /* primary ink text (warm near-black) */
+  --color-probe-50: #FBF6EF;   /* app background — soft warm cream */
+  --color-probe-100: #F3E9DB;  /* subtle fills / hover */
+  --color-probe-200: #E4D6C2;  /* borders / dividers */
+  --color-probe-500: #AD5614;  /* confident terracotta accent (AA on cream + as button bg) */
+  --color-probe-700: #7E3D0F;  /* muted/strong text, hover accent */
+  --color-probe-900: #2E2117;  /* primary ink text (warm near-black) */
   --color-surface: #FFFFFF;   /* card/input surface — flips in dark mode */
 
   --font-sans: var(--font-inter, "Inter"), system-ui, -apple-system,
@@ -17,7 +17,7 @@
   --font-display: var(--font-sans);
 }
 
-html { background: var(--color-chai-50); color: var(--color-chai-900); }
+html { background: var(--color-probe-50); color: var(--color-probe-900); }
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -33,7 +33,7 @@ h1, h2, h3, .display {
 .display { font-weight: 800; }
 
 /* Form renderer applies CSS variables from the theme config */
-[data-chai-form] {
+[data-probe-form] {
   /* The form is a CARD that sits on the page's background, so it uses the
      theme's `surface` — which `--form-text` is designed to be read on. Using
      `--form-bg` here put dark text on a dark page background for themes like
@@ -49,9 +49,9 @@ h1, h2, h3, .display {
 
 /* Text-like inputs fill the row. Radios/checkboxes/buttons must NOT —
    they keep their native intrinsic size (see the dedicated rule below). */
-[data-chai-form] input:not([type="radio"]):not([type="checkbox"]):not([type="button"]):not([type="submit"]),
-[data-chai-form] textarea,
-[data-chai-form] select {
+[data-probe-form] input:not([type="radio"]):not([type="checkbox"]):not([type="button"]):not([type="submit"]),
+[data-probe-form] textarea,
+[data-probe-form] select {
   background: var(--form-surface, #FFFFFF);
   color: var(--form-text);
   border: 1px solid var(--form-border, #E5D5BD);
@@ -61,21 +61,21 @@ h1, h2, h3, .display {
   font-family: inherit;
   font-size: 15px;
 }
-[data-chai-form] input::placeholder,
-[data-chai-form] textarea::placeholder {
+[data-probe-form] input::placeholder,
+[data-probe-form] textarea::placeholder {
   color: var(--form-text-muted, #7A6755);
   opacity: 0.6;
 }
-[data-chai-form] input:focus,
-[data-chai-form] textarea:focus,
-[data-chai-form] select:focus {
+[data-probe-form] input:focus,
+[data-probe-form] textarea:focus,
+[data-probe-form] select:focus {
   outline: 2px solid var(--form-accent, #B8722E);
   outline-offset: 1px;
 }
 
 /* Native radios/checkboxes: fixed size, theme accent, never stretched. */
-[data-chai-form] input[type="radio"],
-[data-chai-form] input[type="checkbox"] {
+[data-probe-form] input[type="radio"],
+[data-probe-form] input[type="checkbox"] {
   appearance: auto;
   width: 18px;
   height: 18px;
@@ -88,7 +88,7 @@ h1, h2, h3, .display {
 }
 
 /* Selectable option rows for single_select / multi_select. */
-[data-chai-form] .chai-option {
+[data-probe-form] .probe-option {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -99,31 +99,31 @@ h1, h2, h3, .display {
   cursor: pointer;
   transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
-[data-chai-form] .chai-option:hover {
+[data-probe-form] .probe-option:hover {
   border-color: var(--form-accent, #B8722E);
 }
-[data-chai-form] .chai-option[data-selected="true"] {
+[data-probe-form] .probe-option[data-selected="true"] {
   border-color: var(--form-accent, #B8722E);
   box-shadow: inset 0 0 0 1px var(--form-accent, #B8722E);
 }
-[data-chai-form] .chai-option > span {
+[data-probe-form] .probe-option > span {
   flex: 1;
   text-align: left;
 }
 /* Keyboard focus is visible on the whole row, not just the native control. */
-[data-chai-form] .chai-option:focus-within {
+[data-probe-form] .probe-option:focus-within {
   border-color: var(--form-accent, #B8722E);
   outline: 2px solid var(--form-accent, #B8722E);
   outline-offset: 1px;
 }
 /* A single boolean checkbox shouldn't stretch full width like an option list. */
-[data-chai-form] .chai-option--inline {
+[data-probe-form] .probe-option--inline {
   display: inline-flex;
   width: auto;
 }
 
 /* fieldset wrappers for grouped controls — strip the UA chrome. */
-[data-chai-form] .chai-field {
+[data-probe-form] .probe-field {
   border: 0;
   margin: 0;
   padding: 0;
@@ -131,25 +131,25 @@ h1, h2, h3, .display {
 }
 
 /* Per-field help text (from the field's helpText). */
-[data-chai-form] .chai-help {
+[data-probe-form] .probe-help {
   font-size: 13px;
   margin: -2px 0 8px;
   line-height: 1.4;
 }
 
-[data-chai-form] .chai-rating-btn:focus-visible {
+[data-probe-form] .probe-rating-btn:focus-visible {
   outline: 2px solid var(--form-accent, #B8722E);
   outline-offset: 2px;
 }
 
 /* In-form validation errors: a fixed vivid red so it's legible on every
-   theme background (the chai-900 red is invisible on dark themes). */
-[data-chai-form] .error {
+   theme background (the probe-900 red is invisible on dark themes). */
+[data-probe-form] .error {
   color: var(--form-error, #EF4444);
   font-weight: 500;
 }
 
-[data-chai-form] button[type="submit"] {
+[data-probe-form] button[type="submit"] {
   background: var(--form-accent, #B8722E);
   color: var(--form-accent-text, #FFFFFF);
   border: 0;
@@ -159,15 +159,15 @@ h1, h2, h3, .display {
   cursor: pointer;
   transition: filter 0.12s ease;
 }
-[data-chai-form] button[type="submit"]:hover:not(:disabled) { filter: brightness(0.93); }
-[data-chai-form] button[type="submit"]:focus-visible {
+[data-probe-form] button[type="submit"]:hover:not(:disabled) { filter: brightness(0.93); }
+[data-probe-form] button[type="submit"]:focus-visible {
   outline: 2px solid var(--form-accent, #B8722E);
   outline-offset: 2px;
 }
-[data-chai-form] button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }
+[data-probe-form] button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* Secondary action (Back, Clear signature) — outlined, theme-aware. */
-[data-chai-form] .chai-btn-secondary {
+[data-probe-form] .probe-btn-secondary {
   background: transparent;
   color: var(--form-text);
   border: 1px solid var(--form-border, #E5D5BD);
@@ -176,14 +176,14 @@ h1, h2, h3, .display {
   font-weight: 600;
   cursor: pointer;
 }
-[data-chai-form] .chai-btn-secondary:hover { border-color: var(--form-accent, #B8722E); }
-[data-chai-form] .chai-btn-secondary:focus-visible {
+[data-probe-form] .probe-btn-secondary:hover { border-color: var(--form-accent, #B8722E); }
+[data-probe-form] .probe-btn-secondary:focus-visible {
   outline: 2px solid var(--form-accent, #B8722E);
   outline-offset: 2px;
 }
 
 /* "Next" on multi-page forms reuses the submit styling. */
-[data-chai-form] button[type="button"]:not(.chai-btn-secondary):not(.chai-rating-btn):not(.chai-rank-btn) {
+[data-probe-form] button[type="button"]:not(.probe-btn-secondary):not(.probe-rating-btn):not(.probe-rank-btn) {
   background: var(--form-accent, #B8722E);
   color: var(--form-accent-text, #FFFFFF);
   border: 0;
@@ -194,7 +194,7 @@ h1, h2, h3, .display {
 }
 
 /* Ranking reorder arrows. */
-[data-chai-form] .chai-rank-btn {
+[data-probe-form] .probe-rank-btn {
   width: 30px;
   height: 30px;
   border: 1px solid var(--form-border, #E5D5BD);
@@ -204,38 +204,38 @@ h1, h2, h3, .display {
   cursor: pointer;
   line-height: 1;
 }
-[data-chai-form] .chai-rank-btn:hover:not(:disabled) { border-color: var(--form-accent, #B8722E); }
-[data-chai-form] .chai-rank-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-[data-chai-form] .chai-rank-btn:focus-visible {
+[data-probe-form] .probe-rank-btn:hover:not(:disabled) { border-color: var(--form-accent, #B8722E); }
+[data-probe-form] .probe-rank-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+[data-probe-form] .probe-rank-btn:focus-visible {
   outline: 2px solid var(--form-accent, #B8722E);
   outline-offset: 1px;
 }
 
 /* ── Form micro-animations (reduced-motion safe) ────────────────────────── */
-@keyframes chai-rise {
+@keyframes probe-rise {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
 }
-[data-chai-form] { animation: chai-rise 0.45s cubic-bezier(0.21, 1, 0.36, 1) both; }
-[data-chai-form] button[type="submit"],
-[data-chai-form] button[type="button"],
-[data-chai-form] .chai-option {
+[data-probe-form] { animation: probe-rise 0.45s cubic-bezier(0.21, 1, 0.36, 1) both; }
+[data-probe-form] button[type="submit"],
+[data-probe-form] button[type="button"],
+[data-probe-form] .probe-option {
   transition: transform 0.08s ease, filter 0.12s ease, border-color 0.12s ease,
     box-shadow 0.12s ease, background-color 0.12s ease;
 }
-[data-chai-form] button:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
-[data-chai-form] .chai-option:active { transform: scale(0.995); }
+[data-probe-form] button:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+[data-probe-form] .probe-option:active { transform: scale(0.995); }
 @media (prefers-reduced-motion: reduce) {
-  [data-chai-form] { animation: none; }
-  [data-chai-form] *,
-  [data-chai-form] *::before,
-  [data-chai-form] *::after { transition: none !important; animation: none !important; }
+  [data-probe-form] { animation: none; }
+  [data-probe-form] *,
+  [data-probe-form] *::before,
+  [data-probe-form] *::after { transition: none !important; animation: none !important; }
 }
 
 /* ── App chrome design system ───────────────────────────────────────────
    Shared button / input / card primitives. Consistent 10px radius,
    visible focus rings, subtle elevation. These are independent of the
-   per-theme [data-chai-form] system above. */
+   per-theme [data-probe-form] system above. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -254,36 +254,36 @@ h1, h2, h3, .display {
 }
 .btn:active { transform: translateY(0.5px); }
 .btn:focus-visible {
-  outline: 2px solid var(--color-chai-500);
+  outline: 2px solid var(--color-probe-500);
   outline-offset: 2px;
 }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .btn-primary {
-  background: var(--color-chai-500);
+  background: var(--color-probe-500);
   color: #fff;
   box-shadow: 0 1px 2px rgba(46, 33, 23, 0.12);
 }
-/* Darken via filter (not chai-700) so the chai ramp's 700 step stays free to be
+/* Darken via filter (not probe-700) so the probe ramp's 700 step stays free to be
    the muted-text role, which lets it invert cleanly in dark mode. */
 .btn-primary:hover:not(:disabled) { filter: brightness(0.92); }
 
 .btn-ghost {
   background: transparent;
-  color: var(--color-chai-900);
-  border-color: var(--color-chai-200);
+  color: var(--color-probe-900);
+  border-color: var(--color-probe-200);
 }
 .btn-ghost:hover:not(:disabled) {
-  background: var(--color-chai-100);
-  border-color: var(--color-chai-200);
+  background: var(--color-probe-100);
+  border-color: var(--color-probe-200);
 }
 
 .input {
   width: 100%;
   padding: 10px 12px;
   background: var(--color-surface);
-  color: var(--color-chai-900);
-  border: 1px solid var(--color-chai-200);
+  color: var(--color-probe-900);
+  border: 1px solid var(--color-probe-200);
   border-radius: 10px;
   font-family: inherit;
   font-size: 14px;
@@ -294,13 +294,13 @@ h1, h2, h3, .display {
 .input:hover { border-color: #D2BFA6; }
 .input:focus {
   outline: none;
-  border-color: var(--color-chai-500);
+  border-color: var(--color-probe-500);
   box-shadow: 0 0 0 3px rgba(173, 86, 20, 0.18);
 }
 
 .card {
   background: var(--color-surface);
-  border: 1px solid var(--color-chai-200);
+  border: 1px solid var(--color-probe-200);
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 1px 2px rgba(46, 33, 23, 0.05),
@@ -312,7 +312,7 @@ h1, h2, h3, .display {
   font-weight: 600;
   font-size: 14px;
   margin-bottom: 6px;
-  color: var(--color-chai-900);
+  color: var(--color-probe-900);
 }
 .help { color: var(--color-help, #6F5E4C); font-size: 13px; margin-top: 4px; line-height: 1.4; }
 .error { color: #C0271B; font-size: 13px; margin-top: 4px; font-weight: 500; }
@@ -320,20 +320,20 @@ h1, h2, h3, .display {
 /* ── Dark mode ──────────────────────────────────────────────────────────
    Toggled by next-themes adding `.dark` to <html>. We override the neutral
    ramp + surface; the terracotta accent stays warm (brightened a touch for
-   contrast on dark). The per-theme [data-chai-form] form system is independent
+   contrast on dark). The per-theme [data-probe-form] form system is independent
    and intentionally unaffected — a user's form keeps its own theme colors. */
 .dark {
-  --color-chai-50: #15110D;   /* page background (warm near-black) */
-  --color-chai-100: #221A13;  /* hover fills */
-  --color-chai-200: #3A2D21;  /* borders / dividers */
-  --color-chai-500: #D9772E;  /* terracotta accent (AA on dark) */
-  --color-chai-700: #C9B6A2;  /* muted light text */
-  --color-chai-900: #F5EFE7;  /* primary light text */
+  --color-probe-50: #15110D;   /* page background (warm near-black) */
+  --color-probe-100: #221A13;  /* hover fills */
+  --color-probe-200: #3A2D21;  /* borders / dividers */
+  --color-probe-500: #D9772E;  /* terracotta accent (AA on dark) */
+  --color-probe-700: #C9B6A2;  /* muted light text */
+  --color-probe-900: #F5EFE7;  /* primary light text */
   --color-surface: #1C150F;   /* card / input surface (lifted from bg) */
   --color-help: #B7A48F;      /* muted help text on dark */
 }
 .dark .input::placeholder { color: #8C7A67; }
-.dark .input:hover { border-color: var(--color-chai-200); }
+.dark .input:hover { border-color: var(--color-probe-200); }
 /* Card elevation reads better with a lighter ambient shadow on dark. */
 .dark .card { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 28px -18px rgba(0, 0, 0, 0.6); }
 html.dark { color-scheme: dark; }

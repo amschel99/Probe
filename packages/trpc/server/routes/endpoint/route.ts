@@ -1,6 +1,6 @@
 import { and, desc, eq, ilike, schema } from "@repo/database";
 import { DEFAULT_ENDPOINT_SETTINGS } from "@repo/database/schema";
-import { sendEmail } from "@repo/services/email";
+import { isEmailConfigured, sendEmail } from "@repo/services/email";
 import {
   assertFormOwner,
   encryptSecret,
@@ -37,9 +37,15 @@ async function sendVerificationEmail(opts: {
   token: string;
 }) {
   const verifyUrl = `${env.PUBLIC_APP_URL}/api/verify-access-key/${opts.token}`;
+  // Without email configured nobody could ever verify the key, so surface the
+  // link in the server logs — the instance owner can open it directly.
+  if (!isEmailConfigured()) {
+    console.warn(`[endpoint] email not configured — verify "${opts.formTitle}" at: ${verifyUrl}`);
+    return;
+  }
   return sendEmail({
     to: opts.to,
-    subject: `Verify ChaiForm endpoint: ${opts.formTitle}`,
+    subject: `Verify Probe endpoint: ${opts.formTitle}`,
     html: `
       <p>You're about to start receiving submissions from <strong>${opts.formTitle}</strong>.</p>
       <p>Confirm this email address by clicking below — link is valid for 24 hours.</p>

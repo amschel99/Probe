@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# ChaiForm smoke test — exercises every public surface via curl.
+# Probe smoke test — exercises every public surface via curl.
 #
 # Prereqs: the server is running at $BASE_URL (default http://localhost:3000)
 # and the DB has been seeded (`pnpm db:seed`).
 #
 # Run with:    bash scripts/smoke-test.sh
-# Set BASE_URL=https://chaiforms.developedbysaad.com to target prod.
+# Set BASE_URL=https://probe.riftfi.com to target prod.
 
 set -u
 BASE_URL="${BASE_URL:-http://localhost:3000}"
@@ -79,7 +79,7 @@ login_status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
   -c "$COOKIE_JAR" -X POST "$BASE_URL/api/auth/sign-in/email" \
   -H "Content-Type: application/json" \
   -H "Origin: $BASE_URL" \
-  -d '{"email":"demo@developedbysaad.com","password":"ChaiForm@2025"}')
+  -d '{"email":"demo@probe.local","password":"Probe@2025"}')
 expect_status "Login as demo user" "200" "$login_status"
 
 section "7. /trpc/auth.me (authenticated)"
@@ -103,7 +103,7 @@ fi
 
 section "10. Create endpoint form (authenticated)"
 ep_resp=$(trpc_post "endpoint.create" \
-  '{"title":"Smoke test endpoint","websiteUrl":"https://example.test","recipientEmail":"demo@developedbysaad.com"}')
+  '{"title":"Smoke test endpoint","websiteUrl":"https://example.test","recipientEmail":"demo@probe.local"}')
 EP_ID=$(echo "$ep_resp" | grep -oP '"id"\s*:\s*"[a-f0-9-]{36}"' | head -n1 | cut -d'"' -f4 || true)
 EP_KEY=$(echo "$ep_resp" | grep -oP '"accessKey"\s*:\s*"[^"]+"' | head -n1 | cut -d'"' -f4 || true)
 if [ -n "$EP_ID" ] && [ -n "$EP_KEY" ]; then

@@ -1,4 +1,4 @@
-import { db, schema } from "@repo/database";
+import { count, db, eq, schema } from "@repo/database";
 import bcrypt from "bcryptjs";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -26,6 +26,23 @@ export const auth = betterAuth({
       verify: async ({ hash, password }) => bcrypt.compare(password, hash),
     },
   },
+  databaseHooks: {
+    user: {
+      create: {
+        // Self-host bootstrap: the first account on a fresh instance becomes
+        // the admin, so no seed (and no well-known password) is needed.
+        after: async (user) => {
+          const [row] = await db.select({ n: count() }).from(schema.users);
+          if (row?.n === 1) {
+            await db
+              .update(schema.users)
+              .set({ role: "admin" })
+              .where(eq(schema.users.id, user.id));
+          }
+        },
+      },
+    },
+  },
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
@@ -35,10 +52,10 @@ export const auth = betterAuth({
     },
   },
   advanced: {
-    cookiePrefix: "chaiform",
+    cookiePrefix: "probe",
     // Cross-subdomain cookies are OPT-IN via COOKIE_DOMAIN (e.g. ".example.com")
     // — only needed if you serve the app and another subdomain that must share
-    // the session. ChaiForm is single-origin, so the default (host-only cookies)
+    // the session. Probe is single-origin, so the default (host-only cookies)
     // works on ANY domain, including localhost and self-host installs. Hardcoding
     // a domain here silently breaks auth for anyone not on that exact domain.
     ...(process.env.COOKIE_DOMAIN

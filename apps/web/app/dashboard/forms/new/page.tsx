@@ -56,12 +56,12 @@ function NewFormForm() {
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
         <h1 className="display text-3xl font-bold">New form</h1>
-        <p className="text-chai-700">Title + theme to start. You can change anything later.</p>
+        <p className="text-probe-700">Title + theme to start. You can change anything later.</p>
       </div>
 
       {/* AI generation — shown only when the user has connected their Anthropic key */}
       {aiStatus.data?.hasKey ? (
-        <div className="card space-y-3 ring-1 ring-chai-500/30">
+        <div className="card space-y-3 ring-1 ring-probe-500/30">
           <div className="font-bold flex items-center gap-2">✨ Generate with AI</div>
           <p className="help">
             Describe your form in plain English — Claude drafts the fields. Uses your own
@@ -82,17 +82,17 @@ function NewFormForm() {
           >
             {generateMutation.isPending ? "Generating…" : "Generate form"}
           </button>
-          <div className="text-xs text-chai-700">
+          <div className="text-xs text-probe-700">
             Or fill in the details manually below.
           </div>
         </div>
       ) : aiStatus.isSuccess ? (
-        <div className="card text-sm text-chai-700">
+        <div className="card text-sm text-probe-700">
           ✨ Want AI to draft your form?{" "}
           <Link href="/dashboard/settings" className="underline">
             Add your Anthropic API key
           </Link>{" "}
-          in settings — ChaiForm never charges for AI.
+          in settings — Probe never charges for AI.
         </div>
       ) : null}
 
@@ -125,7 +125,7 @@ function NewFormForm() {
                 type="button"
                 onClick={() => setValue("themeId", t.id, { shouldValidate: true })}
                 className={`text-left p-2 rounded-xl border ${
-                  selectedThemeId === t.id ? "border-chai-500 ring-2 ring-chai-500" : "border-chai-200"
+                  selectedThemeId === t.id ? "border-probe-500 ring-2 ring-probe-500" : "border-probe-200"
                 }`}
                 style={{ background: t.config.background, fontFamily: t.config.fontFamily }}
               >

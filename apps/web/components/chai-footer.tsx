@@ -21,11 +21,11 @@ export function ChaiFooter() {
   if (!show) return null;
 
   return (
-    <div className="border-t border-chai-200 bg-chai-100">
+    <div className="border-t border-probe-200 bg-probe-100">
       <div className="max-w-7xl mx-auto px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-chai-700">
-          ☕ ChaiForm is free &amp; open source — every feature, forever. If it&apos;s saving
-          you time, you can buy me a chai.
+        <p className="text-sm text-probe-700">
+          Probe is free &amp; open source — every feature, forever. If it&apos;s saving
+          you time, you can leave a tip.
         </p>
         <div className="flex items-center gap-2">
           <a

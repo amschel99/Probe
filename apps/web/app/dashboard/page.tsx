@@ -16,8 +16,8 @@ export default function DashboardHome() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="display text-3xl font-bold">Welcome back ☕</h1>
-        <p className="text-chai-700 mt-1">
+        <h1 className="display text-3xl font-bold">Welcome back 👋</h1>
+        <p className="text-probe-700 mt-1">
           Two surfaces, one dashboard. Build forms, collect responses, ship.
         </p>
       </div>
@@ -37,22 +37,22 @@ export default function DashboardHome() {
             </Link>
           </div>
           {formsQuery.data?.items.length === 0 && (
-            <p className="text-sm text-chai-700">No forms yet. Make one.</p>
+            <p className="text-sm text-probe-700">No forms yet. Make one.</p>
           )}
           <ul className="space-y-2">
             {formsQuery.data?.items.slice(0, 5).map((f) => (
               <li key={f.id}>
                 <Link
                   href={`/dashboard/forms/${f.id}`}
-                  className="flex items-center justify-between p-2 rounded-lg hover:bg-chai-50"
+                  className="flex items-center justify-between p-2 rounded-lg hover:bg-probe-50"
                 >
                   <div>
                     <div className="font-semibold">{f.title}</div>
-                    <div className="text-xs text-chai-700">
+                    <div className="text-xs text-probe-700">
                       {f.status} · {f.responseCount} responses · {formatRelative(f.updatedAt)}
                     </div>
                   </div>
-                  <span className="text-chai-500">→</span>
+                  <span className="text-probe-500">→</span>
                 </Link>
               </li>
             ))}
@@ -67,7 +67,7 @@ export default function DashboardHome() {
             </Link>
           </div>
           {endpointsQuery.data?.items.length === 0 && (
-            <p className="text-sm text-chai-700">
+            <p className="text-sm text-probe-700">
               No endpoint forms yet. For client contact pages, this is what you want.
             </p>
           )}
@@ -76,20 +76,20 @@ export default function DashboardHome() {
               <li key={f.id}>
                 <Link
                   href={`/dashboard/endpoint-forms/${f.id}`}
-                  className="flex items-center justify-between p-2 rounded-lg hover:bg-chai-50"
+                  className="flex items-center justify-between p-2 rounded-lg hover:bg-probe-50"
                 >
                   <div>
                     <div className="font-semibold">
                       {f.title}{" "}
                       {!f.accessKeyVerifiedAt && (
-                        <span className="text-xs text-chai-500 ml-1">(unverified)</span>
+                        <span className="text-xs text-probe-500 ml-1">(unverified)</span>
                       )}
                     </div>
-                    <div className="text-xs text-chai-700">
+                    <div className="text-xs text-probe-700">
                       {f.websiteUrl} · {f.responseCount} submissions
                     </div>
                   </div>
-                  <span className="text-chai-500">→</span>
+                  <span className="text-probe-500">→</span>
                 </Link>
               </li>
             ))}
@@ -103,7 +103,7 @@ export default function DashboardHome() {
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="card">
-      <div className="text-xs uppercase font-semibold text-chai-700">{label}</div>
+      <div className="text-xs uppercase font-semibold text-probe-700">{label}</div>
       <div className="display text-3xl font-bold mt-2">{value}</div>
     </div>
   );

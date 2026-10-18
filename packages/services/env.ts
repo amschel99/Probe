@@ -43,7 +43,7 @@ const envSchema = z.object({
 
   // Email (email/index.ts). Optional so sends are skipped when unconfigured.
   RESEND_API_KEY: z.string().optional(),
-  RESEND_FROM: z.string().default("ChaiForm <noreply@developedbysaad.com>"),
+  RESEND_FROM: z.string().default("Probe <noreply@riftfi.com>"),
 
   // Captcha verification endpoints (lib/captcha.ts).
   HCAPTCHA_VERIFY_URL: z.string().url().default("https://hcaptcha.com/siteverify"),

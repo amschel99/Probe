@@ -34,7 +34,7 @@ export default function AdminPage() {
       <div className="max-w-md mx-auto card text-center py-12">
         <div className="text-3xl mb-2">🔒</div>
         <h1 className="display text-2xl font-bold mb-1">Admins only</h1>
-        <p className="text-chai-700 mb-6">
+        <p className="text-probe-700 mb-6">
           You don&apos;t have permission to view the admin dashboard.
         </p>
         <Link href="/dashboard" className="btn btn-primary">
@@ -48,13 +48,13 @@ export default function AdminPage() {
     <div className="space-y-6">
       <div>
         <h1 className="display text-3xl font-bold">Admin</h1>
-        <p className="text-chai-700 mt-1">
+        <p className="text-probe-700 mt-1">
           Platform-wide moderation across all users, forms and accounts.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 border-b border-chai-200">
+      <div className="flex items-center gap-1 border-b border-probe-200">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -62,8 +62,8 @@ export default function AdminPage() {
             className={cn(
               "px-3 py-2 text-sm font-medium border-b-2 -mb-px",
               tab === t.key
-                ? "border-chai-500 text-chai-900"
-                : "border-transparent text-chai-700 hover:text-chai-900",
+                ? "border-probe-500 text-probe-900"
+                : "border-transparent text-probe-700 hover:text-probe-900",
             )}
           >
             {t.label}
@@ -73,7 +73,7 @@ export default function AdminPage() {
 
       {tab === "overview" && (
         <>
-          {statsQuery.isLoading && <p className="text-chai-700">Loading…</p>}
+          {statsQuery.isLoading && <p className="text-probe-700">Loading…</p>}
           {statsQuery.isError && (
             <p className="text-red-600">
               Failed to load stats: {statsQuery.error.message}

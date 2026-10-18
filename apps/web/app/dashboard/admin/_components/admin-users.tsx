@@ -45,7 +45,7 @@ export function AdminUsers({ currentUserId }: { currentUserId: string | undefine
       {/* Controls */}
       <div className="card flex flex-wrap items-end gap-3">
         <label className="text-sm flex-1 min-w-[200px]">
-          <div className="text-xs text-chai-700 mb-1">Search</div>
+          <div className="text-xs text-probe-700 mb-1">Search</div>
           <input
             type="search"
             className="input"
@@ -72,7 +72,7 @@ export function AdminUsers({ currentUserId }: { currentUserId: string | undefine
 
       {/* Table */}
       <div className="card overflow-x-auto">
-        {query.isLoading && <p className="text-chai-700 py-4">Loading…</p>}
+        {query.isLoading && <p className="text-probe-700 py-4">Loading…</p>}
         {query.isError && (
           <p className="text-red-600 py-4">Failed to load users: {query.error.message}</p>
         )}
@@ -80,7 +80,7 @@ export function AdminUsers({ currentUserId }: { currentUserId: string | undefine
         {!query.isLoading && !query.isError && (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-chai-200 text-xs uppercase text-chai-700">
+              <tr className="border-b border-probe-200 text-xs uppercase text-probe-700">
                 <th className="text-left p-2">Email</th>
                 <th className="text-left p-2">Name</th>
                 <th className="text-left p-2">Role</th>
@@ -95,18 +95,18 @@ export function AdminUsers({ currentUserId }: { currentUserId: string | undefine
                 const isSelf = u.id === currentUserId;
                 const isAdmin = u.role === "admin";
                 return (
-                  <tr key={u.id} className="border-b border-chai-100 hover:bg-chai-50/60">
+                  <tr key={u.id} className="border-b border-probe-100 hover:bg-probe-50/60">
                     <td className="p-2">
                       {u.email}
-                      {isSelf && <span className="text-xs text-chai-500 ml-1">(you)</span>}
+                      {isSelf && <span className="text-xs text-probe-500 ml-1">(you)</span>}
                     </td>
                     <td className="p-2">{u.name || "—"}</td>
                     <td className="p-2">
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full uppercase ${
                           isAdmin
-                            ? "bg-chai-500 text-white"
-                            : "bg-chai-100 text-chai-700"
+                            ? "bg-probe-500 text-white"
+                            : "bg-probe-100 text-probe-700"
                         }`}
                       >
                         {u.role}
@@ -144,15 +144,15 @@ export function AdminUsers({ currentUserId }: { currentUserId: string | undefine
         )}
 
         {!query.isLoading && !query.isError && items.length === 0 && (
-          <p className="text-center text-chai-700 py-12">
+          <p className="text-center text-probe-700 py-12">
             {search ? "No users match your search." : "No users yet."}
           </p>
         )}
 
         {/* Pagination */}
         {pageCount > 1 && (
-          <div className="flex items-center justify-between pt-3 mt-3 border-t border-chai-100 text-sm">
-            <span className="text-chai-700">
+          <div className="flex items-center justify-between pt-3 mt-3 border-t border-probe-100 text-sm">
+            <span className="text-probe-700">
               Page {page} of {pageCount} · {total} total
             </span>
             <div className="flex gap-2">

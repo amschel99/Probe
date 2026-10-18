@@ -34,7 +34,7 @@ export default function NewEndpointFormPage() {
     <div className="max-w-xl mx-auto space-y-6">
       <div>
         <h1 className="display text-3xl font-bold">New endpoint form</h1>
-        <p className="text-chai-700">
+        <p className="text-probe-700">
           Two fields. You&apos;ll get an access key and a verification email — submissions only
           start delivering after you click the link.
         </p>

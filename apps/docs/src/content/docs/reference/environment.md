@@ -1,9 +1,9 @@
 ---
 title: "Environment Variables"
-description: "Every ChaiForm environment variable: scope, required/optional, and what it gates."
+description: "Every Probe environment variable: scope, required/optional, and what it gates."
 ---
 
-Complete reference for every environment variable in ChaiForm.
+Complete reference for every environment variable in Probe.
 
 **Scope key:**
 
@@ -23,7 +23,7 @@ Complete reference for every environment variable in ChaiForm.
 | `NODE_ENV` | server | no | `development` | Set to `production` automatically by Kamal |
 | `PORT` | server | no | `3000` | Port the Next.js (web) app listens on |
 | `API_INTERNAL_URL` | server | no | `http://localhost:8000` | URL the web app uses to reach the API server-to-server. In the single-container production setup both apps share a host, so the default works as-is. |
-| `DATABASE_URL` | server | **yes** | `postgres://chaiforms:chaiforms_local@localhost:5434/chaiforms_dev` | Postgres connection string. In production, composed in `.kamal/secrets` from the Postgres accessory credentials — do not set it as a separate GitHub secret. |
+| `DATABASE_URL` | server | **yes** | `postgres://probe:probe_local@localhost:5434/probe_dev` | Postgres connection string. In production, composed in `.kamal/secrets` from the Postgres accessory credentials — do not set it as a separate GitHub secret. |
 | `BETTER_AUTH_SECRET` | server | **yes** | — | 32+ char random string. Serves three purposes: (1) Better Auth session signing, (2) HKDF master key for AES-256-GCM encryption of captcha secrets and Anthropic API keys, (3) SHA-256 salt for IP hashing. **Rotating this secret logs everyone out, invalidates all stored IP hashes, and makes all AES-GCM-encrypted fields unreadable (captcha secrets and AI keys must be re-entered).** Generate: `openssl rand -base64 32`. |
 | `BETTER_AUTH_URL` | server | **yes** | `http://localhost:3000` | The app's own public origin. Cookies and email verification links are built from this. Must match the actual domain in production. |
 | `PUBLIC_APP_URL` | server | no | `http://localhost:3000` | Used by the API for absolute URLs in API specs, verification links, notification-email links, and the Google OAuth redirect URI. Keep equal to `BETTER_AUTH_URL`. In production, Kamal derives this automatically from `KAMAL_DEPLOY_HOST`. |
@@ -58,7 +58,7 @@ If both are unset, all three rate limiters (`submitLimiter`, `eventLimiter`, `au
 | Variable | Scope | Required | Default | Notes |
 |---|---|---|---|---|
 | `RESEND_API_KEY` | server | no | — | Resend API key from [resend.com](https://resend.com) → API Keys. Verify your sending domain so the `From` address passes SPF/DKIM. If unset, `sendEmail()` is a no-op — submissions are stored and visible in the dashboard, just not emailed. |
-| `RESEND_FROM` | server | no | `ChaiForm <noreply@developedbysaad.com>` | Must be on a Resend-verified domain in production. |
+| `RESEND_FROM` | server | no | `Probe <noreply@riftfi.com>` | Must be on a Resend-verified domain in production. |
 
 ---
 
@@ -123,13 +123,13 @@ These are used by the GitHub Actions workflow and Kamal, not by the running app.
 | `KAMAL_DEPLOY_HOST` | GitHub secret | Public domain. Drives TLS, `BETTER_AUTH_URL`, `PUBLIC_APP_URL`. |
 | `POSTGRES_PASSWORD` | GitHub secret | Password for the Postgres accessory. Also used when composing `DATABASE_URL` in `.kamal/secrets`. |
 | `SSH_PRIVATE_KEY` | GitHub secret | Private key for SSH access to the deploy host |
-| `KAMAL_SERVICE` | GitHub variable (optional) | Service name, default `chaiforms` |
+| `KAMAL_SERVICE` | GitHub variable (optional) | Service name, default `probe` |
 | `KAMAL_IMAGE` | GitHub variable (optional) | Full image name override |
 | `APP_PORT` | GitHub variable (optional) | Container port, default `3000` |
-| `POSTGRES_USER` | GitHub variable (optional) | Postgres user, default `chaiforms` |
-| `POSTGRES_DB` | GitHub variable (optional) | Postgres database name, default `chaiforms_production` |
-| `RESEND_FROM` | GitHub variable (optional) | Sender address, default `ChaiForm <noreply@developedbysaad.com>` |
+| `POSTGRES_USER` | GitHub variable (optional) | Postgres user, default `probe` |
+| `POSTGRES_DB` | GitHub variable (optional) | Postgres database name, default `probe_production` |
+| `RESEND_FROM` | GitHub variable (optional) | Sender address, default `Probe <noreply@riftfi.com>` |
 
 ---
 
-— *Made by Saad · [x.com/developedbysaad](https://x.com/developedbysaad)*
+— *Probe is based on [ChaiForm](https://github.com/developedbysaad) by Saad (MIT).*

@@ -1,20 +1,33 @@
-# ChaiForm 🍵
+# Probe
 
-> Open source form builder. Fuelled entirely by chai.
+> Open source form builder. Self-hosted. Yours.
 
-Google Forms has the design sense of a tax return. Typeform costs more than your Netflix. ChaiForm is free, open source, beautiful, and ships as a single Docker container.
+Google Forms has the design sense of a tax return. Typeform costs more than your Netflix. Probe is free, open source, beautiful, and ships as a single Docker container.
 
-## Live demo
+<p><img src="apps/web/public/logo.svg" alt="Probe" height="48"></p>
+
+## Instance
 
 | | |
 |---|---|
-| **App** | https://chaiforms.developedbysaad.com |
-| **Docs** | https://chaiforms.developedbysaad.com/docs |
-| **API reference (Scalar)** | https://chaiforms.developedbysaad.com/api/docs |
-| **Creator login** | `demo@developedbysaad.com` / `ChaiForm@2025` |
-| **Admin login** | `admin@developedbysaad.com` / `ChaiAdmin@2025` |
+| **App** | https://probe.riftfi.com |
+| **Docs** | https://probe.riftfi.com/docs |
+| **API reference (Scalar)** | https://probe.riftfi.com/api/docs |
+| **For AI agents** | https://probe.riftfi.com/llms.txt (source: [`apps/web/public/llms.txt`](./apps/web/public/llms.txt)) |
 
-The demo account comes pre-seeded with 5 themed forms (Matrix, Naruto, YC, Linux, Cyberpunk — including one unlisted), 10 creative themes, and ~165 responses with analytics, so there's nothing to set up before reviewing. Explore public forms at [`/explore`](https://chaiforms.developedbysaad.com/explore), the theme gallery at [`/templates`](https://chaiforms.developedbysaad.com/templates), and the platform-wide **admin dashboard** at `/dashboard/admin` (admin login).
+## Minimum to self-host
+
+Only three env vars are required; everything else is optional and degrades gracefully:
+
+| Var | Why |
+|---|---|
+| `DATABASE_URL` | Postgres connection string (the Kamal deploy runs its own Postgres accessory and composes this for you) |
+| `BETTER_AUTH_SECRET` | 32+ chars (`openssl rand -base64 32`). Signs sessions and encrypts stored secrets |
+| `BETTER_AUTH_URL` + `PUBLIC_APP_URL` | Your public origin, e.g. `https://probe.riftfi.com` (Kamal sets both from `KAMAL_DEPLOY_HOST`) |
+
+On boot the container pushes the schema and loads the built-in themes (`pnpm db:themes`). **The first account you register becomes the admin.** No demo seed is needed — don't run `pnpm db:seed` on a public instance, it creates demo accounts with well-known passwords.
+
+Without optional services: no Resend → no emails (endpoint-form verification links are printed in the server logs instead); no Upstash → in-memory rate limiting; no R2 → no file-upload field; no Google OAuth → no Sheets integration.
 
 ## What's in the box
 
@@ -22,11 +35,11 @@ The demo account comes pre-seeded with 5 themed forms (Matrix, Naruto, YC, Linux
 - **Hosted forms** — themed form pages at `/f/<slug>` with a builder, 10 themes, conditional logic, password protection, an in-app reports page (filters, per-field charts), and CSV / Excel / PDF export.
 - **Endpoint forms** — `POST` to `/submit` from any HTML. No UI to build. Honeypot + captcha + origin allowlist + AES-GCM encrypted secrets + signed webhooks.
 - **HTML template gallery** — `/templates/html`: downloadable self-contained HTML pages (contact, newsletter, waitlist, feedback) pre-wired to the `/submit` endpoint. No account needed to grab a file; generating an access key takes two minutes.
-- **AI form generation** — describe your form in plain English; Claude drafts the fields. You bring your own Anthropic API key (ChaiForm never charges for AI). Key stored AES-256-GCM encrypted. Connect it in Dashboard → Settings; the "Generate with AI" panel appears on the new-form page.
+- **AI form generation** — describe your form in plain English; Claude drafts the fields. You bring your own Anthropic API key (Probe never charges for AI). Key stored AES-256-GCM encrypted. Connect it in Dashboard → Settings; the "Generate with AI" panel appears on the new-form page.
 - **Integrations: Discord + Google Sheets** — per-form webhook to a Discord channel, or live sync to a Google Sheet. Each integration is admin-enabled platform-wide; form owners then configure it in the builder. Delivery is non-blocking (never holds up a submission).
 - **File uploads (Cloudflare R2)** — a `file_upload` field type backed by presigned R2 uploads. Requires R2 credentials in env; if unset the field type is simply hidden in the builder.
 - **Admin dashboard** — platform-wide stats, cross-user form moderation (status/visibility/delete), user role management, and integration enable/disable toggles.
-- **Donation nudges** — optional "buy me a chai" prompts in the dashboard footer and after publish/export. Off by default for self-hosters; the hosted instance enables them via `NEXT_PUBLIC_ENABLE_CHAI_NUDGE=true`.
+- **Donation nudges** — optional tip-jar prompts in the dashboard footer and after publish/export. Off by default; enable with `NEXT_PUBLIC_ENABLE_CHAI_NUDGE=true`.
 
 ## Stack
 
@@ -45,9 +58,9 @@ docker compose up -d postgresdb
 cp .env.example .env
 ./setup.sh                        # symlinks root .env into each app/package
 
-# 4. Push schema + seed demo data (themes, forms, responses, analytics, users)
+# 4. Push schema + load themes (optionally: pnpm db:seed for demo users/forms/responses)
 pnpm db:push
-pnpm db:seed
+pnpm db:themes
 
 # 5. Run BOTH apps (api on :8000, web on :3000)
 pnpm dev
@@ -60,7 +73,7 @@ The app serves the built docs site at `/docs`; run `pnpm --filter @repo/docs bui
 
 In development set `NEXT_PUBLIC_API_URL=http://localhost:8000/trpc` (so the browser hits the api directly) — in production it's left unset and the web app proxies `/trpc` to the api. See `.env.example`.
 
-Demo logins: creator `demo@developedbysaad.com` / `ChaiForm@2025`, admin `admin@developedbysaad.com` / `ChaiAdmin@2025`. Docs at [`/docs`](http://localhost:3000/docs); API reference (Scalar) at [`/api/docs`](http://localhost:3000/api/docs).
+Register at `/register` — the first account becomes admin. (If you ran `pnpm db:seed`: creator `demo@probe.local` / `Probe@2025`, admin `admin@probe.local` / `ProbeAdmin@2025`.) Docs at [`/docs`](http://localhost:3000/docs); API reference (Scalar) at [`/api/docs`](http://localhost:3000/api/docs).
 
 ## Docs
 
@@ -104,10 +117,10 @@ First-time setup:
 
 ```
 1. Actions → Deploy → action: setup     # provisions host, boots Postgres + app
-2. Actions → Deploy → action: seed       # loads demo user, themed forms, responses
+2. Open https://<your-domain>/register   # first account becomes admin
 ```
 
-After that, `deploy` ships new code and `seed` re-loads demo data (idempotent — it
+After that, `deploy` ships new code. `seed` (optional, demo instances only) loads demo data (idempotent — it
 wipes and re-seeds the demo account only).
 
 > **Rotated `POSTGRES_PASSWORD`?** Postgres only applies that password when it
@@ -125,17 +138,17 @@ wipes and re-seeds the demo account only).
 | `KAMAL_REGISTRY_USERNAME` / `KAMAL_REGISTRY_PASSWORD` | Docker Hub username + **PAT** (`dckr_pat_…`) |
 | `SSH_PRIVATE_KEY` | key for the deploy host |
 | `KAMAL_SERVER_HOST` | server IP / hostname |
-| `KAMAL_DEPLOY_HOST` | public domain — `chaiforms.developedbysaad.com` |
+| `KAMAL_DEPLOY_HOST` | public domain — `probe.riftfi.com` |
 | `POSTGRES_PASSWORD` | Postgres password (also composes `DATABASE_URL`) |
 | `BETTER_AUTH_SECRET`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `RESEND_API_KEY` | app secrets |
 | `NEXT_PUBLIC_*` | GitHub / X / LinkedIn / Razorpay links, nudge flag — **baked at build time** |
 | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | Google Sheets integration (optional) |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE_URL` | Cloudflare R2 file uploads (optional) |
 
-`KAMAL_DEPLOY_HOST` drives the domain, SSL, `PUBLIC_APP_URL`, and `BETTER_AUTH_URL` — set it to `chaiforms.developedbysaad.com`. The Kamal deploy boots one container + one Postgres accessory on a single VPS. See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) for the full production guide and [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for the deployment shape table.
+`KAMAL_DEPLOY_HOST` drives the domain, SSL, `PUBLIC_APP_URL`, and `BETTER_AUTH_URL` — set it to `probe.riftfi.com`. The Kamal deploy boots one container + one Postgres accessory on a single VPS. See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) for the full production guide and [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for the deployment shape table.
 
 ## License
 
 MIT.
 
-— *Made by Saad · [x.com/developedbysaad](https://x.com/developedbysaad)*
+— *Probe is based on [ChaiForm](https://github.com/developedbysaad) by Saad (MIT).*

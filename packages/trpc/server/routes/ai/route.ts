@@ -17,7 +17,7 @@ import { protectedProcedure, router } from "../../trpc";
 // drafting is a short, scoped task and we want it fast/cheap for the user.
 const AI_MODEL = "claude-opus-4-7";
 
-const SYSTEM_PROMPT = `You are a form-building assistant for ChaiForm. Given a short description, design a clean, sensible web form by calling the create_form tool exactly once.
+const SYSTEM_PROMPT = `You are a form-building assistant for Probe. Given a short description, design a clean, sensible web form by calling the create_form tool exactly once.
 
 Guidelines:
 - Pick the most fitting field type for each question. Use single_select/multi_select (with options) over free text when the answer is from a known set.

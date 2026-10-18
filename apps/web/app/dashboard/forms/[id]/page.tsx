@@ -92,7 +92,7 @@ export default function BuilderPage() {
     onSuccess: () => {
       utils.forms.get.invalidate({ id });
       toast.success("Form published");
-      nudgeChai("Form published 🎉 ChaiForm ships every feature free — it runs on chai.");
+      nudgeChai("Form published 🎉 Probe ships every feature free — tips are welcome.");
     },
   });
   const unpublishMutation = trpc.forms.unpublish.useMutation({
@@ -134,8 +134,8 @@ export default function BuilderPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, description]);
 
-  if (formQuery.isLoading) return <p className="text-chai-700">Loading…</p>;
-  if (!formQuery.data) return <p className="text-chai-700">Form not found.</p>;
+  if (formQuery.isLoading) return <p className="text-probe-700">Loading…</p>;
+  if (!formQuery.data) return <p className="text-probe-700">Form not found.</p>;
 
   const form = formQuery.data;
   const selectedField = form.fields.find((f) => f.id === selectedFieldId);
@@ -175,11 +175,11 @@ export default function BuilderPage() {
     <div className="space-y-4">
       {/* Top bar */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-xs text-chai-700">
+        <div className="flex items-center gap-2 text-xs text-probe-700">
           <Link href="/dashboard/forms" className="hover:underline">Forms</Link>
           <span>/</span>
-          <span className="font-medium text-chai-900">{form.title}</span>
-          <span className="px-2 py-0.5 rounded-full bg-chai-100 uppercase tracking-wide">{form.status}</span>
+          <span className="font-medium text-probe-900">{form.title}</span>
+          <span className="px-2 py-0.5 rounded-full bg-probe-100 uppercase tracking-wide">{form.status}</span>
         </div>
         <FormTabs
           id={id}
@@ -204,7 +204,7 @@ export default function BuilderPage() {
         // public /f/<slug> page — so what you see here matches what visitors see
         // (no "themed form on a different-coloured page" mismatch).
         <div
-          className="rounded-2xl border border-chai-200 overflow-hidden py-10 px-4"
+          className="rounded-2xl border border-probe-200 overflow-hidden py-10 px-4"
           style={{ background: form.theme.config.background }}
         >
           <FormRenderer
@@ -232,7 +232,7 @@ export default function BuilderPage() {
         <div className="grid grid-cols-[220px_1fr_300px] gap-4">
           {/* Left: field palette */}
           <div className="card sticky top-4 h-fit">
-            <div className="text-xs font-bold uppercase text-chai-700 mb-3">Add field</div>
+            <div className="text-xs font-bold uppercase text-probe-700 mb-3">Add field</div>
             <div className="space-y-1">
               {FIELD_TYPES.map((t) => {
                 // File upload requires R2 storage; disable when not configured.
@@ -246,24 +246,24 @@ export default function BuilderPage() {
                     title={
                       storageOff ? "Configure R2 storage to enable file uploads" : undefined
                     }
-                    className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm hover:bg-chai-50 text-left disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm hover:bg-probe-50 text-left disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                   >
                     <span className="w-5">{t.emoji}</span>
                     <span>{t.label}</span>
                     {storageOff && (
-                      <span className="ml-auto text-[10px] text-chai-500">off</span>
+                      <span className="ml-auto text-[10px] text-probe-500">off</span>
                     )}
                   </button>
                 );
               })}
             </div>
             {uploadsStatusQuery.data?.configured === false && (
-              <p className="mt-2 text-[11px] leading-snug text-chai-700">
+              <p className="mt-2 text-[11px] leading-snug text-probe-700">
                 Configure R2 storage to enable file uploads.
               </p>
             )}
-            <div className="mt-4 pt-4 border-t border-chai-100 space-y-2">
-              <div className="text-xs font-bold uppercase text-chai-700">Theme</div>
+            <div className="mt-4 pt-4 border-t border-probe-100 space-y-2">
+              <div className="text-xs font-bold uppercase text-probe-700">Theme</div>
               <select
                 className="input text-sm"
                 value={form.themeId}
@@ -276,10 +276,10 @@ export default function BuilderPage() {
                 ))}
               </select>
             </div>
-            <div className="mt-4 pt-4 border-t border-chai-100 space-y-1">
+            <div className="mt-4 pt-4 border-t border-probe-100 space-y-1">
               <button
                 onClick={() => duplicateMutation.mutate({ id })}
-                className="w-full text-left text-sm py-1 px-2 rounded-lg hover:bg-chai-50"
+                className="w-full text-left text-sm py-1 px-2 rounded-lg hover:bg-probe-50"
               >
                 Duplicate form
               </button>
@@ -304,7 +304,7 @@ export default function BuilderPage() {
               onChange={(e) => setTitle(e.target.value)}
             />
             <textarea
-              className="text-chai-700 bg-transparent w-full mb-6 border-none focus:outline-none resize-none"
+              className="text-probe-700 bg-transparent w-full mb-6 border-none focus:outline-none resize-none"
               rows={1}
               placeholder="Add a description"
               value={description}
@@ -328,12 +328,12 @@ export default function BuilderPage() {
             </DndContext>
 
             {form.fields.length === 0 && (
-              <div className="text-center py-12 border-2 border-dashed border-chai-200 rounded-xl">
-                <p className="text-chai-700">Add fields from the left panel.</p>
+              <div className="text-center py-12 border-2 border-dashed border-probe-200 rounded-xl">
+                <p className="text-probe-700">Add fields from the left panel.</p>
               </div>
             )}
 
-            <div className="mt-4 text-xs text-chai-700">
+            <div className="mt-4 text-xs text-probe-700">
               Share URL: <Link href={`/f/${form.slug}`} target="_blank" className="underline">{shareUrl}</Link>
             </div>
           </div>
@@ -383,18 +383,18 @@ function SortableField({
       style={style}
       onClick={onSelect}
       className={`flex items-center gap-2 p-3 rounded-xl border ${
-        selected ? "border-chai-500 ring-2 ring-chai-500" : "border-chai-200"
+        selected ? "border-probe-500 ring-2 ring-probe-500" : "border-probe-200"
       } bg-surface cursor-pointer`}
     >
-      <span {...attributes} {...listeners} className="cursor-grab text-chai-500" aria-label="Drag">
+      <span {...attributes} {...listeners} className="cursor-grab text-probe-500" aria-label="Drag">
         ⠿
       </span>
       <div className="flex-1">
         <div className="font-semibold text-sm">
           {field.label}
-          {field.required && <span className="text-chai-500">*</span>}
+          {field.required && <span className="text-probe-500">*</span>}
         </div>
-        <div className="text-xs text-chai-700">{field.type.replace("_", " ")}</div>
+        <div className="text-xs text-probe-700">{field.type.replace("_", " ")}</div>
       </div>
       <button
         onClick={(e) => {
@@ -426,7 +426,7 @@ function FieldSettings({
 }) {
   return (
     <div className="space-y-3">
-      <div className="text-xs font-bold uppercase text-chai-700">Field settings</div>
+      <div className="text-xs font-bold uppercase text-probe-700">Field settings</div>
       <div>
         <label className="label text-sm">Label</label>
         <input
@@ -567,7 +567,7 @@ function FieldSettings({
                 })
               }
             />
-            <p className="text-xs text-chai-700 mt-1">
+            <p className="text-xs text-probe-700 mt-1">
               Comma-separated mime types or extensions. Leave blank to accept any file.
             </p>
           </div>
@@ -575,7 +575,7 @@ function FieldSettings({
       )}
 
       {field.type === "page_break" && (
-        <p className="text-xs text-chai-700">
+        <p className="text-xs text-probe-700">
           The label is shown as the page title and help text as its intro. Page breaks
           split the form into multiple steps with a progress bar.
         </p>
@@ -583,7 +583,7 @@ function FieldSettings({
 
       {field.type !== "page_break" && (
         <details className="text-sm">
-          <summary className="cursor-pointer text-chai-700">Advanced</summary>
+          <summary className="cursor-pointer text-probe-700">Advanced</summary>
           <label className="flex items-center gap-2 cursor-pointer mt-2">
             <input
               type="checkbox"
@@ -702,7 +702,7 @@ function FormSettings({
     onChange({ settings: { ...form.settings, scoring: next } });
   return (
     <div className="space-y-3">
-      <div className="text-xs font-bold uppercase text-chai-700">Form settings</div>
+      <div className="text-xs font-bold uppercase text-probe-700">Form settings</div>
       <div>
         <label className="label text-sm">Visibility</label>
         <select
@@ -796,7 +796,7 @@ function FormSettings({
       </div>
 
       {/* Quiz scoring */}
-      <div className="border-t border-chai-200 pt-3">
+      <div className="border-t border-probe-200 pt-3">
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
@@ -807,11 +807,11 @@ function FormSettings({
         </label>
         {scoring.enabled && (
           <div className="mt-2 space-y-2">
-            <p className="text-xs text-chai-700">
+            <p className="text-xs text-probe-700">
               Add option/rating scores above. Define outcomes by score range:
             </p>
             {scoring.outcomes.map((o, i) => (
-              <div key={i} className="space-y-1 border border-chai-100 rounded-lg p-2">
+              <div key={i} className="space-y-1 border border-probe-100 rounded-lg p-2">
                 <div className="flex gap-2">
                   <input
                     type="number"

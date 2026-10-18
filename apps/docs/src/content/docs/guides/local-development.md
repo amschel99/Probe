@@ -1,9 +1,9 @@
 ---
 title: "Local Development Setup"
-description: "Run ChaiForm locally: install, database, env, and enabling optional features."
+description: "Run Probe locally: install, database, env, and enabling optional features."
 ---
 
-Everything you need to run ChaiForm on your machine. For production, see [`DEPLOYMENT.md`](/docs/guides/deployment/). For architecture, see [`ARCHITECTURE.md`](/docs/reference/architecture/).
+Everything you need to run Probe on your machine. For production, see [`DEPLOYMENT.md`](/docs/guides/deployment/). For architecture, see [`ARCHITECTURE.md`](/docs/reference/architecture/).
 
 ---
 
@@ -50,8 +50,8 @@ pnpm dev
 
 | Role | Email | Password |
 |---|---|---|
-| Creator | `demo@developedbysaad.com` | `ChaiForm@2025` |
-| Admin | `admin@developedbysaad.com` | `ChaiAdmin@2025` |
+| Creator | `demo@probe.local` | `Probe@2025` |
+| Admin | `admin@probe.local` | `ProbeAdmin@2025` |
 
 In development, `NEXT_PUBLIC_API_URL=http://localhost:8000/trpc` (set in `.env.example`) makes the browser hit the API directly instead of going through the Next.js reverse proxy. In production this variable is left unset and the proxy is used.
 
@@ -65,7 +65,7 @@ Copy `.env.example` to `.env` and fill in the values you need. The annotated tem
 
 | Key | How to get it |
 |---|---|
-| `DATABASE_URL` | The docker-compose default (`postgres://chaiforms:chaiforms_local@localhost:5434/chaiforms_dev`) works out of the box |
+| `DATABASE_URL` | The docker-compose default (`postgres://probe:probe_local@localhost:5434/probe_dev`) works out of the box |
 | `BETTER_AUTH_SECRET` | `openssl rand -base64 32` — also the master key for AES-GCM encryption and IP-hash salt; rotating it logs everyone out |
 | `BETTER_AUTH_URL` | `http://localhost:3000` for local dev |
 
@@ -101,7 +101,7 @@ pnpm db:studio      # open Drizzle Studio in the browser
 3. The key is stored AES-256-GCM encrypted on your user row.
 4. Return to Dashboard → Forms → New — the "✨ Generate with AI" panel now appears.
 
-ChaiForm never charges for AI. All Anthropic API costs go to your own account.
+Probe never charges for AI. All Anthropic API costs go to your own account.
 
 ### Discord integration
 
@@ -185,7 +185,7 @@ Postgres isn't running. `docker compose up -d postgresdb`, then re-try. The pool
 There is no Makefile. Use `pnpm dev`.
 
 **Docker on WSL dropped the container**
-Docker doesn't auto-start on WSL. `docker start chaiforms-postgres` if the container still exists, or rerun `docker compose up -d postgresdb`. Re-seed if needed (`pnpm db:seed`).
+Docker doesn't auto-start on WSL. `docker start probe-postgres` if the container still exists, or rerun `docker compose up -d postgresdb`. Re-seed if needed (`pnpm db:seed`).
 
 **`NEXT_PUBLIC_*` change has no effect**
 These variables are inlined at build time by Next.js. Changing them in `.env` requires restarting `pnpm dev` (Next will rebuild the affected pages). Changing them in `.env` without restarting the dev server has no effect.
@@ -204,4 +204,4 @@ The integration must be enabled platform-wide by an admin (Dashboard → Admin) 
 
 ---
 
-— *Made by Saad · [x.com/developedbysaad](https://x.com/developedbysaad)*
+— *Probe is based on [ChaiForm](https://github.com/developedbysaad) by Saad (MIT).*

@@ -1,9 +1,9 @@
 ---
 title: "Deployment Guide"
-description: "Ship ChaiForm to production with Kamal + GitHub Actions, secrets, and integrations."
+description: "Ship Probe to production with Kamal + GitHub Actions, secrets, and integrations."
 ---
 
-ChaiForm ships as a single Docker image deployed via **Kamal** onto a single VPS. GitHub Actions handles CI and all deploy operations through a manual `workflow_dispatch` workflow — no code push triggers deploys automatically.
+Probe ships as a single Docker image deployed via **Kamal** onto a single VPS. GitHub Actions handles CI and all deploy operations through a manual `workflow_dispatch` workflow — no code push triggers deploys automatically.
 
 For local development, see [`SETUP.md`](/docs/guides/local-development/). For architecture, see [`ARCHITECTURE.md`](/docs/reference/architecture/). For the complete env-var reference, see [`ENVIRONMENT.md`](/docs/reference/environment/).
 
@@ -71,7 +71,7 @@ All secrets live under **Settings → Environments → `production`** in your Gi
 |---|---|
 | `SSH_PRIVATE_KEY` | Private key matching a public key on the deploy host (root or deploy user) |
 | `KAMAL_SERVER_HOST` | IP address or hostname of the target VPS |
-| `KAMAL_DEPLOY_HOST` | Public domain, e.g. `chaiforms.yourdomain.com` — drives TLS, `BETTER_AUTH_URL`, `PUBLIC_APP_URL` |
+| `KAMAL_DEPLOY_HOST` | Public domain, e.g. `probe.yourdomain.com` — drives TLS, `BETTER_AUTH_URL`, `PUBLIC_APP_URL` |
 | `KAMAL_REGISTRY_USERNAME` | Docker Hub username |
 | `KAMAL_REGISTRY_PASSWORD` | Docker Hub PAT starting with `dckr_pat_` (not your account password) |
 | `POSTGRES_PASSWORD` | Password for the Postgres accessory |
@@ -218,7 +218,7 @@ After R2 env vars are set and the app is redeployed, the `file_upload` field typ
 
 ## Pre-deploy checklist
 
-ChaiForm is designed so that **every optional feature degrades gracefully when its keys are absent.** The only secrets that are truly mandatory are the two below; everything else is optional and the app boots and runs core flows without it.
+Probe is designed so that **every optional feature degrades gracefully when its keys are absent.** The only secrets that are truly mandatory are the two below; everything else is optional and the app boots and runs core flows without it.
 
 ### Minimum required (core works with just these)
 
@@ -268,4 +268,4 @@ The current setup uses `pnpm db:push` (via the `migrate` action), which drops an
 
 ---
 
-— *Made by Saad · [x.com/developedbysaad](https://x.com/developedbysaad)*
+— *Probe is based on [ChaiForm](https://github.com/developedbysaad) by Saad (MIT).*

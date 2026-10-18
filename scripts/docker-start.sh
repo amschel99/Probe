@@ -10,11 +10,14 @@ set -e
 # DB, so the container can become healthy immediately while the schema is
 # applied alongside. For a guaranteed, observable migration, use the `migrate`
 # deploy action instead of relying on this.
-echo "☕ ChaiForm — applying database schema (drizzle push) in background…"
+echo "🔎 Probe — applying database schema (drizzle push) in background…"
 (
   pnpm --filter @repo/database exec drizzle-kit push --force \
     && echo "✅ schema push complete" \
     || echo "⚠️  schema push failed — run the 'migrate' action (DB may already be current)"
+  # Built-in themes (idempotent upsert). The builder needs at least one theme,
+  # so a fresh database works without running the demo seed.
+  pnpm --filter @repo/database db:themes || echo "⚠️  theme load failed — run 'pnpm db:themes'"
 ) &
 
 echo "🚀 starting API on :8000…"

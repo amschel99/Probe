@@ -30,7 +30,7 @@ export function DashboardNav() {
 
   return (
     <nav className="flex items-center gap-2 text-sm" aria-label="Dashboard">
-      <div className="inline-flex items-center gap-1 rounded-xl border border-chai-200 bg-chai-50 p-1">
+      <div className="inline-flex items-center gap-1 rounded-xl border border-probe-200 bg-probe-50 p-1">
         {links.map((l) => {
           const active =
             l.href === "/dashboard"
@@ -43,10 +43,10 @@ export function DashboardNav() {
               aria-current={active ? "page" : undefined}
               className={cn(
                 "rounded-lg px-3 py-1.5 font-medium transition-colors",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chai-500 focus-visible:ring-offset-1",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-probe-500 focus-visible:ring-offset-1",
                 active
-                  ? "bg-chai-500 text-white shadow-sm"
-                  : "text-chai-700 hover:bg-chai-100 hover:text-chai-900",
+                  ? "bg-probe-500 text-white shadow-sm"
+                  : "text-probe-700 hover:bg-probe-100 hover:text-probe-900",
               )}
             >
               {l.label}
@@ -56,7 +56,7 @@ export function DashboardNav() {
       </div>
       <button
         onClick={logout}
-        className="rounded-lg border border-chai-200 px-3 py-1.5 font-medium text-chai-700 transition-colors hover:bg-chai-100 hover:text-chai-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chai-500 focus-visible:ring-offset-1"
+        className="rounded-lg border border-probe-200 px-3 py-1.5 font-medium text-probe-700 transition-colors hover:bg-probe-100 hover:text-probe-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-probe-500 focus-visible:ring-offset-1"
       >
         Log out
       </button>

@@ -46,7 +46,7 @@ export default function SettingsPage() {
       <h1 className="display text-3xl font-bold">Settings</h1>
 
       <div className="card space-y-2">
-        <div className="text-xs uppercase font-bold text-chai-700">Account</div>
+        <div className="text-xs uppercase font-bold text-probe-700">Account</div>
         <div>
           <div className="label">Name</div>
           <input className="input" defaultValue={meQuery.data?.name ?? ""} disabled />
@@ -68,8 +68,8 @@ export default function SettingsPage() {
             </span>
           )}
         </div>
-        <p className="text-sm text-chai-700">
-          ChaiForm never charges for AI — you bring your own Anthropic API key. It&apos;s stored
+        <p className="text-sm text-probe-700">
+          Probe never charges for AI — you bring your own Anthropic API key. It&apos;s stored
           encrypted and used only to draft forms from your prompts. Get one at{" "}
           <a
             href="https://console.anthropic.com/settings/keys"
@@ -130,7 +130,7 @@ export default function SettingsPage() {
               </span>
             )}
           </div>
-          <p className="text-sm text-chai-700">
+          <p className="text-sm text-probe-700">
             Connect a Google account so forms can append each response to a spreadsheet.
             Tokens are stored encrypted and used only for the Sheets integration.
           </p>
@@ -163,7 +163,7 @@ export default function SettingsPage() {
 
       <div className="card">
         <h3 className="font-bold mb-2">API access</h3>
-        <p className="text-sm text-chai-700">
+        <p className="text-sm text-probe-700">
           All authenticated API calls go through cookie-based sessions over the same origin —
           no API key needed. For endpoint forms, each form gets a public access key. See
           /docs for the OpenAPI reference.

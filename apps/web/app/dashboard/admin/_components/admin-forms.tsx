@@ -82,7 +82,7 @@ export function AdminForms() {
       {/* Controls */}
       <div className="card flex flex-wrap items-end gap-3">
         <label className="text-sm flex-1 min-w-[200px]">
-          <div className="text-xs text-chai-700 mb-1">Search</div>
+          <div className="text-xs text-probe-700 mb-1">Search</div>
           <input
             type="search"
             className="input"
@@ -95,7 +95,7 @@ export function AdminForms() {
           />
         </label>
         <label className="text-sm">
-          <div className="text-xs text-chai-700 mb-1">Status</div>
+          <div className="text-xs text-probe-700 mb-1">Status</div>
           <select
             className="input"
             value={status}
@@ -111,7 +111,7 @@ export function AdminForms() {
           </select>
         </label>
         <label className="text-sm">
-          <div className="text-xs text-chai-700 mb-1">Visibility</div>
+          <div className="text-xs text-probe-700 mb-1">Visibility</div>
           <select
             className="input"
             value={visibility}
@@ -134,7 +134,7 @@ export function AdminForms() {
 
       {/* Table */}
       <div className="card overflow-x-auto">
-        {query.isLoading && <p className="text-chai-700 py-4">Loading…</p>}
+        {query.isLoading && <p className="text-probe-700 py-4">Loading…</p>}
         {query.isError && (
           <p className="text-red-600 py-4">Failed to load forms: {query.error.message}</p>
         )}
@@ -142,7 +142,7 @@ export function AdminForms() {
         {!query.isLoading && !query.isError && (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-chai-200 text-xs uppercase text-chai-700">
+              <tr className="border-b border-probe-200 text-xs uppercase text-probe-700">
                 <th className="text-left p-2">Title</th>
                 <th className="text-left p-2">Owner</th>
                 <th className="text-left p-2">Status</th>
@@ -154,17 +154,17 @@ export function AdminForms() {
             </thead>
             <tbody>
               {items.map((f) => (
-                <tr key={f.id} className="border-b border-chai-100 hover:bg-chai-50/60">
+                <tr key={f.id} className="border-b border-probe-100 hover:bg-probe-50/60">
                   <td className="p-2">
                     <div className="font-semibold">{f.title}</div>
-                    <div className="text-xs text-chai-700">/f/{f.slug}</div>
+                    <div className="text-xs text-probe-700">/f/{f.slug}</div>
                   </td>
                   <td className="p-2 whitespace-nowrap">
                     <div>{f.ownerName || "—"}</div>
-                    <div className="text-xs text-chai-700">{f.ownerEmail}</div>
+                    <div className="text-xs text-probe-700">{f.ownerEmail}</div>
                   </td>
                   <td className="p-2">
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-chai-100 text-chai-700 uppercase">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-probe-100 text-probe-700 uppercase">
                       {f.status}
                     </span>
                   </td>
@@ -226,15 +226,15 @@ export function AdminForms() {
         )}
 
         {!query.isLoading && !query.isError && items.length === 0 && (
-          <p className="text-center text-chai-700 py-12">
+          <p className="text-center text-probe-700 py-12">
             {hasFilters ? "No forms match these filters." : "No forms yet."}
           </p>
         )}
 
         {/* Pagination */}
         {pageCount > 1 && (
-          <div className="flex items-center justify-between pt-3 mt-3 border-t border-chai-100 text-sm">
-            <span className="text-chai-700">
+          <div className="flex items-center justify-between pt-3 mt-3 border-t border-probe-100 text-sm">
+            <span className="text-probe-700">
               Page {page} of {pageCount} · {total} total
             </span>
             <div className="flex gap-2">

@@ -40,17 +40,17 @@ export default function EndpointFormDetail() {
   const auditQuery = trpc.endpoint.auditLog.useQuery({ id });
 
   const [tab, setTab] = useState<Tab>("snippet");
-  if (!formQuery.data) return <p className="text-chai-700">Loading…</p>;
+  if (!formQuery.data) return <p className="text-probe-700">Loading…</p>;
 
   const form = formQuery.data;
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://chaiforms.developedbysaad.com";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://probe.riftfi.com";
   const endpoint = `${origin}/submit`;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs text-chai-700">
+          <div className="text-xs text-probe-700">
             <Link href="/dashboard/endpoint-forms" className="hover:underline">
               Endpoint forms
             </Link>{" "}
@@ -69,7 +69,7 @@ export default function EndpointFormDetail() {
               </button>
             )}
           </div>
-          <p className="text-chai-700 text-sm">
+          <p className="text-probe-700 text-sm">
             Submissions to {form.recipientEmail} from {form.websiteUrl}
           </p>
         </div>
@@ -81,15 +81,15 @@ export default function EndpointFormDetail() {
         </button>
       </div>
 
-      <div className="flex gap-2 border-b border-chai-200">
+      <div className="flex gap-2 border-b border-probe-200">
         {TABS.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={`px-3 py-2 text-sm font-medium border-b-2 ${
               tab === t
-                ? "border-chai-500 text-chai-900"
-                : "border-transparent text-chai-700 hover:text-chai-900"
+                ? "border-probe-500 text-probe-900"
+                : "border-transparent text-probe-700 hover:text-probe-900"
             }`}
           >
             {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -100,12 +100,12 @@ export default function EndpointFormDetail() {
       {tab === "snippet" && (
         <div className="space-y-4">
           <div className="card">
-            <div className="text-xs font-bold uppercase text-chai-700 mb-1">Endpoint URL</div>
-            <code className="block bg-chai-900 text-chai-50 p-3 rounded-lg text-xs">{endpoint}</code>
+            <div className="text-xs font-bold uppercase text-probe-700 mb-1">Endpoint URL</div>
+            <code className="block bg-probe-900 text-probe-50 p-3 rounded-lg text-xs">{endpoint}</code>
           </div>
           <div className="card">
-            <div className="text-xs font-bold uppercase text-chai-700 mb-1">Access key (public)</div>
-            <code className="block bg-chai-900 text-chai-50 p-3 rounded-lg text-xs">
+            <div className="text-xs font-bold uppercase text-probe-700 mb-1">Access key (public)</div>
+            <code className="block bg-probe-900 text-probe-50 p-3 rounded-lg text-xs">
               {form.accessKey}
             </code>
             <p className="help">
@@ -121,19 +121,19 @@ export default function EndpointFormDetail() {
       {tab === "submissions" && (
         <div className="card">
           {submissionsQuery.data?.items.length === 0 && (
-            <p className="text-chai-700">No submissions yet.</p>
+            <p className="text-probe-700">No submissions yet.</p>
           )}
           <ul className="space-y-2">
             {submissionsQuery.data?.items.map((r) => (
-              <li key={r.id} className="border border-chai-200 rounded-lg p-3">
-                <div className="text-xs text-chai-700 mb-1">
+              <li key={r.id} className="border border-probe-200 rounded-lg p-3">
+                <div className="text-xs text-probe-700 mb-1">
                   {formatRelative(r.createdAt)}
                   {r.submitterEmail && <> · from {r.submitterEmail}</>}
                   {r.spamFlagged && (
                     <span className="ml-2 text-red-700">⚠ flagged</span>
                   )}
                 </div>
-                <pre className="text-xs bg-chai-50 p-2 rounded">
+                <pre className="text-xs bg-probe-50 p-2 rounded">
                   {JSON.stringify(r.payload, null, 2)}
                 </pre>
               </li>
@@ -154,7 +154,7 @@ export default function EndpointFormDetail() {
           <div className="card flex items-center justify-between">
             <div>
               <div className="font-bold">Rotate access key</div>
-              <p className="text-sm text-chai-700">
+              <p className="text-sm text-probe-700">
                 Old key becomes invalid immediately. Update your snippets after rotation.
               </p>
             </div>
@@ -169,20 +169,20 @@ export default function EndpointFormDetail() {
             <h3 className="font-bold mb-3">Audit log</h3>
             <ul className="text-sm space-y-2">
               {auditQuery.data?.map((row) => (
-                <li key={row.id} className="flex justify-between border-b border-chai-100 pb-2">
+                <li key={row.id} className="flex justify-between border-b border-probe-100 pb-2">
                   <div>
-                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-chai-100">
+                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-probe-100">
                       {row.action}
                     </span>
-                    <span className="ml-2 text-chai-700">
+                    <span className="ml-2 text-probe-700">
                       {row.detail ? JSON.stringify(row.detail) : ""}
                     </span>
                   </div>
-                  <div className="text-xs text-chai-700">{formatRelative(row.createdAt)}</div>
+                  <div className="text-xs text-probe-700">{formatRelative(row.createdAt)}</div>
                 </li>
               ))}
               {auditQuery.data?.length === 0 && (
-                <li className="text-chai-700">No audit events yet.</li>
+                <li className="text-probe-700">No audit events yet.</li>
               )}
             </ul>
           </div>
@@ -248,7 +248,7 @@ export function ContactForm() {
             key={s}
             onClick={() => setSnippet(s)}
             className={`px-3 py-1 rounded-lg text-sm ${
-              snippet === s ? "bg-chai-900 text-white" : "bg-chai-100 text-chai-900"
+              snippet === s ? "bg-probe-900 text-white" : "bg-probe-100 text-probe-900"
             }`}
           >
             {s.toUpperCase()}
@@ -264,7 +264,7 @@ export function ContactForm() {
           Copy
         </button>
       </div>
-      <pre className="bg-chai-900 text-chai-50 p-4 rounded-xl overflow-x-auto text-xs">
+      <pre className="bg-probe-900 text-probe-50 p-4 rounded-xl overflow-x-auto text-xs">
         {content}
       </pre>
     </div>
@@ -388,7 +388,7 @@ function SettingsTab({
           value={webhookUrl}
           onChange={(e) => setWebhookUrl(e.target.value)}
         />
-        <p className="help">Signed with HMAC-SHA256 in the X-ChaiForm-Signature header.</p>
+        <p className="help">Signed with HMAC-SHA256 in the X-Probe-Signature header.</p>
       </div>
       <label className="flex items-center gap-2 cursor-pointer">
         <input type="checkbox" checked={honeypot} onChange={(e) => setHoneypot(e.target.checked)} />

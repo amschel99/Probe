@@ -1,5 +1,5 @@
 /**
- * Downloadable HTML page templates with the ChaiForm endpoint (`/submit`) form
+ * Downloadable HTML page templates with the Probe endpoint (`/submit`) form
  * pre-wired. The actual files live in `public/form-templates/<slug>.html` — this
  * module is just the gallery metadata. Anyone can download them for free; they
  * only need to generate an access key (Dashboard → Endpoint Forms) to go live.

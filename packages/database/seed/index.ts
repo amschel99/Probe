@@ -21,7 +21,6 @@ import {
   forms as formsTable,
   responses,
   responseValues,
-  themes as themesTable,
   users as usersTable,
 } from "../schema";
 import type {
@@ -31,37 +30,19 @@ import type {
   SelectOption,
 } from "../models/types";
 import { SEED_FORMS, type SeedField, type SeedForm } from "./forms";
-import { SEED_THEMES } from "./themes";
+import { upsertThemes } from "./upsert-themes";
 
 faker.seed(42);
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 6);
 
-const DEMO_EMAIL = "demo@developedbysaad.com";
-const DEMO_PASSWORD = "ChaiForm@2025";
-const DEMO_NAME = "Saad (Demo)";
+const DEMO_EMAIL = "demo@probe.local";
+const DEMO_PASSWORD = "Probe@2025";
+const DEMO_NAME = "Demo User";
 
-const ADMIN_EMAIL = "admin@developedbysaad.com";
-const ADMIN_PASSWORD = "ChaiAdmin@2025";
-const ADMIN_NAME = "Saad (Admin)";
-
-async function upsertThemes() {
-  for (const theme of SEED_THEMES) {
-    await db
-      .insert(themesTable)
-      .values(theme)
-      .onConflictDoUpdate({
-        target: themesTable.slug,
-        set: {
-          name: theme.name,
-          category: theme.category,
-          description: theme.description,
-          config: theme.config,
-        },
-      });
-  }
-  return db.select().from(themesTable);
-}
+const ADMIN_EMAIL = "admin@probe.local";
+const ADMIN_PASSWORD = "ProbeAdmin@2025";
+const ADMIN_NAME = "Demo Admin";
 
 async function ensureUser(opts: {
   email: string;
@@ -293,7 +274,7 @@ async function seedFormWithResponses(opts: {
 }
 
 async function main() {
-  console.log("☕ ChaiForm seed — pour yourself a chai, this might take a moment.");
+  console.log("🔎 Probe seed — loading demo data…");
 
   const allThemes = await upsertThemes();
   console.log(`  ✓ Themes upserted (${allThemes.length})`);

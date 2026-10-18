@@ -43,7 +43,7 @@ export function ExploreCard({ form }: { form: ExploreFormItem }) {
 
   // The mini-preview header paints the form's real `background`. The label sits
   // on a `surface`-colored chip because the theme's text color is designed to
-  // be read on `surface` (see globals.css [data-chai-form]). Falling back to the
+  // be read on `surface` (see globals.css [data-probe-form]). Falling back to the
   // app surface/ink tokens keeps AA contrast when a form has no theme.
   const headerStyle: React.CSSProperties = theme
     ? {
@@ -51,7 +51,7 @@ export function ExploreCard({ form }: { form: ExploreFormItem }) {
         borderBottom: `1px solid ${theme.border}`,
         fontFamily: theme.fontFamily,
       }
-    : { background: "var(--color-chai-100)" };
+    : { background: "var(--color-probe-100)" };
 
   const titleChipStyle: React.CSSProperties = theme
     ? {
@@ -75,7 +75,7 @@ export function ExploreCard({ form }: { form: ExploreFormItem }) {
           "card flex h-full flex-col gap-0 overflow-hidden p-0",
           "transition duration-200 will-change-transform",
           "hover:-translate-y-1 hover:shadow-[0_18px_40px_-18px_rgba(46,33,23,0.45)]",
-          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-chai-500",
+          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-probe-500",
           "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
         ].join(" ")}
       >
@@ -107,19 +107,19 @@ export function ExploreCard({ form }: { form: ExploreFormItem }) {
 
         {/* Body — uses app chrome tokens for guaranteed AA contrast */}
         <div className="flex flex-1 flex-col gap-2 p-5">
-          <h3 className="display text-lg font-bold leading-snug text-chai-900 line-clamp-2">
+          <h3 className="display text-lg font-bold leading-snug text-probe-900 line-clamp-2">
             {form.title}
           </h3>
           {form.description ? (
-            <p className="text-sm text-chai-700 line-clamp-2">{form.description}</p>
+            <p className="text-sm text-probe-700 line-clamp-2">{form.description}</p>
           ) : null}
 
-          <dl className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-chai-700">
+          <dl className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-probe-700">
             <div className="flex items-center gap-1">
               <dt className="sr-only">Responses</dt>
               <dd>{plural(responses, "response")}</dd>
             </div>
-            <span aria-hidden="true" className="text-chai-200">
+            <span aria-hidden="true" className="text-probe-200">
               •
             </span>
             <div className="flex items-center gap-1">
@@ -128,7 +128,7 @@ export function ExploreCard({ form }: { form: ExploreFormItem }) {
             </div>
             {form.publishedAt ? (
               <>
-                <span aria-hidden="true" className="text-chai-200">
+                <span aria-hidden="true" className="text-probe-200">
                   •
                 </span>
                 <div className="flex items-center gap-1">

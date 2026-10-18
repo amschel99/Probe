@@ -44,7 +44,7 @@ export default function RegisterPage() {
   return (
     <div className="card">
       <h1 className="display text-2xl font-bold mb-2">Make an account.</h1>
-      <p className="text-chai-700 text-sm mb-6">Takes 5 seconds. No credit card. Honest.</p>
+      <p className="text-probe-700 text-sm mb-6">Takes 5 seconds. No credit card. Honest.</p>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="label">Your name</label>
@@ -65,9 +65,9 @@ export default function RegisterPage() {
           {submitting ? "Creating…" : "Sign up"}
         </button>
       </form>
-      <p className="text-sm text-chai-700 mt-6">
+      <p className="text-sm text-probe-700 mt-6">
         Already have an account?{" "}
-        <Link href="/login" className="text-chai-500 font-semibold">
+        <Link href="/login" className="text-probe-500 font-semibold">
           Log in
         </Link>
       </p>

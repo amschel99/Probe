@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Pricing — ChaiForm",
-  description: "ChaiForm is free and open source. Everything included, forever.",
+  title: "Pricing — Probe",
+  description: "Probe is free and open source. Everything included, forever.",
 };
 
 const TIERS = [
@@ -10,7 +10,7 @@ const TIERS = [
     name: "Hosted",
     price: "₹0",
     cadence: "forever",
-    emoji: "🍵",
+    emoji: "🔎",
     blurb: "The instance you're looking at right now. Sign up and start building.",
     cta: { label: "Get started", href: "/register" },
     highlight: true,
@@ -41,12 +41,12 @@ const TIERS = [
     ],
   },
   {
-    name: "Buy me a chai",
-    price: "₹99",
+    name: "Tip jar",
+    price: "Any",
     cadence: "one-time, optional",
     emoji: "☕",
-    blurb: "Nothing unlocks. It just keeps the maintainer caffeinated.",
-    cta: { label: "Send a chai", href: "/open-source" },
+    blurb: "Nothing unlocks. It just says thanks.",
+    cta: { label: "Send a tip", href: "/open-source" },
     highlight: false,
     perks: [
       "A warm fuzzy feeling",
@@ -63,11 +63,11 @@ export default function PricingPage() {
   return (
     <section className="max-w-5xl mx-auto px-6 py-20">
       <div className="text-center max-w-2xl mx-auto">
-        <h1 className="display text-5xl font-bold text-chai-900">
+        <h1 className="display text-5xl font-bold text-probe-900">
           One price. It&apos;s free.
         </h1>
-        <p className="text-lg text-chai-700 mt-6">
-          Google Forms is free but ugly. Typeform is pretty but pricey. ChaiForm is free,
+        <p className="text-lg text-probe-700 mt-6">
+          Google Forms is free but ugly. Typeform is pretty but pricey. Probe is free,
           open source, and ships every feature to everyone. No tiers, no metering, no
           &ldquo;contact sales.&rdquo;
         </p>
@@ -75,12 +75,12 @@ export default function PricingPage() {
 
       <div className="grid md:grid-cols-3 gap-6 mt-14">
         {TIERS.map((tier) => {
-          // The "Buy me a chai" CTA goes straight to the Razorpay link when one
+          // The "Tip jar" CTA goes straight to the Razorpay link when one
           // is configured (public, build-time env var); otherwise it falls back
           // to /open-source, which has the donate card.
           const donateUrl = process.env.NEXT_PUBLIC_RAZORPAY_DONATE_LINK;
           const useDonate =
-            tier.name === "Buy me a chai" && !!donateUrl && !donateUrl.includes("your-link");
+            tier.name === "Tip jar" && !!donateUrl && !donateUrl.includes("your-link");
           const href = useDonate ? donateUrl! : tier.cta.href;
           // Every tier's CTA is a real button: primary for the highlighted tier,
           // outlined (ghost) for the rest.
@@ -91,22 +91,22 @@ export default function PricingPage() {
             <div
               key={tier.name}
               className={`card flex flex-col ${
-                tier.highlight ? "ring-2 ring-chai-500 shadow-md" : ""
+                tier.highlight ? "ring-2 ring-probe-500 shadow-md" : ""
               }`}
             >
               <div className="text-3xl">{tier.emoji}</div>
               <div className="font-bold text-lg mt-3">{tier.name}</div>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="display text-4xl font-bold text-chai-900">{tier.price}</span>
-                <span className="text-sm text-chai-700">/ {tier.cadence}</span>
+                <span className="display text-4xl font-bold text-probe-900">{tier.price}</span>
+                <span className="text-sm text-probe-700">/ {tier.cadence}</span>
               </div>
-              <p className="text-sm text-chai-700 mt-3">{tier.blurb}</p>
+              <p className="text-sm text-probe-700 mt-3">{tier.blurb}</p>
 
               <ul className="mt-6 space-y-2 text-sm flex-1">
                 {tier.perks.map((perk) => (
                   <li key={perk} className="flex gap-2">
-                    <span className="text-chai-500 font-bold">✓</span>
-                    <span className="text-chai-900">{perk}</span>
+                    <span className="text-probe-500 font-bold">✓</span>
+                    <span className="text-probe-900">{perk}</span>
                   </li>
                 ))}
               </ul>
@@ -127,12 +127,12 @@ export default function PricingPage() {
 
       <div className="mt-16 text-center">
         <h2 className="display text-2xl font-bold mb-2">&ldquo;What&apos;s the catch?&rdquo;</h2>
-        <p className="text-chai-700 max-w-2xl mx-auto">
-          There isn&apos;t one. ChaiForm is a side project that got out of hand. Every paid
+        <p className="text-probe-700 max-w-2xl mx-auto">
+          There isn&apos;t one. Probe is a side project that got out of hand. Every paid
           form-builder feature you can think of — conditional logic, exports, password
           protection, analytics — is included on day one, for everyone.
         </p>
-        <p className="mt-8 text-sm text-chai-700">
+        <p className="mt-8 text-sm text-probe-700">
           Curious how it works?{" "}
           <Link href="/docs" className="underline">
             API reference

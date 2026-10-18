@@ -29,8 +29,8 @@ export default async function ExplorePage({
     <section className="mx-auto max-w-6xl px-6 py-12">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="display text-4xl font-bold text-chai-900">Explore</h1>
-          <p className="mt-2 max-w-xl text-chai-700">
+          <h1 className="display text-4xl font-bold text-probe-900">Explore</h1>
+          <p className="mt-2 max-w-xl text-probe-700">
             Public forms built by the community — each one wears its own theme.
             Open-source vibes, public visibility.
           </p>
@@ -59,16 +59,16 @@ export default async function ExplorePage({
 
       {items.length > 0 ? (
         <>
-          <p className="mt-8 text-sm text-chai-700" aria-live="polite">
+          <p className="mt-8 text-sm text-probe-700" aria-live="polite">
             {hasSearch ? (
               <>
-                Showing <strong className="text-chai-900">{items.length}</strong>{" "}
+                Showing <strong className="text-probe-900">{items.length}</strong>{" "}
                 {items.length === 1 ? "result" : "results"} for{" "}
-                <span className="text-chai-900">&ldquo;{query}&rdquo;</span>
+                <span className="text-probe-900">&ldquo;{query}&rdquo;</span>
               </>
             ) : (
               <>
-                <strong className="text-chai-900">{items.length}</strong> public{" "}
+                <strong className="text-probe-900">{items.length}</strong> public{" "}
                 {items.length === 1 ? "form" : "forms"}
               </>
             )}
@@ -90,13 +90,13 @@ export default async function ExplorePage({
           </div>
           {hasSearch ? (
             <>
-              <p className="text-chai-900">
+              <p className="text-probe-900">
                 No public forms match{" "}
                 <span className="font-semibold">&ldquo;{query}&rdquo;</span>.
               </p>
-              <p className="text-sm text-chai-700">
+              <p className="text-sm text-probe-700">
                 Try a different search, or{" "}
-                <Link href="/explore" className="text-chai-500 underline underline-offset-2">
+                <Link href="/explore" className="text-probe-500 underline underline-offset-2">
                   browse all forms
                 </Link>
                 .
@@ -104,10 +104,10 @@ export default async function ExplorePage({
             </>
           ) : (
             <>
-              <p className="text-chai-900">No public forms yet.</p>
-              <p className="text-sm text-chai-700">
+              <p className="text-probe-900">No public forms yet.</p>
+              <p className="text-sm text-probe-700">
                 Be the first —{" "}
-                <Link href="/register" className="text-chai-500 underline underline-offset-2">
+                <Link href="/register" className="text-probe-500 underline underline-offset-2">
                   build a form
                 </Link>{" "}
                 and publish it for everyone.

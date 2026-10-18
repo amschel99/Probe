@@ -1,15 +1,15 @@
 <!doctype html>
 <!--
-  ChaiForm template — Contact page
+  Probe template — Contact page
   ────────────────────────────────────────────────────────────────────────
   HOW TO USE THIS FILE
-  1. Get an access key: sign up at https://chaiforms.developedbysaad.com →
+  1. Get an access key: sign up at https://probe.riftfi.com →
      Dashboard → Endpoint Forms → New. Enter a name + your website, then
      VERIFY the email we send you (submissions won't deliver until you do).
   2. Replace YOUR_ACCESS_KEY below with the key from your dashboard.
-  3. (Self-hosting ChaiForm? Change the form's `action` to your own /submit URL.)
+  3. (Self-hosting Probe? Change the form's `action` to your own /submit URL.)
   4. Drop this file on any host — Netlify, GitHub Pages, your own server.
-  5. Submissions land in your inbox AND your ChaiForm dashboard. Done.
+  5. Submissions land in your inbox AND your Probe dashboard. Done.
   ────────────────────────────────────────────────────────────────────────
 -->
 <html lang="en">
@@ -86,8 +86,8 @@
       <h1>Get in touch ☕</h1>
       <p class="lede">Drop a message and we'll get back to you.</p>
 
-      <form id="chaiform" action="https://chaiforms.developedbysaad.com/submit" method="POST">
-        <!-- Replace with your access key from the ChaiForm dashboard -->
+      <form id="probe" action="https://probe.riftfi.com/submit" method="POST">
+        <!-- Replace with your access key from the Probe dashboard -->
         <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY" />
         <input type="hidden" name="subject" value="New contact form message" />
         <!-- Honeypot: bots fill this, humans never see it. Leave it empty. -->
@@ -107,14 +107,14 @@
         <div class="err" id="err">Something went wrong. Please try again.</div>
       </form>
 
-      <p class="note">Powered by <a href="https://chaiforms.developedbysaad.com">ChaiForm</a></p>
+      <p class="note">Powered by <a href="https://probe.riftfi.com">Probe</a></p>
     </main>
 
     <script>
       // Progressive enhancement: submit via fetch so the page shows inline
       // success instead of navigating away. Falls back to a normal POST if JS
       // is disabled (the form still works without this script).
-      const form = document.getElementById("chaiform");
+      const form = document.getElementById("probe");
       const ok = document.getElementById("ok");
       const err = document.getElementById("err");
       form.addEventListener("submit", async (e) => {

@@ -3,8 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   // Better Auth session cookie names
   const candidates = [
-    "chaiform.session_token",
-    "__Secure-chaiform.session_token",
+    "probe.session_token",
+    "__Secure-probe.session_token",
     "better-auth.session_token",
   ];
   const hasSession = candidates.some((name) => !!req.cookies.get(name)?.value);

@@ -14,10 +14,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ChaiForm — Open source form builder",
+  title: "Probe — Open source form builder",
   description:
-    "Google Forms has the design sense of a tax return. Typeform costs more than your Netflix. ChaiForm is free, open source, beautiful, and fuelled entirely by chai.",
-  icons: { icon: "/favicon.ico" },
+    "Google Forms has the design sense of a tax return. Typeform costs more than your Netflix. Probe is free, open source, beautiful, and and entirely yours.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

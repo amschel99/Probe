@@ -11,10 +11,10 @@
   end
 %>
 
-# ChaiForm — single Docker image, single origin, single Kamal service.
-service: <%= env_or('KAMAL_SERVICE', 'chaiforms') %>
+# Probe — single Docker image, single origin, single Kamal service.
+service: <%= env_or('KAMAL_SERVICE', 'probe') %>
 
-image: <%= env_or('KAMAL_IMAGE') || "#{env_or('KAMAL_REGISTRY_USERNAME', 'developedbysaad')}/#{env_or('KAMAL_SERVICE', 'chaiforms')}" %>
+image: <%= env_or('KAMAL_IMAGE') || "#{env_or('KAMAL_REGISTRY_USERNAME')}/#{env_or('KAMAL_SERVICE', 'probe')}" %>
 
 servers:
   web:
@@ -46,14 +46,14 @@ builder:
     NEXT_PUBLIC_TWITTER_URL: <%= ENV['NEXT_PUBLIC_TWITTER_URL'] %>
     NEXT_PUBLIC_LINKEDIN_URL: <%= ENV['NEXT_PUBLIC_LINKEDIN_URL'] %>
     # Hosted instance enables the donation nudges; self-host forks default to off.
-    NEXT_PUBLIC_ENABLE_CHAI_NUDGE: <%= env_or('NEXT_PUBLIC_ENABLE_CHAI_NUDGE', 'true') %>
+    NEXT_PUBLIC_ENABLE_CHAI_NUDGE: <%= env_or('NEXT_PUBLIC_ENABLE_CHAI_NUDGE', 'false') %>
   cache:
     type: registry
-    # Cache is a TAG on the SAME image repo (…/chaiforms:buildcache), not a
-    # separate …/chaiforms-buildcache repo. That way the whole deploy only ever
+    # Cache is a TAG on the SAME image repo (…/probe:buildcache), not a
+    # separate …/probe-buildcache repo. That way the whole deploy only ever
     # pushes to ONE Docker Hub repo, so a registry token scoped to just that repo
     # works — avoids the recurring "access token has insufficient scopes" failures.
-    image: <%= env_or('KAMAL_BUILD_CACHE_IMAGE') || "#{env_or('KAMAL_REGISTRY_USERNAME', 'developedbysaad')}/#{env_or('KAMAL_SERVICE', 'chaiforms')}:buildcache" %>
+    image: <%= env_or('KAMAL_BUILD_CACHE_IMAGE') || "#{env_or('KAMAL_REGISTRY_USERNAME')}/#{env_or('KAMAL_SERVICE', 'probe')}:buildcache" %>
     options: mode=max
 
 env:
@@ -64,7 +64,7 @@ env:
     API_INTERNAL_URL: http://localhost:8000
     PUBLIC_APP_URL: <%= "https://#{ENV['KAMAL_DEPLOY_HOST']}" %>
     BETTER_AUTH_URL: <%= "https://#{ENV['KAMAL_DEPLOY_HOST']}" %>
-    RESEND_FROM: <%= env_or('RESEND_FROM', 'ChaiForm <noreply@developedbysaad.com>') %>
+    RESEND_FROM: <%= env_or('RESEND_FROM', 'Probe <noreply@riftfi.com>') %>
   # IMPORTANT: only genuine secrets go here. Kamal masks every secret VALUE in
   # its log output, so listing a *public* value (e.g. NEXT_PUBLIC_*) as a secret
   # both leaks nothing useful AND risks the masker redacting that same string
@@ -94,8 +94,8 @@ accessories:
     host: <%= ENV['KAMAL_SERVER_HOST'] %>
     env:
       clear:
-        POSTGRES_USER: <%= env_or('POSTGRES_USER', 'chaiforms') %>
-        POSTGRES_DB: <%= env_or('POSTGRES_DB', 'chaiforms_production') %>
+        POSTGRES_USER: <%= env_or('POSTGRES_USER', 'probe') %>
+        POSTGRES_DB: <%= env_or('POSTGRES_DB', 'probe_production') %>
       secret:
         - POSTGRES_PASSWORD
     directories:

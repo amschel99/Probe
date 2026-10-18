@@ -104,7 +104,7 @@ export const publicRouter = router({
       if (!success) {
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
-          message: "Slow down, chai's not that hot",
+          message: "Too many submissions — slow down",
         });
       }
 

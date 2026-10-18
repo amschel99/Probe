@@ -2,12 +2,12 @@ services:
   postgresdb:
     image: postgres:17
     restart: unless-stopped
-    container_name: chaiforms-postgres
+    container_name: probe-postgres
 
     environment:
-      POSTGRES_USER: chaiforms
-      POSTGRES_PASSWORD: chaiforms_local
-      POSTGRES_DB: chaiforms_dev
+      POSTGRES_USER: probe
+      POSTGRES_PASSWORD: probe_local
+      POSTGRES_DB: probe_dev
 
     ports:
       - "5434:5432"

@@ -1,0 +1,132 @@
+# Probe
+
+> Probe is a self-hosted form builder (a Tally / Typeform alternative) running at https://probe.riftfi.com. It has two surfaces: **hosted forms** (themed pages at `/f/<slug>` built in a dashboard) and **endpoint forms** (a form-to-email/webhook backend: POST any HTML form or JSON to `/submit` with an access key). Everything is same-origin on one domain.
+
+Base URL: `https://probe.riftfi.com` (replace with your instance's origin if different).
+
+## Which surface to use
+
+- You just need to **collect submissions from a site, script, or agent** → use an **endpoint form** + `POST /submit`. No session needed at submit time, only the public `access_key`.
+- You need a **hosted, themed form page** with typed fields, validation, analytics → use **hosted forms** via the tRPC API (needs a signed-in session).
+- You only need to **read results** → tRPC `responses.list` (session) or the export URL.
+
+## 1. Endpoint forms — `POST /submit` (no auth)
+
+```
+POST https://probe.riftfi.com/submit
+Content-Type: application/json | application/x-www-form-urlencoded | multipart/form-data
+```
+
+Body fields:
+- `access_key` (required) — the endpoint form's public key (from the dashboard or `endpoint.create`).
+- `email` (optional) — submitter email; becomes Reply-To on the notification.
+- `from_name` (optional) — submitter name.
+- `subject` (optional) — overrides the email subject.
+- `redirect` (optional) — absolute URL; responds `303` there. Its origin must be in the form's allowed origins.
+- `botcheck` (optional) — honeypot; leave empty. A non-empty value is silently dropped with a fake 200.
+- `h-captcha-response` / `g-recaptcha-response` / `cf-turnstile-response` — only if captcha is enabled on the form.
+- Any other keys — stored as the submission payload (max 50 keys, 64 KB body). File parts are ignored.
+
+Example (server-side / agent):
+```bash
+curl -X POST https://probe.riftfi.com/submit \
+  -H "Content-Type: application/json" \
+  -d '{"access_key":"YOUR_ACCESS_KEY","name":"Ada","email":"ada@example.com","message":"Hello"}'
+```
+
+Responses: `200 {"success":true,"message":"Submission received"}`; `303` redirect; errors are `{"success":false,"code":"...","message":"..."}` with codes `INVALID_INPUT` (400), `TOO_MANY_FIELDS` (400), `INVALID_REDIRECT` (400), `INVALID_ACCESS_KEY` (401), `ORIGIN_NOT_ALLOWED` (403), `PAYLOAD_TOO_LARGE` (413), `SPAM_REJECTED` (422), `RATE_LIMITED` (429).
+
+Rules that commonly bite agents:
+- **Origin allowlist.** Browser requests must come from an origin in the form's `allowedOrigins` (wildcards like `*.example.com` work). **Requests with no `Origin`/`Referer` (curl, servers, agents) are rejected with 403 unless the form has `endpointSettings.allowServerSide: true`.** Enable it with `endpoint.update`.
+- **Verification.** A new key starts unverified. Submissions are still stored and visible in the dashboard, but notification emails and webhooks only fire after the recipient clicks the verification link. (If the instance has no email provider configured, the link is printed in the server logs.)
+- **Webhooks.** If `endpointSettings.webhookUrl` is set, each verified submission is POSTed there as `{"formId","formTitle","payload"}` with header `X-Probe-Signature: sha256=<hex HMAC-SHA256 of the raw body>`. The signing secret is `endpointSettings.webhookSigningSecret` from `endpoint.get`.
+
+## 2. Authentication (for everything except `/submit` and public reads)
+
+Session cookies via Better Auth. Send an `Origin: https://probe.riftfi.com` header on auth calls.
+
+```bash
+# Register (the first account on a fresh instance becomes admin)
+curl -c jar.txt -X POST https://probe.riftfi.com/api/auth/sign-up/email \
+  -H "Content-Type: application/json" -H "Origin: https://probe.riftfi.com" \
+  -d '{"name":"Agent","email":"agent@example.com","password":"a-long-password"}'
+
+# Sign in (stores the session cookie in jar.txt)
+curl -c jar.txt -X POST https://probe.riftfi.com/api/auth/sign-in/email \
+  -H "Content-Type: application/json" -H "Origin: https://probe.riftfi.com" \
+  -d '{"email":"agent@example.com","password":"a-long-password"}'
+```
+
+Reuse the cookie (`-b jar.txt`) on every tRPC call below. Sessions last 7 days.
+
+## 3. tRPC over HTTP — `/trpc/<router>.<procedure>`
+
+The API uses tRPC with the **superjson** transformer, so inputs and outputs are wrapped in `{"json": ...}`.
+
+- **Query** (read): `GET /trpc/<proc>?input=<url-encoded {"json":{...}}>`
+- **Mutation** (write): `POST /trpc/<proc>` with body `{"json":{...}}`
+- **Success**: `{"result":{"data":{"json": <value>}}}`
+- **Error**: `{"error":{"json":{"message":"...","data":{"code":"NOT_FOUND" | "UNAUTHORIZED" | "BAD_REQUEST" | "TOO_MANY_REQUESTS" | ...}}}}`. Resources you don't own return `NOT_FOUND`.
+
+```bash
+# Query example
+curl -b jar.txt -G https://probe.riftfi.com/trpc/forms.list \
+  --data-urlencode 'input={"json":{"limit":20}}'
+
+# Mutation example
+curl -b jar.txt -X POST https://probe.riftfi.com/trpc/forms.publish \
+  -H "Content-Type: application/json" -d '{"json":{"id":"<form-uuid>"}}'
+```
+
+### Recipe: create and publish a hosted form
+
+1. `themes.list` (query, no input, public) → pick a theme `id`.
+2. `forms.create` (mutation) `{"title":"Feedback","themeId":"<uuid>","visibility":"unlisted","description":"optional","slug":"optional-custom-slug"}` → returns the form (with `id`, `slug`).
+3. `fields.create` (mutation), once per field, with increasing `order`:
+   `{"formId":"<uuid>","type":"short_text","label":"Your name","required":true,"order":0,"config":{}}`
+   Select-type example: `{"formId":"<uuid>","type":"single_select","label":"Plan","order":1,"config":{"options":[{"label":"Free","value":"free"},{"label":"Pro","value":"pro"}]}}`
+4. `forms.publish` (mutation) `{"id":"<uuid>"}`.
+5. Share `https://probe.riftfi.com/f/<slug>`.
+
+Field `type` values: `short_text`, `long_text`, `email`, `number`, `single_select`, `multi_select`, `checkbox`, `rating`, `date`, `phone`, `url`, `linear_scale`, `ranking`, `address`, `time`, `signature`, `file_upload` (only if storage is configured), `page_break`.
+Useful `config` keys: `options[{label,value}]`, `maxRating`, `ratingStyle` (`star|number|emoji`), `min`, `max`, `step`, `minLength`, `maxLength`, `scaleMin`, `scaleMax`, `scaleMinLabel`, `scaleMaxLabel`, `hidden`, `prefillKey`. Unknown config keys are rejected.
+Conditional display: `"conditionalLogic":{"showIf":[{"fieldId":"<uuid>","operator":"equals|not_equals|contains|is_filled|is_empty","value":"..."}]}` (all rules must pass).
+
+### Recipe: submit to a hosted form (public, no auth)
+
+1. `public.getForm` (query) `{"slug":"<slug>"}` → `{form, fields, theme}`; field ids are the answer keys.
+2. `public.submitResponse` (mutation) `{"slug":"<slug>","values":{"<fieldId>":"answer", ...},"submitterEmail":"optional"}`.
+   Password-protected forms also need `"password"`. Rate-limited per IP per form.
+
+### Recipe: create an endpoint form
+
+1. `endpoint.create` (mutation) `{"title":"Contact","websiteUrl":"https://example.com","recipientEmail":"optional@example.com"}` → includes `accessKey`.
+2. Optional, `endpoint.update` (mutation) `{"id":"<uuid>","allowedOrigins":["https://example.com"],"endpointSettings":{"allowServerSide":true,"webhookUrl":"https://hooks.example.com/probe"}}`.
+3. Submit with `POST /submit` (section 1).
+
+### Reading results
+
+- `responses.list` (query) `{"formId":"<uuid>","limit":25,"from":"<ISO datetime>","to":"<ISO datetime>"}` → `{items:[...]}`. Hosted-form answers are in `items[].values[]` (`fieldId`, `value`). Endpoint submissions are in `items[].payload`.
+- `responses.get` (query) `{"id":"<response-uuid>"}`.
+- `forms.getAnalytics` (query) `{"id":"<form-uuid>"}` → views, starts, completion rate, daily series.
+- File export (cookie auth): `GET /forms/<formId>/export.csv` (also `.xlsx`, `.pdf`).
+
+### Procedure index
+
+- `public` (no auth): `getForm`, `submitResponse`, `trackEvent`, `listPublicForms`
+- `themes` (no auth): `list`
+- `auth`: `me`, `status`
+- `forms`: `list`, `get`, `create`, `update`, `delete`, `publish`, `unpublish`, `duplicate`, `setPassword`, `getAnalytics`, `fieldDistribution`
+- `fields`: `list` `{formId}`, `create`, `update`, `delete` `{id}`, `reorder` `{formId, fields:[{id,order}]}`
+- `responses`: `list`, `get`, `delete`, `exportCsv`
+- `endpoint`: `list`, `get`, `create`, `update`, `rotateKey`, `resendVerification`, `delete`, `auditLog`
+- `integrations`: Discord and Google Sheets forwarding per form (`listForForm`, `upsertForForm`, `deleteForForm`)
+- `ai`: `generateForm` (needs the user's own Anthropic key saved in settings)
+- `admin` (admin role only): `getStats`, `listForms`, `listUsers`, `setFormStatus`, `setFormVisibility`, `deleteForm`, `setUserRole`
+
+## Links
+
+- [OpenAPI spec](https://probe.riftfi.com/openapi.json)
+- [API reference (Scalar)](https://probe.riftfi.com/api/docs)
+- [Docs](https://probe.riftfi.com/docs)
+- [Health](https://probe.riftfi.com/health)

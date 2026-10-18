@@ -23,7 +23,7 @@ export default function AnalyticsPage() {
   const formQuery = trpc.forms.get.useQuery({ id });
   const analyticsQuery = trpc.forms.getAnalytics.useQuery({ id });
 
-  if (!formQuery.data || !analyticsQuery.data) return <p className="text-chai-700">Loading…</p>;
+  if (!formQuery.data || !analyticsQuery.data) return <p className="text-probe-700">Loading…</p>;
 
   const a = analyticsQuery.data;
   const topField = a.topDropoffFieldId
@@ -35,7 +35,7 @@ export default function AnalyticsPage() {
       <FormTabs id={id} responseCount={formQuery.data.responseCount} />
 
       <div>
-        <div className="text-xs text-chai-700">
+        <div className="text-xs text-probe-700">
           <Link href={`/dashboard/forms/${id}`} className="hover:underline">
             {formQuery.data.title}
           </Link>
@@ -66,7 +66,7 @@ export default function AnalyticsPage() {
       <div className="grid md:grid-cols-2 gap-4">
         <div className="card">
           <h3 className="display text-lg font-bold mb-2">Top drop-off field</h3>
-          <p className="text-chai-700">
+          <p className="text-probe-700">
             {topField ?? "Not enough abandon events to determine yet."}
           </p>
         </div>
@@ -82,7 +82,7 @@ export default function AnalyticsPage() {
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="card">
-      <div className="text-xs uppercase font-semibold text-chai-700">{label}</div>
+      <div className="text-xs uppercase font-semibold text-probe-700">{label}</div>
       <div className="display text-3xl font-bold mt-2">{value}</div>
     </div>
   );

@@ -20,8 +20,8 @@ export function IntegrationsPanel({ formId }: { formId: string }) {
   return (
     <div className="card space-y-4">
       <div>
-        <div className="text-xs font-bold uppercase text-chai-700">Integrations</div>
-        <p className="text-xs text-chai-700 mt-1">
+        <div className="text-xs font-bold uppercase text-probe-700">Integrations</div>
+        <p className="text-xs text-probe-700 mt-1">
           Forward each new response to your tools. Delivery is best-effort and never
           blocks submissions.
         </p>
@@ -67,7 +67,7 @@ function DiscordIntegration({ formId }: { formId: string }) {
   });
 
   return (
-    <div className="border-t border-chai-100 pt-3 space-y-2">
+    <div className="border-t border-probe-100 pt-3 space-y-2">
       <div className="flex items-center justify-between">
         <div className="font-semibold text-sm">Discord</div>
         {existing && (
@@ -154,7 +154,7 @@ function SheetsIntegration({ formId }: { formId: string }) {
   const connected = googleStatus.data?.connected;
 
   return (
-    <div className="border-t border-chai-100 pt-3 space-y-2">
+    <div className="border-t border-probe-100 pt-3 space-y-2">
       <div className="flex items-center justify-between">
         <div className="font-semibold text-sm">Google Sheets</div>
         {existing && (
@@ -166,7 +166,7 @@ function SheetsIntegration({ formId }: { formId: string }) {
 
       {!connected ? (
         <div className="space-y-2">
-          <p className="text-xs text-chai-700">
+          <p className="text-xs text-probe-700">
             Connect your Google account to append responses to a spreadsheet.
           </p>
           <a
@@ -178,7 +178,7 @@ function SheetsIntegration({ formId }: { formId: string }) {
         </div>
       ) : (
         <>
-          <p className="text-xs text-chai-700">
+          <p className="text-xs text-probe-700">
             Connected as {googleStatus.data?.email ?? "your Google account"}.
           </p>
           <label className="label text-sm">Spreadsheet ID</label>

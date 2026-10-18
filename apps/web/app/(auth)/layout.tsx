@@ -1,12 +1,13 @@
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-chai-200 bg-chai-50/80">
+      <header className="border-b border-probe-200 bg-probe-50/80">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center">
-          <Link href="/" className="display text-xl font-bold text-chai-900">
-            🍵 ChaiForm
+          <Link href="/" className="display text-xl font-bold text-probe-900">
+            <Logo />
           </Link>
         </div>
       </header>

@@ -34,7 +34,7 @@ function LoginForm() {
         toast.error(data?.message ?? "Login failed");
         return;
       }
-      toast.success("Welcome back ☕");
+      toast.success("Welcome back 👋");
       router.push(params.get("next") ?? "/dashboard");
       router.refresh();
     } finally {
@@ -45,7 +45,7 @@ function LoginForm() {
   return (
     <div className="card">
       <h1 className="display text-2xl font-bold mb-2">Welcome back.</h1>
-      <p className="text-chai-700 text-sm mb-6">Steep into your account.</p>
+      <p className="text-probe-700 text-sm mb-6">Steep into your account.</p>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="label">Email</label>
@@ -61,9 +61,9 @@ function LoginForm() {
           {submitting ? "Logging in…" : "Log in"}
         </button>
       </form>
-      <p className="text-sm text-chai-700 mt-6">
+      <p className="text-sm text-probe-700 mt-6">
         No account?{" "}
-        <Link href="/register" className="text-chai-500 font-semibold">
+        <Link href="/register" className="text-probe-500 font-semibold">
           Sign up
         </Link>
       </p>

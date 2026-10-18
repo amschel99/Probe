@@ -29,7 +29,7 @@ function windowToMs(window: Window): number {
 /**
  * In-memory sliding-window limiter. Used when Upstash isn't configured.
  *
- * ChaiForm runs as a single container on one VPS, so a distributed store
+ * Probe runs as a single container on one VPS, so a distributed store
  * (Upstash) is unnecessary — process memory shares state across every request
  * this instance handles. Counters reset on restart and aren't shared across
  * instances; both are irrelevant for a single-instance deploy. Scale out and
@@ -90,7 +90,7 @@ function makeLimiter(rate: number, window: Window): Limiter {
     redis,
     limiter: Ratelimit.slidingWindow(rate, window),
     analytics: false,
-    prefix: "chaiform",
+    prefix: "probe",
   });
 }
 

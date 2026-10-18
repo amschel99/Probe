@@ -40,12 +40,12 @@ export function nudgeChai(message: string) {
   // bottom — instead of sonner's cramped inline action/cancel buttons.
   toast.custom(
     (id) => (
-      <div className="relative w-[360px] max-w-[calc(100vw-2rem)] rounded-2xl border border-chai-200 bg-white p-4 shadow-[0_12px_40px_-12px_rgba(59,42,26,0.35)]">
+      <div className="relative w-[360px] max-w-[calc(100vw-2rem)] rounded-2xl border border-probe-200 bg-white p-4 shadow-[0_12px_40px_-12px_rgba(59,42,26,0.35)]">
         <button
           type="button"
           onClick={() => toast.dismiss(id)}
           aria-label="Dismiss"
-          className="absolute right-2.5 top-2.5 grid h-6 w-6 place-items-center rounded-full text-chai-700 transition-colors hover:bg-chai-100 hover:text-chai-900"
+          className="absolute right-2.5 top-2.5 grid h-6 w-6 place-items-center rounded-full text-probe-700 transition-colors hover:bg-probe-100 hover:text-probe-900"
         >
           ✕
         </button>
@@ -53,7 +53,7 @@ export function nudgeChai(message: string) {
           <span className="text-2xl leading-none" aria-hidden>
             ☕
           </span>
-          <p className="text-sm leading-snug text-chai-900">{message}</p>
+          <p className="text-sm leading-snug text-probe-900">{message}</p>
         </div>
         <div className="mt-4 flex gap-2">
           <button
@@ -64,7 +64,7 @@ export function nudgeChai(message: string) {
             }}
             className="btn btn-primary flex-1 justify-center text-sm"
           >
-            Buy a chai — ₹99
+            Send a tip
           </button>
           <button
             type="button"
