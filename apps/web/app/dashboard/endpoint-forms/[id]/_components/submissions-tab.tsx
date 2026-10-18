@@ -51,7 +51,10 @@ function Value({ v }: { v: unknown }) {
 
 export function SubmissionsTab({ formId }: { formId: string }) {
   const utils = trpc.useUtils();
-  const query = trpc.responses.list.useQuery({ formId, limit: 100 });
+  const query = trpc.responses.list.useInfiniteQuery(
+    { formId, limit: 50 },
+    { getNextPageParam: (last) => last.nextCursor ?? undefined },
+  );
   const deleteMutation = trpc.responses.delete.useMutation({
     onSuccess: () => {
       toast("Submission deleted");
@@ -63,7 +66,7 @@ export function SubmissionsTab({ formId }: { formId: string }) {
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
 
-  const items = query.data?.items ?? [];
+  const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
 
   // One column per payload key, in first-seen order (matches the CSV export).
   const columns = useMemo(() => {
@@ -93,8 +96,11 @@ export function SubmissionsTab({ formId }: { formId: string }) {
     <div className="card space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <div className="text-sm font-semibold mr-auto">
-          {rows.length === items.length ? `${items.length}` : `${rows.length} of ${items.length}`}{" "}
-          submission{items.length === 1 ? "" : "s"}
+          {rows.length === items.length ? `${items.length}` : `${rows.length} of ${items.length}`}
+          {query.hasNextPage ? "+" : ""} submission{items.length === 1 ? "" : "s"}
+          {search && query.hasNextPage && (
+            <span className="font-normal text-probe-700"> (searching loaded only)</span>
+          )}
         </div>
         <input
           className="input w-56 text-sm"
@@ -187,6 +193,19 @@ export function SubmissionsTab({ formId }: { formId: string }) {
           </tbody>
         </table>
       </div>
+
+      {query.hasNextPage && (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            className="btn btn-ghost text-sm"
+            onClick={() => query.fetchNextPage()}
+            disabled={query.isFetchingNextPage}
+          >
+            {query.isFetchingNextPage ? "Loading…" : "Load more"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

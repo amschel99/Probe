@@ -67,8 +67,12 @@ export default async function PublicFormPage({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-6"
-      style={{ background: result.theme?.config.background ?? "#FBF5EC" }}
+    // Tally-style: one full-bleed surface, content in a single column from the
+    // top. The theme's `surface` (not `background`) is what its text colors are
+    // designed to be read on.
+    <div
+      className="min-h-[100dvh] px-5 pt-12 pb-24 sm:px-8 sm:pt-20"
+      style={{ background: result.theme?.config.surface ?? "#FFFFFF" }}
     >
       <FormFiller
         slug={params.slug}
@@ -92,6 +96,14 @@ export default async function PublicFormPage({
         scoring={result.form!.settings.scoring}
         password={searchParams.password}
       />
+      <a
+        href="/"
+        target="_blank"
+        rel="noreferrer"
+        className="fixed bottom-4 right-4 rounded-lg border border-black/10 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm hover:text-neutral-900"
+      >
+        Made with <span className="font-bold">Probe</span>
+      </a>
     </div>
   );
 }

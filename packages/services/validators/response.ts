@@ -286,7 +286,7 @@ export type TrackEventInput = z.infer<typeof trackEventSchema>;
 
 export const listResponsesSchema = z.object({
   formId: z.string().uuid(),
-  cursor: z.string().optional(),
+  cursor: z.string().uuid().nullish(),
   limit: z.number().int().min(1).max(100).default(25),
   from: z.string().datetime().optional(),
   to: z.string().datetime().optional(),

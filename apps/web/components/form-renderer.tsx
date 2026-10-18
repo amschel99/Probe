@@ -212,9 +212,20 @@ export function FormRenderer(props: FormRendererProps) {
 
   if (done) {
     return (
-      <div data-probe-form style={applyThemeVars(props.theme)} className="max-w-xl mx-auto p-10 text-center">
-        <div className="text-5xl mb-4">{outcome ? "🎉" : "☕"}</div>
-        <h2 className="display text-2xl font-bold mb-2">{outcome?.title ?? "Submission received"}</h2>
+      <div
+        data-probe-form
+        data-preview={props.isPreview ? "" : undefined}
+        style={applyThemeVars(props.theme)}
+        className={props.isPreview ? "max-w-xl mx-auto p-10 text-center" : "w-full max-w-[680px] mx-auto py-16 text-center"}
+      >
+        <div
+          className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-full text-2xl"
+          style={{ background: "var(--form-accent)", color: "var(--form-accent-text)" }}
+          aria-hidden="true"
+        >
+          {outcome ? "🎉" : "✓"}
+        </div>
+        <h2 className="display text-3xl font-bold mb-2">{outcome?.title ?? "Submission received"}</h2>
         <p style={{ color: "var(--form-text-muted)" }}>
           {outcome?.message ?? props.successMessage ?? "Thanks for filling this out."}
         </p>
@@ -228,9 +239,10 @@ export function FormRenderer(props: FormRendererProps) {
   return (
     <form
       data-probe-form
+      data-preview={props.isPreview ? "" : undefined}
       style={applyThemeVars(props.theme)}
       onSubmit={handleSubmit}
-      className="max-w-xl mx-auto p-8 space-y-6"
+      className={props.isPreview ? "max-w-xl mx-auto p-8 space-y-6" : "w-full max-w-[680px] mx-auto space-y-8"}
     >
       <div ref={formTopRef} />
 
@@ -261,10 +273,9 @@ export function FormRenderer(props: FormRendererProps) {
       {/* Title + description only on the first page. */}
       {safePageIndex === 0 && (
         <div>
-          {props.theme.logoEmoji && <div className="text-3xl mb-2">{props.theme.logoEmoji}</div>}
-          <h2 className="display text-2xl font-bold">{props.title}</h2>
+          <h1 className="display text-3xl sm:text-4xl font-bold leading-tight">{props.title}</h1>
           {props.description && (
-            <p className="mt-1" style={{ color: "var(--form-text-muted)" }}>
+            <p className="mt-3 text-base sm:text-lg whitespace-pre-line" style={{ color: "var(--form-text-muted)" }}>
               {pipeText(props.description, values)}
             </p>
           )}

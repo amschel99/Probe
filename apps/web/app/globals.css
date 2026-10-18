@@ -42,9 +42,22 @@ h1, h2, h3, .display {
   background: var(--form-surface, #FFFFFF);
   color: var(--form-text, #3B2A1A);
   font-family: var(--form-font, var(--font-sans));
+}
+/* Builder preview keeps a card frame; the public page is a bare Tally-style
+   column on a full-bleed surface (see app/f/[slug]/page.tsx). */
+[data-probe-form][data-preview] {
   border-radius: var(--form-radius, 12px);
   border: 1px solid var(--form-border, #E5D5BD);
   box-shadow: 0 10px 40px -16px rgba(0, 0, 0, 0.35);
+}
+
+/* Question titles. */
+[data-probe-form] .label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 8px;
 }
 
 /* Text-like inputs fill the row. Radios/checkboxes/buttons must NOT —
@@ -55,22 +68,39 @@ h1, h2, h3, .display {
   background: var(--form-surface, #FFFFFF);
   color: var(--form-text);
   border: 1px solid var(--form-border, #E5D5BD);
-  border-radius: var(--form-radius, 8px);
-  padding: 11px 13px;
+  border-radius: 8px;
+  padding: 10px 12px;
   width: 100%;
   font-family: inherit;
-  font-size: 15px;
+  /* 16px keeps iOS Safari from zooming the page on focus. */
+  font-size: 16px;
+  line-height: 1.5;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+/* No drag-to-resize handle; long answers grow the box instead (Tally-style). */
+[data-probe-form] textarea {
+  resize: none;
+  min-height: 96px;
+  field-sizing: content;
+  max-height: 480px;
 }
 [data-probe-form] input::placeholder,
 [data-probe-form] textarea::placeholder {
   color: var(--form-text-muted, #7A6755);
   opacity: 0.6;
 }
-[data-probe-form] input:focus,
+[data-probe-form] input:not([type="radio"]):not([type="checkbox"]):focus,
 [data-probe-form] textarea:focus,
 [data-probe-form] select:focus {
+  outline: none;
+  border-color: var(--form-accent, #B8722E);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--form-accent, #B8722E) 22%, transparent);
+}
+[data-probe-form] input[type="radio"]:focus-visible,
+[data-probe-form] input[type="checkbox"]:focus-visible {
   outline: 2px solid var(--form-accent, #B8722E);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 /* Native radios/checkboxes: fixed size, theme accent, never stretched. */
@@ -92,10 +122,11 @@ h1, h2, h3, .display {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 11px 14px;
+  padding: 10px 14px;
   border: 1px solid var(--form-border, #E5D5BD);
-  border-radius: var(--form-radius, 8px);
+  border-radius: 8px;
   background: var(--form-surface, #FFFFFF);
+  font-size: 16px;
   cursor: pointer;
   transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
@@ -113,8 +144,7 @@ h1, h2, h3, .display {
 /* Keyboard focus is visible on the whole row, not just the native control. */
 [data-probe-form] .probe-option:focus-within {
   border-color: var(--form-accent, #B8722E);
-  outline: 2px solid var(--form-accent, #B8722E);
-  outline-offset: 1px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--form-accent, #B8722E) 22%, transparent);
 }
 /* A single boolean checkbox shouldn't stretch full width like an option list. */
 [data-probe-form] .probe-option--inline {
@@ -153,8 +183,9 @@ h1, h2, h3, .display {
   background: var(--form-accent, #B8722E);
   color: var(--form-accent-text, #FFFFFF);
   border: 0;
-  padding: 12px 24px;
-  border-radius: var(--form-radius, 8px);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: filter 0.12s ease;

@@ -28,12 +28,19 @@ export const responsesRouter = router({
         eq(schema.responses.formId, input.formId),
         input.from ? gte(schema.responses.createdAt, new Date(input.from)) : undefined,
         input.to ? lte(schema.responses.createdAt, new Date(input.to)) : undefined,
+        // Keyset pagination: the cursor is the last row's id; compare in SQL so
+        // Postgres' microsecond timestamps stay exact (JS Dates are ms only).
+        input.cursor
+          ? sql`(${schema.responses.createdAt}, ${schema.responses.id}) < (select r.created_at, r.id from responses r where r.id = ${input.cursor})`
+          : undefined,
       ),
       with: { values: true },
-      orderBy: (r, { desc }) => [desc(r.createdAt)],
-      limit: input.limit,
+      orderBy: (r, { desc }) => [desc(r.createdAt), desc(r.id)],
+      limit: input.limit + 1,
     });
-    return { items: rows };
+    const hasMore = rows.length > input.limit;
+    const items = hasMore ? rows.slice(0, input.limit) : rows;
+    return { items, nextCursor: hasMore ? items[items.length - 1]!.id : null };
   }),
 
   get: protectedProcedure
