@@ -94,9 +94,8 @@ export default async function LandingPage() {
           />
           <div className="relative mx-auto grid max-w-6xl gap-10 px-5 pb-20 pt-14 sm:px-6 md:pt-20 lg:grid-cols-[1.15fr_1fr] lg:gap-4">
             <div className="relative z-10">
-              <p className="kicker anim-in">Self-hosted forms</p>
               <h1
-                className="anim-in mt-6 text-[3.4rem] leading-[0.92] sm:text-[5.2rem] lg:text-[6.4rem]"
+                className="anim-in text-[3.4rem] leading-[0.92] sm:text-[5.2rem] lg:text-[6.4rem]"
                 style={{ animationDelay: "60ms" }}
               >
                 <span className="block">
@@ -177,8 +176,7 @@ export default async function LandingPage() {
         {/* ── How it travels ───────────────────────────────────────────── */}
         <section className="border-b border-probe-200 bg-probe-100">
           <div className="mx-auto max-w-6xl px-5 pt-20 sm:px-6">
-            <p className="kicker">How it travels</p>
-            <h2 className="mt-5 max-w-3xl text-4xl sm:text-5xl">
+            <h2 className="max-w-3xl text-4xl sm:text-5xl">
               Forms, pages and agents send answers in. Your server keeps them.
             </h2>
           </div>
@@ -191,8 +189,7 @@ export default async function LandingPage() {
         <section className="mx-auto max-w-6xl px-5 py-24 sm:px-6 md:py-32">
           <div className="grid gap-12 md:grid-cols-[1fr_1.5fr] md:gap-16">
             <div>
-              <p className="kicker">What it does</p>
-              <h2 className="mt-5 text-4xl sm:text-5xl">
+              <h2 className="text-4xl sm:text-5xl">
                 A form builder, a form backend, and an{" "}
                 <span className="pixel text-[0.8em] text-probe-500">API</span>.
               </h2>
@@ -217,8 +214,7 @@ export default async function LandingPage() {
           <div className="mx-auto grid max-w-6xl gap-14 px-5 py-24 sm:px-6 md:grid-cols-2 md:items-center md:py-32">
             <FormSpecimen />
             <div>
-              <p className="kicker">The builder</p>
-              <h2 className="mt-5 text-4xl sm:text-5xl">
+              <h2 className="text-4xl sm:text-5xl">
                 Eighteen kinds of question. Logic when you need it.
               </h2>
               <p className="mt-6 max-w-lg font-light leading-relaxed text-[var(--color-body)]">
@@ -243,8 +239,7 @@ export default async function LandingPage() {
           <section className="mx-auto max-w-6xl px-5 py-24 sm:px-6">
             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
               <div>
-                <p className="kicker">Themes</p>
-                <h2 className="mt-5 text-4xl sm:text-5xl">Make it look like yours.</h2>
+                <h2 className="text-4xl sm:text-5xl">Make it look like yours.</h2>
               </div>
               <Link href="/templates" className="btn btn-ghost self-start md:self-auto">
                 All {themes.length} themes
@@ -279,8 +274,7 @@ export default async function LandingPage() {
           />
           <div className="relative mx-auto grid max-w-6xl gap-14 px-5 py-24 sm:px-6 md:grid-cols-2 md:items-center md:py-32">
             <div>
-              <p className="pixel text-[12px] uppercase tracking-[0.06em] text-[#7D93FF]">For agents</p>
-              <h2 className="mt-5 text-4xl sm:text-5xl">
+              <h2 className="text-4xl sm:text-5xl">
                 Give your agent a <span className="pixel text-[0.82em] text-[#7D93FF]">key</span>. It
                 does the rest.
               </h2>
@@ -325,8 +319,7 @@ export default async function LandingPage() {
         <section className="mx-auto max-w-6xl px-5 py-24 sm:px-6 md:py-32">
           <div className="grid gap-12 md:grid-cols-[1fr_1.5fr] md:gap-16">
             <div>
-              <p className="kicker">Running it</p>
-              <h2 className="mt-5 text-4xl sm:text-5xl">One container. One database.</h2>
+              <h2 className="text-4xl sm:text-5xl">One container. One database.</h2>
               <p className="mt-6 font-light leading-relaxed text-[var(--color-body)]">
                 Put it on Railway, a small VPS or the computer under your desk. Back it up,
                 query it, move it. It is your database.
@@ -359,8 +352,7 @@ export default async function LandingPage() {
         <section className="border-t border-probe-200 bg-probe-100">
           <div className="mx-auto grid max-w-6xl gap-12 px-5 py-24 sm:px-6 md:grid-cols-[1fr_1.5fr] md:gap-16 md:py-32">
             <div>
-              <p className="kicker">Questions</p>
-              <h2 className="mt-5 text-4xl sm:text-5xl">Before you start.</h2>
+              <h2 className="text-4xl sm:text-5xl">Before you start.</h2>
             </div>
             <div className="border-t border-probe-900">
               {FAQ.map((f) => (
