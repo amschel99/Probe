@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { formatRelative } from "@/lib/utils";
 
+import { SubmissionsTab } from "./_components/submissions-tab";
+
 const TABS = ["snippet", "submissions", "settings", "security"] as const;
 type Tab = (typeof TABS)[number];
 
@@ -16,7 +18,6 @@ export default function EndpointFormDetail() {
   const router = useRouter();
   const utils = trpc.useUtils();
   const formQuery = trpc.endpoint.get.useQuery({ id });
-  const submissionsQuery = trpc.responses.list.useQuery({ formId: id, limit: 50 });
 
   const rotateMutation = trpc.endpoint.rotateKey.useMutation({
     onSuccess: () => {
@@ -118,29 +119,7 @@ export default function EndpointFormDetail() {
         </div>
       )}
 
-      {tab === "submissions" && (
-        <div className="card">
-          {submissionsQuery.data?.items.length === 0 && (
-            <p className="text-probe-700">No submissions yet.</p>
-          )}
-          <ul className="space-y-2">
-            {submissionsQuery.data?.items.map((r) => (
-              <li key={r.id} className="border border-probe-200 rounded-lg p-3">
-                <div className="text-xs text-probe-700 mb-1">
-                  {formatRelative(r.createdAt)}
-                  {r.submitterEmail && <> · from {r.submitterEmail}</>}
-                  {r.spamFlagged && (
-                    <span className="ml-2 text-red-700">⚠ flagged</span>
-                  )}
-                </div>
-                <pre className="text-xs bg-probe-50 p-2 rounded">
-                  {JSON.stringify(r.payload, null, 2)}
-                </pre>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {tab === "submissions" && <SubmissionsTab formId={id} />}
 
       {tab === "settings" && (
         <SettingsTab
