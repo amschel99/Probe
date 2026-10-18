@@ -22,7 +22,7 @@ export default function FormsListPage() {
         {isLoading && <p className="text-probe-700">Loading…</p>}
         {!isLoading && data?.items.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-3xl mb-2">🫖</div>
+            <div className="text-3xl mb-2 text-probe-500" aria-hidden>✦</div>
             <p className="text-probe-700">No forms yet.</p>
             <Link href="/dashboard/forms/new" className="btn btn-primary mt-4">Start your first form</Link>
           </div>

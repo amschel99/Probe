@@ -2,6 +2,28 @@ import type { NewTheme } from "../models/themes";
 
 export const SEED_THEMES: NewTheme[] = [
   {
+    name: "Cybercore",
+    slug: "cybercore",
+    category: "Internet",
+    description: "Deep-space navy, cyber blue, chrome. Y2K software, rebooted.",
+    config: {
+      background: "#04060D",
+      surface: "#070A16",
+      surfaceAlt: "#0D1222",
+      text: "#E9EDFF",
+      textMuted: "#9AA5C9",
+      accent: "#4C63FF",
+      accentText: "#FFFFFF",
+      border: "#1D2643",
+      error: "#FF5C7A",
+      fontFamily: "'Chakra Petch', 'Segoe UI', sans-serif",
+      fontUrl: "https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap",
+      headingWeight: 700,
+      borderRadius: "sm",
+      logoEmoji: "✦",
+    },
+  },
+  {
     name: "Chai",
     slug: "chai",
     category: "Community",

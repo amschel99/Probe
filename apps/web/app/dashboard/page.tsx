@@ -16,7 +16,7 @@ export default function DashboardHome() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="display text-3xl font-bold">Welcome back 👋</h1>
+        <h1 className="display text-3xl font-bold">Welcome back.</h1>
         <p className="text-probe-700 mt-1">
           Two surfaces, one dashboard. Build forms, collect responses, ship.
         </p>

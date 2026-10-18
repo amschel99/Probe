@@ -32,24 +32,24 @@ import { FormTabs } from "./_components/form-tabs";
 import { IntegrationsPanel } from "./_components/integrations-panel";
 
 const FIELD_TYPES: { type: FieldTypeInput; label: string; emoji: string }[] = [
-  { type: "short_text", label: "Short text", emoji: "✏️" },
-  { type: "long_text", label: "Long text", emoji: "📝" },
-  { type: "email", label: "Email", emoji: "📧" },
+  { type: "short_text", label: "Short text", emoji: "Aa" },
+  { type: "long_text", label: "Long text", emoji: "¶" },
+  { type: "email", label: "Email", emoji: "@" },
   { type: "number", label: "Number", emoji: "#" },
   { type: "single_select", label: "Single select", emoji: "◉" },
-  { type: "multi_select", label: "Multi-select", emoji: "☑️" },
+  { type: "multi_select", label: "Multi-select", emoji: "☰" },
   { type: "checkbox", label: "Checkbox", emoji: "✓" },
-  { type: "rating", label: "Rating", emoji: "⭐" },
-  { type: "date", label: "Date", emoji: "📅" },
-  { type: "phone", label: "Phone", emoji: "📞" },
-  { type: "url", label: "URL", emoji: "🔗" },
-  { type: "linear_scale", label: "Linear scale", emoji: "📏" },
-  { type: "ranking", label: "Ranking", emoji: "🔢" },
-  { type: "address", label: "Address", emoji: "📍" },
-  { type: "time", label: "Time", emoji: "⏰" },
-  { type: "signature", label: "Signature", emoji: "✍️" },
-  { type: "file_upload", label: "File upload", emoji: "📎" },
-  { type: "page_break", label: "Page break", emoji: "📄" },
+  { type: "rating", label: "Rating", emoji: "★" },
+  { type: "date", label: "Date", emoji: "▦" },
+  { type: "phone", label: "Phone", emoji: "☏" },
+  { type: "url", label: "URL", emoji: "⌁" },
+  { type: "linear_scale", label: "Linear scale", emoji: "⇿" },
+  { type: "ranking", label: "Ranking", emoji: "1²" },
+  { type: "address", label: "Address", emoji: "⌖" },
+  { type: "time", label: "Time", emoji: "◷" },
+  { type: "signature", label: "Signature", emoji: "✎" },
+  { type: "file_upload", label: "File upload", emoji: "⇪" },
+  { type: "page_break", label: "Page break", emoji: "⎯" },
 ];
 
 const DEFAULT_OPTIONS = [
@@ -92,7 +92,7 @@ export default function BuilderPage() {
     onSuccess: () => {
       utils.forms.get.invalidate({ id });
       toast.success("Form published");
-      nudgeChai("Form published 🎉 Probe ships every feature free — tips are welcome.");
+      nudgeChai("Form published. Probe ships every feature free — tips are welcome.");
     },
   });
   const unpublishMutation = trpc.forms.unpublish.useMutation({
@@ -248,7 +248,7 @@ export default function BuilderPage() {
                     }
                     className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm hover:bg-probe-50 text-left disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                   >
-                    <span className="w-5">{t.emoji}</span>
+                    <span className="w-5 text-center font-mono text-[12px] text-probe-500">{t.emoji}</span>
                     <span>{t.label}</span>
                     {storageOff && (
                       <span className="ml-auto text-[10px] text-probe-500">off</span>

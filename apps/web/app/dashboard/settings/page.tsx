@@ -15,7 +15,7 @@ export default function SettingsPage() {
 
   const setKey = trpc.ai.setKey.useMutation({
     onSuccess: () => {
-      toast.success("Anthropic key saved — AI generation is on ✨");
+      toast.success("Anthropic key saved — AI generation is on.");
       setApiKey("");
       utils.ai.status.invalidate();
     },
@@ -63,7 +63,7 @@ export default function SettingsPage() {
       {/* AI form generation — bring your own Anthropic key */}
       <div className="card space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="font-bold">✨ AI form generation</h3>
+          <h3 className="font-bold">AI form generation</h3>
           {aiStatus.data?.hasKey && (
             <span className="text-xs font-semibold text-green-700 bg-green-50 rounded-full px-2.5 py-0.5">
               Connected
@@ -125,7 +125,7 @@ export default function SettingsPage() {
       {googleStatus.data?.available && (
         <div className="card space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold">📊 Google Sheets</h3>
+            <h3 className="font-bold">Google Sheets</h3>
             {googleStatus.data?.connected && (
               <span className="text-xs font-semibold text-green-700 bg-green-50 rounded-full px-2.5 py-0.5">
                 Connected

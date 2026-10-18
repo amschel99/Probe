@@ -34,7 +34,7 @@ function LoginForm() {
         toast.error(data?.message ?? "Login failed");
         return;
       }
-      toast.success("Welcome back 👋");
+      toast.success("Welcome back.");
       router.push(params.get("next") ?? "/dashboard");
       router.refresh();
     } finally {

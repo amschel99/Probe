@@ -32,7 +32,7 @@ export default function AdminPage() {
   if (statsQuery.error?.data?.code === "FORBIDDEN") {
     return (
       <div className="max-w-md mx-auto card text-center py-12">
-        <div className="text-3xl mb-2">🔒</div>
+        <div className="text-3xl mb-2 font-mono text-probe-500" aria-hidden>◈</div>
         <h1 className="display text-2xl font-bold mb-1">Admins only</h1>
         <p className="text-probe-700 mb-6">
           You don&apos;t have permission to view the admin dashboard.

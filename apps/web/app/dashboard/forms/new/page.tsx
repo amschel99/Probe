@@ -26,7 +26,7 @@ function NewFormForm() {
   });
   const generateMutation = trpc.ai.generateForm.useMutation({
     onSuccess: (r) => {
-      toast.success(`Generated a form with ${r.fieldCount} fields ✨`);
+      toast.success(`Generated a form with ${r.fieldCount} fields`);
       router.push(`/dashboard/forms/${r.id}`);
     },
     onError: (e) => toast.error(e.message),
@@ -62,7 +62,7 @@ function NewFormForm() {
       {/* AI generation — shown only when the user has connected their Anthropic key */}
       {aiStatus.data?.hasKey ? (
         <div className="card space-y-3 ring-1 ring-probe-500/30">
-          <div className="font-bold flex items-center gap-2">✨ Generate with AI</div>
+          <div className="font-bold flex items-center gap-2"><span className="text-probe-500">✦</span> Generate with AI</div>
           <p className="help">
             Describe your form in plain English — Claude drafts the fields. Uses your own
             Anthropic key; you can tweak everything after.
@@ -88,7 +88,7 @@ function NewFormForm() {
         </div>
       ) : aiStatus.isSuccess ? (
         <div className="card text-sm text-probe-700">
-          ✨ Want AI to draft your form?{" "}
+          <span className="text-probe-500">✦</span> Want AI to draft your form?{" "}
           <Link href="/dashboard/settings" className="underline">
             Add your Anthropic API key
           </Link>{" "}
@@ -141,7 +141,7 @@ function NewFormForm() {
                   }}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-lg leading-none">{t.config.logoEmoji ?? "🎨"}</span>
+                    <span aria-hidden className="h-3 w-3 shrink-0 rounded-full" style={{ background: t.config.accent }} />
                     <span className="font-bold text-sm">{t.name}</span>
                   </div>
                   <div className="text-xs mt-0.5" style={{ color: t.config.textMuted }}>

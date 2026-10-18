@@ -25,7 +25,7 @@ export default async function TemplatesPage() {
       >
         <div>
           <div className="font-bold flex items-center gap-2">
-            <span className="text-xl">📄</span> Looking for plain HTML pages?
+            <span className="text-probe-500">✦</span> Looking for plain HTML pages?
           </div>
           <p className="text-sm text-probe-700 mt-1">
             Download a ready-made contact, newsletter, waitlist, or feedback page with a
@@ -58,7 +58,7 @@ export default async function TemplatesPage() {
                   border: `1px solid ${t.config.border}`,
                 }}
               >
-                <div className="text-2xl mb-1">{t.config.logoEmoji ?? "🎨"}</div>
+                <div aria-hidden className="mb-2 h-3 w-3 rounded-full" style={{ background: t.config.accent }} />
                 <div className="font-bold">{t.name}</div>
                 <p className="text-xs mt-1" style={{ color: t.config.textMuted }}>
                   Aa — the quick brown fox

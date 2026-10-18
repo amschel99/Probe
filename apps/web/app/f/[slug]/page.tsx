@@ -30,7 +30,7 @@ export default async function PublicFormPage({
       return (
         <div className="min-h-screen flex items-center justify-center bg-probe-50 p-6">
           <div className="card text-center max-w-md">
-            <div className="text-3xl mb-4">🫖</div>
+            <div className="text-3xl mb-4 text-probe-500" aria-hidden>✦</div>
             <h1 className="display text-2xl font-bold">This form is closed.</h1>
             <p className="text-probe-700 mt-2">It either expired or hit its response limit.</p>
           </div>
@@ -46,7 +46,7 @@ export default async function PublicFormPage({
     return (
       <div className="min-h-screen flex items-center justify-center bg-probe-50 p-6">
         <form className="card max-w-md w-full">
-          <div className="text-3xl mb-2">🔒</div>
+          <div className="text-3xl mb-2 font-mono text-probe-500" aria-hidden>◈</div>
           <h1 className="display text-xl font-bold">Password required</h1>
           <p className="text-probe-700 text-sm mt-1 mb-4">
             This form is password protected.

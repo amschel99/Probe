@@ -29,8 +29,8 @@ export function DashboardNav() {
   }
 
   return (
-    <nav className="flex items-center gap-2 text-sm" aria-label="Dashboard">
-      <div className="inline-flex items-center gap-1 rounded-xl border border-probe-200 bg-probe-50 p-1">
+    <nav className="order-last flex w-full items-center gap-2 text-sm md:order-none md:w-auto" aria-label="Dashboard">
+      <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-md border border-probe-200 bg-[var(--color-surface)] p-1 md:flex-none">
         {links.map((l) => {
           const active =
             l.href === "/dashboard"
@@ -42,10 +42,10 @@ export function DashboardNav() {
               href={l.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "rounded-lg px-3 py-1.5 font-medium transition-colors",
+                "shrink-0 whitespace-nowrap rounded px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-probe-500 focus-visible:ring-offset-1",
                 active
-                  ? "bg-probe-500 text-white shadow-sm"
+                  ? "btn-primary text-white"
                   : "text-probe-700 hover:bg-probe-100 hover:text-probe-900",
               )}
             >
@@ -56,7 +56,7 @@ export function DashboardNav() {
       </div>
       <button
         onClick={logout}
-        className="rounded-lg border border-probe-200 px-3 py-1.5 font-medium text-probe-700 transition-colors hover:bg-probe-100 hover:text-probe-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-probe-500 focus-visible:ring-offset-1"
+        className="btn btn-ghost shrink-0 px-3 py-1.5 text-[13px]"
       >
         Log out
       </button>

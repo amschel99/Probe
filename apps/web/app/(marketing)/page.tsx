@@ -2,48 +2,75 @@ import type { RouterOutputs } from "@repo/trpc/client";
 import Link from "next/link";
 
 import { api } from "@/lib/trpc-server";
-import { applyThemeVars } from "@/lib/utils";
 
 type Theme = RouterOutputs["themes"]["list"][number];
 
-const FEATURES: { kicker: string; title: string; body: string }[] = [
-  {
-    kicker: "01",
-    title: "Two surfaces, one builder",
-    body: "Ship a hosted form with a beautiful URL, or grab an API endpoint and bolt it onto the HTML you already have.",
-  },
-  {
-    kicker: "02",
-    title: "Drag, drop, done",
-    body: "Sortable fields with conditional logic. Auto-saves as you go. Preview without ever leaving the canvas.",
-  },
-  {
-    kicker: "03",
-    title: "Responses & analytics",
-    body: "Real-time view / start / submit / abandon tracking and CSV export. No third-party analytics SDK phoning home.",
-  },
-  {
-    kicker: "04",
-    title: "Security, pre-brewed",
-    body: "Honeypot, captcha, origin allowlist, recipient verification, and AES-GCM for every stored secret.",
-  },
-  {
-    kicker: "05",
-    title: "One docker image",
-    body: "One container, one origin, one DNS record. No CORS gymnastics. Ships with Kamal out of the box.",
-  },
-  {
-    kicker: "06",
-    title: "Themes with a personality",
-    body: "Matrix, Cyberpunk, Minecraft, Windows Vista (unironic). Switch the entire vibe in two clicks.",
-  },
+const TICKER = [
+  "Hosted forms",
+  "Form-to-email endpoints",
+  "Signed webhooks",
+  "Conditional logic",
+  "Multi-page",
+  "File uploads",
+  "CSV · XLSX · PDF",
+  "Discord",
+  "Google Sheets",
+  "API keys",
+  "llms.txt",
+  "Self-hosted",
 ];
 
-/** The satirical price comparison — rendered as a café receipt. */
-const RECEIPT: { item: string; price: string; note: string }[] = [
-  { item: "Google Forms", price: "$0", note: "Looks like a tax return" },
-  { item: "Typeform", price: "$$$", note: "Pricier than your Netflix" },
-  { item: "Probe", price: "$0", note: "Free. Open source. Tasty." },
+const FIELD_TYPES = [
+  "Short text",
+  "Long text",
+  "Email",
+  "Number",
+  "Phone",
+  "URL",
+  "Single select",
+  "Multi select",
+  "Checkbox",
+  "Rating",
+  "Linear scale",
+  "Ranking",
+  "Date",
+  "Time",
+  "Address",
+  "Signature",
+  "File upload",
+  "Page break",
+];
+
+const SPECS: [string, string][] = [
+  ["Runtime", "1 Docker image"],
+  ["Database", "Postgres — yours"],
+  ["Required config", "2 env vars"],
+  ["Forms / responses", "Unlimited"],
+  ["Third-party tracking", "None"],
+  ["License", "MIT"],
+];
+
+const FAQ: { q: string; a: string }[] = [
+  {
+    q: "Is it actually free?",
+    a: "Yes. There are no plans and no feature gates. You run it on your own server, so the only bill is your hosting.",
+  },
+  {
+    q: "Where does my data live?",
+    a: "In your Postgres database, on your infrastructure. Respondent IPs are hashed before they're stored, and nothing is sent to an analytics vendor.",
+  },
+  {
+    q: "What does it take to run?",
+    a: "One container and a Postgres URL. Email (Resend), file storage (R2), rate limiting (Upstash) and Google Sheets are optional — leave them out and those features switch off quietly.",
+  },
+  {
+    q: "Can my scripts or AI agents use it?",
+    a: "That's half the point. Create an API key in Settings and anything that speaks HTTP can build forms, publish them and read responses. The full contract lives at /llms.txt.",
+  },
+  {
+    q: "I already have a form on my site. Do I need to rebuild it?",
+    a: "No. Create an endpoint form, point your existing <form> at /submit with its access key, and submissions land in Probe — with email alerts, webhooks and spam protection.",
+  },
 ];
 
 export default async function LandingPage() {
@@ -56,405 +83,660 @@ export default async function LandingPage() {
 
   return (
     <>
-      {/* Scoped, reduced-motion-aware entrance animations. Lives here because
-          globals.css is owned by another agent. No motion when the user has
-          asked for less of it. */}
-      <style>{`
-        .cf-rise { opacity: 0; transform: translateY(14px); animation: cf-rise .7s cubic-bezier(.2,.7,.2,1) forwards; }
-        .cf-d1 { animation-delay: .05s } .cf-d2 { animation-delay: .15s }
-        .cf-d3 { animation-delay: .25s } .cf-d4 { animation-delay: .35s }
-        @keyframes cf-rise { to { opacity: 1; transform: none } }
-        .cf-steam { transform-origin: bottom center; animation: cf-steam 3.4s ease-in-out infinite; }
-        .cf-steam-2 { animation-delay: 1.1s } .cf-steam-3 { animation-delay: 2.2s }
-        @keyframes cf-steam {
-          0%,100% { opacity:.15; transform: translateY(2px) scaleY(.9) }
-          50% { opacity:.6; transform: translateY(-6px) scaleY(1.05) }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .cf-rise { opacity: 1; transform: none; animation: none }
-          .cf-steam { animation: none; opacity: .35 }
-        }
-      `}</style>
-
-      {/* Skip link — first focusable element on the page. */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-probe-900 focus:px-4 focus:py-2 focus:text-probe-50 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-probe-500"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-probe-900 focus:px-4 focus:py-2 focus:text-probe-50"
       >
         Skip to main content
       </a>
 
-      <div id="main-content">
-        {/* ── Hero ────────────────────────────────────────────────── */}
-        <section
-          aria-labelledby="hero-heading"
-          className="relative overflow-hidden border-b border-probe-200"
-        >
-          {/* Atmosphere: warm radial glow + dotted grain. Decorative only. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundImage:
-                "radial-gradient(60% 50% at 50% -10%, color-mix(in srgb, var(--color-probe-200) 70%, transparent) 0%, transparent 70%), radial-gradient(var(--color-probe-200) 1px, transparent 1px)",
-              backgroundSize: "auto, 22px 22px",
-              opacity: 0.7,
-            }}
+      <div id="main-content" className="overflow-x-clip">
+        {/* ── Hero ─────────────────────────────────────────────────────── */}
+        <section className="relative">
+          <HeroBackdrop />
+          <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 pt-14 sm:px-6 md:pt-20 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:pb-28">
+            <div>
+              <p className="kicker anim-in flex items-center gap-2">
+                <span className="relative inline-flex h-2 w-2">
+                  <span className="anim-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-cyan)]" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--color-cyan)]" />
+                </span>
+                Probe — self-hosted forms
+              </p>
+              <h1
+                className="chrome-text anim-in mt-5 text-[2.9rem] font-extrabold leading-[0.98] sm:text-6xl lg:text-[4.6rem]"
+                style={{ animationDelay: "80ms" }}
+              >
+                Forms that
+                <br />
+                phone home.
+              </h1>
+              <p
+                className="anim-in mt-6 max-w-xl text-lg leading-relaxed text-probe-700"
+                style={{ animationDelay: "160ms" }}
+              >
+                Build a form, send it out, and every answer comes straight back to your own
+                server. No plans, no per-response pricing, no one else holding your data.
+              </p>
+              <div
+                className="anim-in mt-9 flex flex-col gap-3 sm:flex-row"
+                style={{ animationDelay: "240ms" }}
+              >
+                <Link href="/register" className="btn btn-primary px-6 py-3 text-[15px]">
+                  Start building <span aria-hidden>→</span>
+                </Link>
+                <Link href="/docs" className="btn btn-ghost px-6 py-3 text-[15px]">
+                  Read the docs
+                </Link>
+              </div>
+              <dl
+                className="anim-in mt-10 grid max-w-md grid-cols-3 gap-4 font-mono text-xs"
+                style={{ animationDelay: "320ms" }}
+              >
+                {[
+                  ["∞", "forms"],
+                  ["∞", "responses"],
+                  ["0", "trackers"],
+                ].map(([v, k]) => (
+                  <div key={k} className="border-l border-probe-200 pl-3">
+                    <dt className="sr-only">{k}</dt>
+                    <dd className="font-display text-2xl font-bold text-probe-900">{v}</dd>
+                    <dd className="mt-0.5 uppercase tracking-[0.14em] text-probe-700">{k}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+
+            <HeroCollage />
+          </div>
+        </section>
+
+        {/* ── Ticker ───────────────────────────────────────────────────── */}
+        <div className="border-y border-probe-200 bg-[var(--color-surface)]" aria-hidden>
+          <div className="flex overflow-hidden py-3">
+            <div className="anim-marquee flex shrink-0 gap-8 pr-8 font-mono text-xs uppercase tracking-[0.18em] text-probe-700">
+              {[...TICKER, ...TICKER].map((t, i) => (
+                <span key={i} className="flex items-center gap-8 whitespace-nowrap">
+                  {t}
+                  <span className="text-probe-500">✦</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── 01 Build ─────────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-6xl px-5 py-24 sm:px-6">
+          <SectionHead
+            n="01"
+            label="Build"
+            title="Everything the paid tiers lock away. Here, it's just on."
+            body="Logic, multi-page flows, file uploads, exports and analytics come with every form. There's nothing to unlock."
           />
 
-          <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-20 md:pt-28">
-            <p className="cf-rise mx-auto mb-7 flex w-fit flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border border-probe-200 bg-white/70 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-probe-700 backdrop-blur">
-              <span>Open source</span>
-              <span aria-hidden="true" className="text-probe-500">
-                &bull;
-              </span>
-              <span>Satirically serious</span>
-              <span aria-hidden="true" className="text-probe-500">
-                &bull;
-              </span>
-              <span>Actually works</span>
-            </p>
+          <div className="mt-12 grid gap-4 md:grid-cols-6">
+            <Win title="fields.lib" className="md:col-span-4">
+              <p className="text-sm text-probe-700">18 field types, from one-liners to signatures.</p>
+              <ul className="mt-4 flex flex-wrap gap-2">
+                {FIELD_TYPES.map((f) => (
+                  <li
+                    key={f}
+                    className="rounded border border-probe-200 bg-probe-50 px-2.5 py-1 font-mono text-[11px] text-probe-900"
+                  >
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </Win>
 
-            <h1
-              id="hero-heading"
-              className="cf-rise cf-d1 display mx-auto max-w-4xl text-center text-5xl font-bold leading-[1.05] tracking-tight text-probe-900 md:text-7xl"
-            >
-              Forms worth
-              <span className="relative mx-3 inline-block whitespace-nowrap text-probe-500">
-                pouring
-                {/* Hand-drawn underline accent. */}
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 200 18"
-                  preserveAspectRatio="none"
-                  className="absolute -bottom-2 left-0 h-3 w-full text-probe-500"
-                >
-                  <path
-                    d="M2 12 C 50 4, 150 4, 198 11"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
-              your data into.
-            </h1>
-
-            <p className="cf-rise cf-d2 mx-auto mt-7 max-w-2xl text-center text-lg text-probe-700 md:text-xl">
-              Google Forms has the design sense of a tax return. Typeform costs
-              more than your Netflix. Probe is{" "}
-              <strong className="font-semibold text-probe-900">free</strong>,{" "}
-              <strong className="font-semibold text-probe-900">open source</strong>
-              , genuinely pretty, and and entirely yours.
-            </p>
-
-            <div className="cf-rise cf-d3 mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-              <Link href="/register" className="btn btn-primary">
-                Build your first form
-              </Link>
-              <Link href="/explore" className="btn btn-ghost">
-                See it in the wild
-              </Link>
-            </div>
-
-            {/* The mascot cup with animated steam. Decorative, hidden from AT. */}
-            <div
-              aria-hidden="true"
-              className="cf-rise cf-d4 mx-auto mt-14 flex w-fit flex-col items-center"
-            >
-              <div className="mb-1 flex gap-2 text-probe-500">
-                <span className="cf-steam block h-6 w-0.5 rounded-full bg-current" />
-                <span className="cf-steam cf-steam-2 block h-7 w-0.5 rounded-full bg-current" />
-                <span className="cf-steam cf-steam-3 block h-5 w-0.5 rounded-full bg-current" />
-              </div>
-              <div className="rounded-2xl border border-probe-200 bg-white px-6 py-3 text-4xl shadow-sm">
-                🔎
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── The Receipt (price satire) ──────────────────────────── */}
-        <section
-          aria-labelledby="receipt-heading"
-          className="mx-auto max-w-6xl px-6 py-20"
-        >
-          <div className="grid items-center gap-12 md:grid-cols-2">
-            <div>
-              <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-probe-500">
-                The math, plainly
-              </p>
-              <h2
-                id="receipt-heading"
-                className="display text-3xl font-bold leading-tight text-probe-900 md:text-4xl"
-              >
-                Other form builders hand you a bill.
-                <br />
-                We hand you a receipt for nothing.
-              </h2>
-              <p className="mt-5 max-w-md text-probe-700">
-                No seats. No &ldquo;contact sales.&rdquo; No watermark begging you
-                to upgrade. Self-host it or use ours &mdash; the price is the same
-                cup of nothing.
-              </p>
-              <Link href="/pricing" className="btn btn-ghost mt-7">
-                Read the (very short) pricing
-              </Link>
-            </div>
-
-            {/* Receipt card */}
-            <div className="relative mx-auto w-full max-w-sm">
-              <div
-                className="rounded-2xl border border-probe-200 bg-white p-7 shadow-[0_18px_50px_-24px_rgba(59,42,26,0.45)]"
-                role="presentation"
-              >
-                <div className="mb-5 border-b border-dashed border-probe-200 pb-4 text-center">
-                  <p className="display text-xl font-bold text-probe-900">
-                    PROBE &amp; CO.
-                  </p>
-                  <p className="text-xs uppercase tracking-[0.2em] text-probe-500">
-                    Form builders compared
-                  </p>
-                </div>
-                <ul className="space-y-4 font-mono text-sm">
-                  {RECEIPT.map((row) => (
-                    <li
-                      key={row.item}
-                      className="flex items-baseline justify-between gap-4"
-                    >
-                      <span className="flex-1">
-                        <span className="block font-semibold text-probe-900">
-                          {row.item}
-                        </span>
-                        <span className="text-xs text-probe-700">{row.note}</span>
-                      </span>
-                      <span className="shrink-0 font-bold text-probe-500">
-                        {row.price}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-5 flex items-baseline justify-between border-t border-dashed border-probe-200 pt-4 font-mono">
-                  <span className="font-bold uppercase tracking-wide text-probe-900">
-                    Total
-                  </span>
-                  <span className="font-bold text-probe-500">$0.00</span>
-                </div>
-                <p className="mt-4 text-center text-xs text-probe-700">
-                  Thank you. Come back any time.
+            <Win title="logic.cfg" className="md:col-span-2">
+              <div className="space-y-2 font-mono text-[12px] leading-relaxed">
+                <p>
+                  <span className="text-probe-500">if</span> plan{" "}
+                  <span className="text-probe-700">equals</span> &quot;team&quot;
+                </p>
+                <p className="pl-4">
+                  <span className="text-probe-500">show</span> team_size
+                </p>
+                <p>
+                  <span className="text-probe-500">if</span> score{" "}
+                  <span className="text-probe-700">&gt;</span> 8
+                </p>
+                <p className="pl-4">
+                  <span className="text-probe-500">result</span> &quot;You&apos;re in&quot;
                 </p>
               </div>
-            </div>
-          </div>
-        </section>
+              <p className="mt-4 text-sm text-probe-700">
+                Show and hide questions, split into pages, pipe answers into later questions, score
+                outcomes.
+              </p>
+            </Win>
 
-        {/* ── Feature grid ────────────────────────────────────────── */}
-        <section
-          aria-labelledby="features-heading"
-          className="border-y border-probe-200 bg-white"
-        >
-          <div className="mx-auto max-w-6xl px-6 py-20">
-            <h2
-              id="features-heading"
-              className="display max-w-2xl text-3xl font-bold leading-tight text-probe-900 md:text-4xl"
-            >
-              Everything a form needs.
-              <span className="text-probe-500"> Nothing it doesn&apos;t.</span>
-            </h2>
-            <ul className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-probe-200 bg-probe-200 sm:grid-cols-2 lg:grid-cols-3">
-              {FEATURES.map((f) => (
-                <li
-                  key={f.title}
-                  className="group bg-white p-7 transition-colors hover:bg-probe-50"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="display block text-2xl font-bold text-probe-200 transition-colors group-hover:text-probe-500"
+            <Win title="signal.exe" className="md:col-span-2">
+              <Funnel />
+              <p className="mt-4 text-sm text-probe-700">
+                Views, starts, completions and the exact question where people drop off.
+              </p>
+            </Win>
+
+            <Win title="export.bat" className="md:col-span-2">
+              <div className="grid grid-cols-3 gap-2">
+                {["CSV", "XLSX", "PDF"].map((x) => (
+                  <div
+                    key={x}
+                    className="grid aspect-[3/4] place-items-center rounded border border-probe-200 bg-probe-50 font-display text-sm font-bold"
                   >
-                    {f.kicker}
-                  </span>
-                  <h3 className="display mt-3 text-xl font-bold text-probe-900">
-                    {f.title}
-                  </h3>
-                  <p className="mt-2 text-probe-700">{f.body}</p>
-                </li>
-              ))}
-            </ul>
+                    .{x.toLowerCase()}
+                  </div>
+                ))}
+              </div>
+              <p className="mt-4 text-sm text-probe-700">
+                Filter by date, download in one click, or stream every response to Sheets.
+              </p>
+            </Win>
+
+            <Win title="shield.sys" className="md:col-span-2">
+              <ul className="space-y-2 font-mono text-[12px]">
+                {[
+                  "password lock",
+                  "captcha — hCaptcha · reCAPTCHA · Turnstile",
+                  "honeypot",
+                  "origin allowlist",
+                  "rate limits",
+                  "IPs hashed, never stored",
+                ].map((s) => (
+                  <li key={s} className="flex gap-2">
+                    <span className="text-probe-500">▸</span>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </Win>
           </div>
         </section>
 
-        {/* ── Theme gallery (live data) ───────────────────────────── */}
+        {/* ── Themes (live data) ───────────────────────────────────────── */}
         {themes.length > 0 && (
-          <section
-            aria-labelledby="themes-heading"
-            className="mx-auto max-w-6xl px-6 py-20"
-          >
-            <div className="max-w-2xl">
-              <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-probe-500">
-                {themes.length} live themes
-              </p>
-              <h2
-                id="themes-heading"
-                className="display text-3xl font-bold leading-tight text-probe-900 md:text-4xl"
-              >
-                Every one of them an aesthetic crime.
-              </h2>
-              <p className="mt-3 text-probe-700">
-                Mostly on purpose. Each preview below is painted with that
-                theme&apos;s own real colours and fonts &mdash; the same config
-                your respondents will see.
-              </p>
-            </div>
-
-            <ul className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-              {themes.map((t) => (
-                <li key={t.id}>
-                  <Link
-                    href={`/explore?theme=${encodeURIComponent(t.slug)}`}
-                    aria-label={`Preview the ${t.name} theme (${t.category})`}
-                    className="block h-full rounded-2xl outline-offset-4 transition-transform duration-200 hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-probe-500 motion-reduce:transform-none motion-reduce:transition-none"
-                  >
+          <section className="border-y border-probe-200 bg-[var(--color-surface)]">
+            <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6">
+              <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+                <SectionHead
+                  n="✦"
+                  label="Style"
+                  title="Dress it up. Or don't."
+                  body={`${themes.length} built-in themes, each with its own colours and type. Respondents see exactly what you pick.`}
+                />
+                <Link href="/templates" className="btn btn-ghost shrink-0 self-start md:self-auto">
+                  Browse themes
+                </Link>
+              </div>
+              <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                {themes.map((t) => (
+                  <li key={t.id}>
                     <div
-                      className="flex h-full flex-col gap-2 rounded-2xl border p-4"
-                      style={{
-                        ...applyThemeVars(t.config),
-                        background: t.config.surface,
-                        color: t.config.text,
-                        borderColor: t.config.border,
-                        fontFamily: t.config.fontFamily,
-                      }}
+                      className="group h-full overflow-hidden rounded-lg border transition-transform duration-200 hover:-translate-y-1 motion-reduce:transform-none"
+                      style={{ borderColor: t.config.border, background: t.config.surface }}
                     >
-                      <span aria-hidden="true" className="text-2xl leading-none">
-                        {t.config.logoEmoji || "🎨"}
-                      </span>
-                      <span className="font-bold leading-tight">{t.name}</span>
-                      {/* Swatch row of the theme's actual palette. */}
-                      <span
-                        aria-hidden="true"
-                        className="mt-auto flex gap-1.5 pt-2"
-                      >
-                        {[
-                          t.config.accent,
-                          t.config.text,
-                          t.config.border,
-                        ].map((c, i) => (
-                          <span
-                            key={i}
-                            className="h-3 w-3 rounded-full"
-                            style={{
-                              background: c,
-                              boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.12)",
-                            }}
-                          />
-                        ))}
-                      </span>
-                      <span
-                        className="text-xs"
-                        style={{ color: t.config.textMuted, opacity: 0.9 }}
-                      >
-                        {t.category}
-                      </span>
+                      <div className="h-14" style={{ background: t.config.background }}>
+                        <div
+                          className="ml-3 mt-3 h-1.5 w-10 rounded-full"
+                          style={{ background: t.config.accent }}
+                        />
+                        <div
+                          className="ml-3 mt-1.5 h-1.5 w-16 rounded-full opacity-40"
+                          style={{ background: t.config.text }}
+                        />
+                      </div>
+                      <div className="p-3" style={{ color: t.config.text, fontFamily: t.config.fontFamily }}>
+                        <div className="text-sm font-bold leading-tight">{t.name}</div>
+                        <div className="text-[11px]" style={{ color: t.config.textMuted }}>
+                          {t.category}
+                        </div>
+                      </div>
                     </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </section>
         )}
 
-        {/* ── Endpoint forms callout ──────────────────────────────── */}
-        <section
-          aria-labelledby="endpoint-heading"
-          className="border-t border-probe-200 bg-white"
-        >
-          <div className="mx-auto max-w-6xl px-6 py-20">
-            <div className="grid items-center gap-10 rounded-3xl border border-probe-200 bg-probe-50 p-8 md:grid-cols-2 md:p-12">
-              <div>
-                <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-probe-500">
-                  For your client sites
-                </p>
-                <h2
-                  id="endpoint-heading"
-                  className="display text-3xl font-bold leading-tight text-probe-900 md:text-4xl"
-                >
-                  Endpoint forms.
-                  <br />
-                  No UI required.
-                </h2>
-                <p className="mt-5 max-w-md text-probe-700">
-                  Paste a plain HTML form on your client&apos;s site. We handle
-                  delivery, anti-spam, captcha, rate limits, and webhooks. You
-                  handle the invoice.
-                </p>
-                <Link
-                  href="/dashboard/endpoint-forms/new"
-                  className="btn btn-primary mt-7"
-                >
-                  Create an endpoint
-                </Link>
+        {/* ── 03 Collect ───────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-6xl px-5 py-24 sm:px-6">
+          <SectionHead
+            n="02"
+            label="Collect"
+            title="Two ways in. One inbox."
+            body="Share a hosted page, or keep the form you already have and just send it here."
+          />
+          <div className="mt-12 grid gap-4 lg:grid-cols-2">
+            <Win title="hosted — probe.riftfi.com/f/launch-waitlist">
+              <h3 className="text-xl font-bold">Hosted forms</h3>
+              <p className="mt-2 text-sm text-probe-700">
+                A clean, fast page at its own link. Share it, embed it, or print the QR code.
+                Password-protect it, cap responses, set a closing date.
+              </p>
+              <div className="mt-5 space-y-3 rounded-md border border-probe-200 bg-probe-50 p-4">
+                <div className="h-2 w-24 rounded-full bg-probe-900/80" />
+                <div className="h-9 rounded border border-probe-200 bg-[var(--color-surface)]" />
+                <div className="h-9 rounded border border-probe-200 bg-[var(--color-surface)]" />
+                <div className="h-8 w-24 rounded bg-probe-500" />
               </div>
+            </Win>
+            <Win title="endpoint — your-site.com/contact.html">
+              <h3 className="text-xl font-bold">Endpoint forms</h3>
+              <p className="mt-2 text-sm text-probe-700">
+                Keep your own HTML. Post it to Probe and get email alerts, signed webhooks, spam
+                filtering and a dashboard — no backend to write.
+              </p>
+              <pre className="mt-5 overflow-x-auto rounded-md bg-[#070A16] p-4 font-mono text-[12px] leading-relaxed text-[#C9D2F2]">
+                <code>
+                  <span className="text-[#6EF2FF]">&lt;form</span> action=
+                  <span className="text-[#9FB0FF]">&quot;https://probe.riftfi.com/submit&quot;</span>{" "}
+                  method=<span className="text-[#9FB0FF]">&quot;POST&quot;</span>
+                  <span className="text-[#6EF2FF]">&gt;</span>
+                  {"\n  "}
+                  <span className="text-[#6EF2FF]">&lt;input</span> type=&quot;hidden&quot;
+                  name=&quot;access_key&quot; value=&quot;…&quot;
+                  <span className="text-[#6EF2FF]">&gt;</span>
+                  {"\n  "}
+                  <span className="text-[#6EF2FF]">&lt;input</span> name=&quot;email&quot;
+                  <span className="text-[#6EF2FF]">&gt;</span>
+                  {"\n  "}
+                  <span className="text-[#6EF2FF]">&lt;button&gt;</span>Send
+                  <span className="text-[#6EF2FF]">&lt;/button&gt;</span>
+                  {"\n"}
+                  <span className="text-[#6EF2FF]">&lt;/form&gt;</span>
+                </code>
+              </pre>
+            </Win>
+          </div>
+        </section>
 
-              <div className="overflow-hidden rounded-2xl border border-probe-900/40 bg-probe-900 shadow-[0_18px_50px_-24px_rgba(59,42,26,0.6)]">
-                <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-                  <span aria-hidden="true" className="h-3 w-3 rounded-full bg-probe-500" />
-                  <span aria-hidden="true" className="h-3 w-3 rounded-full bg-probe-200" />
-                  <span aria-hidden="true" className="h-3 w-3 rounded-full bg-probe-100" />
-                  <span className="ml-2 font-mono text-xs text-probe-100/70">
-                    contact-form.html
-                  </span>
-                </div>
-                <pre className="overflow-x-auto p-5 font-mono text-xs leading-relaxed text-probe-50">
-                  <code>{`<form
-  action="https://probe.riftfi.com/submit"
-  method="POST">
-  <input type="hidden" name="access_key" value="YOUR_KEY">
-  <input name="name" required>
-  <input name="email" type="email" required>
-  <textarea name="message"></textarea>
-  <button type="submit">Send</button>
-</form>`}</code>
-                </pre>
+        {/* ── 04 Automate ──────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden bg-[#04060D] text-[#E9EDFF]">
+          <div
+            className="pointer-events-none absolute inset-0 opacity-60"
+            style={{
+              backgroundImage:
+                "radial-gradient(rgba(110,242,255,0.18) 1px, transparent 1px)",
+              backgroundSize: "22px 22px",
+            }}
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(76,99,255,0.35), transparent 65%)" }}
+            aria-hidden
+          />
+          <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-24 sm:px-6 lg:grid-cols-2 lg:items-center">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#6EF2FF]">
+                03 — Automate
+              </p>
+              <h2 className="mt-4 text-4xl font-extrabold sm:text-5xl">
+                Hand your agent a key.
+              </h2>
+              <p className="mt-5 max-w-lg text-lg leading-relaxed text-[#9AA5C9]">
+                It can build the form, publish it and read the replies without anyone touching
+                the dashboard. Everything it needs to know is in one file.
+              </p>
+              <ul className="mt-8 grid gap-3 font-mono text-sm sm:grid-cols-2">
+                {[
+                  "Personal API keys",
+                  "/llms.txt contract",
+                  "Signed webhooks",
+                  "Discord + Google Sheets",
+                ].map((x) => (
+                  <li key={x} className="flex items-center gap-2">
+                    <span className="text-[#6EF2FF]">✦</span>
+                    {x}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="/llms.txt"
+                className="mt-9 inline-flex items-center gap-2 font-mono text-sm text-[#6EF2FF] underline-offset-4 hover:underline"
+              >
+                read /llms.txt →
+              </a>
+            </div>
+
+            <div className="overflow-hidden rounded-lg border border-[#1D2643] bg-[#070A16] shadow-[0_30px_80px_-30px_rgba(76,99,255,0.55)]">
+              <div className="flex h-8 items-center gap-2 border-b border-[#1D2643] bg-gradient-to-b from-[#121931] to-[#0B1020] px-3 font-mono text-[11px] text-[#9AA5C9]">
+                <span className="flex gap-1">
+                  <span className="h-2.5 w-2.5 rounded-[2px] border border-[#1D2643]" />
+                  <span className="h-2.5 w-2.5 rounded-[2px] border border-[#1D2643]" />
+                  <span className="h-2.5 w-2.5 rounded-[2px] bg-[#4C63FF]" />
+                </span>
+                agent@probe: ~
               </div>
+              <pre className="overflow-x-auto p-5 font-mono text-[12.5px] leading-[1.7] text-[#C9D2F2]">
+                <code>
+                  <span className="text-[#6EF2FF]">$</span> curl -X POST probe.riftfi.com/trpc/forms.create \
+                  {"\n    "}-H <span className="text-[#9FB0FF]">&quot;Authorization: Bearer probe_••••&quot;</span> \
+                  {"\n    "}-d <span className="text-[#9FB0FF]">&apos;{"{"}&quot;json&quot;:{"{"}&quot;title&quot;:&quot;Beta signup&quot;,…{"}}"}&apos;</span>
+                  {"\n"}
+                  <span className="text-[#7C88B4]">{"{"} &quot;id&quot;: &quot;3f9c…&quot;, &quot;slug&quot;: &quot;beta-signup&quot; {"}"}</span>
+                  {"\n\n"}
+                  <span className="text-[#6EF2FF]">$</span> curl …/trpc/forms.publish
+                  {"\n"}
+                  <span className="text-[#7C88B4]">{"{"} &quot;status&quot;: &quot;published&quot; {"}"}</span>
+                  {"\n\n"}
+                  <span className="text-[#6EF2FF]">$</span> curl …/trpc/responses.list
+                  {"\n"}
+                  <span className="text-[#7C88B4]">{"{"} &quot;items&quot;: [ 12 responses ] {"}"}</span>
+                  {"\n"}
+                  <span className="text-[#6EF2FF]">$</span>{" "}
+                  <span className="anim-blink inline-block h-4 w-2 translate-y-0.5 bg-[#6EF2FF]" />
+                </code>
+              </pre>
             </div>
           </div>
         </section>
 
-        {/* ── Final CTA ───────────────────────────────────────────── */}
-        <section
-          aria-labelledby="cta-heading"
-          className="relative overflow-hidden border-t border-probe-200"
-        >
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundImage:
-                "radial-gradient(50% 60% at 50% 120%, color-mix(in srgb, var(--color-probe-200) 80%, transparent) 0%, transparent 70%)",
-            }}
-          />
-          <div className="relative mx-auto max-w-3xl px-6 py-24 text-center">
-            <h2
-              id="cta-heading"
-              className="display text-4xl font-bold leading-tight text-probe-900 md:text-5xl"
-            >
-              Your next form is one cup away.
+        {/* ── 05 Own ───────────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-6xl px-5 py-24 sm:px-6">
+          <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
+            <SectionHead
+              n="04"
+              label="Own"
+              title="One container. One Postgres. That's the stack."
+              body="Deploy it on Railway, a VPS or your laptop. Your forms and every response live in a database you control — export it, back it up, query it directly."
+            />
+            <div className="window">
+              <div className="window-bar">
+                <span className="window-title">system.info</span>
+                <span className="window-btns">
+                  <span />
+                  <span />
+                  <span />
+                </span>
+              </div>
+              <dl className="divide-y divide-probe-200 font-mono text-sm">
+                {SPECS.map(([k, v]) => (
+                  <div key={k} className="flex items-center justify-between gap-4 px-5 py-3">
+                    <dt className="text-probe-700">{k}</dt>
+                    <dd className="text-right font-medium text-probe-900">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
+        </section>
+
+        {/* ── FAQ ──────────────────────────────────────────────────────── */}
+        <section className="border-t border-probe-200">
+          <div className="mx-auto max-w-3xl px-5 py-24 sm:px-6">
+            <p className="kicker">FAQ</p>
+            <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Questions, answered.</h2>
+            <div className="mt-10 divide-y divide-probe-200 border-y border-probe-200">
+              {FAQ.map((f) => (
+                <details key={f.q} className="group py-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-left text-lg font-semibold [&::-webkit-details-marker]:hidden">
+                    {f.q}
+                    <span
+                      aria-hidden
+                      className="grid h-7 w-7 shrink-0 place-items-center rounded border border-probe-200 font-mono text-probe-500 transition-transform group-open:rotate-45"
+                    >
+                      +
+                    </span>
+                  </summary>
+                  <p className="mt-3 max-w-2xl leading-relaxed text-probe-700">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Final CTA ────────────────────────────────────────────────── */}
+        <section className="px-5 pb-24 sm:px-6">
+          <div className="relative mx-auto max-w-6xl overflow-hidden rounded-xl border border-probe-200 bg-[var(--color-surface)] px-6 py-16 text-center sm:py-20">
+            <Sparkles />
+            <p className="kicker relative">Ready when you are</p>
+            <h2 className="chrome-text relative mx-auto mt-4 max-w-3xl text-4xl font-extrabold sm:text-6xl">
+              Send your first probe.
             </h2>
-            <p className="mx-auto mt-5 max-w-xl text-lg text-probe-700">
-              Free forever, open source, and self-hostable in a single container.
-              Steep, ship, collect.
+            <p className="relative mx-auto mt-5 max-w-md text-probe-700">
+              It takes about a minute to make a form. The first account on a new install becomes
+              the admin.
             </p>
-            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-              <Link href="/register" className="btn btn-primary">
-                Start brewing &mdash; it&apos;s free
-              </Link>
-              <Link href="/open-source" className="btn btn-ghost">
-                Read the source
+            <div className="relative mt-9 flex justify-center">
+              <Link href="/register" className="btn btn-primary px-7 py-3 text-[15px]">
+                Create a form <span aria-hidden>→</span>
               </Link>
             </div>
           </div>
         </section>
       </div>
     </>
+  );
+}
+
+/* ───────────────────────────────────────────────────────────────────────── */
+
+function SectionHead({
+  n,
+  label,
+  title,
+  body,
+}: {
+  n: string;
+  label: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="max-w-2xl">
+      <p className="kicker">
+        {n} — {label}
+      </p>
+      <h2 className="mt-3 text-3xl font-bold sm:text-[2.6rem]">{title}</h2>
+      <p className="mt-4 text-lg leading-relaxed text-probe-700">{body}</p>
+    </div>
+  );
+}
+
+function Win({
+  title,
+  className = "",
+  children,
+}: {
+  title: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`window ${className}`}>
+      <div className="window-bar">
+        <span className="window-title">{title}</span>
+        <span className="window-btns" aria-hidden>
+          <span />
+          <span />
+          <span />
+        </span>
+      </div>
+      <div className="p-5">{children}</div>
+    </div>
+  );
+}
+
+function Funnel() {
+  const rows: [string, number][] = [
+    ["views", 100],
+    ["starts", 72],
+    ["done", 58],
+  ];
+  return (
+    <div className="space-y-2.5 font-mono text-[11px]">
+      {rows.map(([k, v]) => (
+        <div key={k} className="flex items-center gap-3">
+          <span className="w-12 uppercase tracking-wider text-probe-700">{k}</span>
+          <span className="h-3 flex-1 overflow-hidden rounded-sm bg-probe-100">
+            <span
+              className="block h-full rounded-sm"
+              style={{
+                width: `${v}%`,
+                background:
+                  "linear-gradient(90deg, var(--color-probe-500), var(--color-cyan))",
+              }}
+            />
+          </span>
+          <span className="w-8 text-right text-probe-900">{v}%</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Sparkles() {
+  const stars: { top: string; left: string; size: number; delay: string }[] = [
+    { top: "14%", left: "8%", size: 16, delay: "0s" },
+    { top: "70%", left: "14%", size: 10, delay: "1.2s" },
+    { top: "22%", left: "88%", size: 14, delay: "0.6s" },
+    { top: "76%", left: "84%", size: 18, delay: "1.8s" },
+    { top: "48%", left: "94%", size: 8, delay: "2.4s" },
+  ];
+  return (
+    <div className="pointer-events-none absolute inset-0" aria-hidden>
+      {stars.map((s, i) => (
+        <svg
+          key={i}
+          viewBox="0 0 24 24"
+          className="anim-twinkle absolute text-probe-500"
+          style={{ top: s.top, left: s.left, width: s.size, height: s.size, animationDelay: s.delay }}
+        >
+          <path d="M12 0 L14 10 L24 12 L14 14 L12 24 L10 14 L0 12 L10 10 Z" fill="currentColor" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+function HeroBackdrop() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+      <div
+        className="absolute -top-48 left-1/2 h-[42rem] w-[42rem] -translate-x-1/2 rounded-full opacity-70 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(circle, color-mix(in srgb, var(--color-probe-500) 28%, transparent), transparent 62%)",
+        }}
+      />
+      <Sparkles />
+    </div>
+  );
+}
+
+/** Overlapping early-OS windows: one readable form, with the inbox and a
+ *  live readout stacked behind it. Decorative — the real thing is one click away. */
+function HeroCollage() {
+  return (
+    <div className="relative mx-auto w-full max-w-[34rem] lg:h-[34rem]" aria-hidden>
+      {/* Orbiting planet */}
+      <svg
+        viewBox="0 0 200 200"
+        className="anim-float absolute -right-6 -top-10 hidden h-36 w-36 sm:block"
+        style={{ animationDelay: "1s" }}
+      >
+        <defs>
+          <radialGradient id="planet" cx="35%" cy="30%" r="70%">
+            <stop offset="0" stopColor="#B9C4FF" />
+            <stop offset="0.45" stopColor="#4C63FF" />
+            <stop offset="1" stopColor="#0B1460" />
+          </radialGradient>
+        </defs>
+        <ellipse cx="100" cy="104" rx="92" ry="22" fill="none" stroke="var(--color-cyan)" strokeOpacity="0.55" strokeWidth="2" />
+        <circle cx="100" cy="100" r="48" fill="url(#planet)" />
+        <path d="M8 104 A92 22 0 0 0 192 104" fill="none" stroke="var(--color-cyan)" strokeWidth="2.5" />
+      </svg>
+
+      {/* Back: inbox log */}
+      <div className="window absolute left-0 top-0 hidden w-[20rem] -rotate-2 lg:block">
+        <div className="window-bar">
+          <span className="window-title">inbox.log</span>
+          <span className="window-btns">
+            <span />
+            <span />
+            <span />
+          </span>
+        </div>
+        <ul className="space-y-1.5 p-4 font-mono text-[11px] text-probe-700">
+          {[
+            ["09:41:02", "ada@lovelace.dev"],
+            ["09:41:17", "grace@hopper.io"],
+            ["09:42:55", "alan@turing.uk"],
+            ["09:44:30", "kat@johnson.space"],
+          ].map(([t, e]) => (
+            <li key={t} className="flex justify-between gap-3">
+              <span className="text-probe-500">{t}</span>
+              <span className="truncate">{e}</span>
+            </li>
+          ))}
+          <li className="text-probe-900">
+            ▸ listening<span className="anim-blink">_</span>
+          </li>
+        </ul>
+      </div>
+
+      {/* Back: readout */}
+      <div className="window absolute bottom-0 left-2 hidden w-56 -rotate-3 lg:block">
+        <div className="window-bar">
+          <span className="window-title">signal.exe</span>
+          <span className="window-btns">
+            <span />
+            <span />
+            <span />
+          </span>
+        </div>
+        <div className="flex h-24 items-end gap-1.5 p-4">
+          {[30, 52, 41, 68, 59, 84, 72, 96].map((h, i) => (
+            <span
+              key={i}
+              className="flex-1 rounded-t-sm"
+              style={{
+                height: `${h}%`,
+                background: "linear-gradient(180deg, var(--color-cyan), var(--color-probe-500))",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Front: the form */}
+      <div className="window anim-float relative z-10 mx-auto w-full max-w-sm lg:absolute lg:right-0 lg:top-24">
+        <div className="window-bar">
+          <span className="window-title">launch-waitlist.form</span>
+          <span className="window-btns">
+            <span />
+            <span />
+            <span />
+          </span>
+        </div>
+        <div className="space-y-4 p-6">
+          <div>
+            <div className="font-display text-xl font-bold">Join the launch list</div>
+            <div className="mt-1 text-sm text-probe-700">We&apos;ll write once. Promise.</div>
+          </div>
+          {[
+            ["Name", "Ada Lovelace"],
+            ["Email", "ada@lovelace.dev"],
+          ].map(([l, v]) => (
+            <div key={l}>
+              <div className="mb-1.5 text-xs font-semibold">{l}</div>
+              <div className="rounded-md border border-probe-200 bg-probe-50 px-3 py-2 text-sm">{v}</div>
+            </div>
+          ))}
+          <div>
+            <div className="mb-1.5 text-xs font-semibold">What are you building?</div>
+            <div className="rounded-md border border-probe-500 bg-probe-50 px-3 py-2 text-sm shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-probe-500)_20%,transparent)]">
+              An analytical engine
+              <span className="anim-blink ml-0.5 inline-block h-4 w-px translate-y-0.5 bg-probe-900" />
+            </div>
+          </div>
+          <div className="btn btn-primary w-full">Submit</div>
+        </div>
+      </div>
+    </div>
   );
 }

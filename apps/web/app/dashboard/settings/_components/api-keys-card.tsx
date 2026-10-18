@@ -34,7 +34,7 @@ export function ApiKeysCard() {
 
   return (
     <div className="card space-y-3">
-      <h3 className="font-bold">🔑 API keys</h3>
+      <h3 className="font-bold">API keys</h3>
       <p className="text-sm text-probe-700">
         Let agents and scripts use the API as you — create forms, add fields, read responses.
         Send <code>Authorization: Bearer &lt;key&gt;</code>. Instructions for agents:{" "}

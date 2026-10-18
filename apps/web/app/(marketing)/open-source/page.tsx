@@ -31,7 +31,7 @@ export default function OpenSourcePage() {
           <div className="text-sm text-probe-700">Where Probe gets roasted before it ships.</div>
         </a>
         <a href={linkedinUrl} target="_blank" rel="noreferrer" className="card hover:shadow-md transition-shadow">
-          <div className="text-2xl">💼</div>
+          <div className="font-mono text-xl font-bold">in</div>
           <div className="font-bold mt-2">LinkedIn</div>
           <div className="text-sm text-probe-700">For the polite version of the same content.</div>
         </a>
