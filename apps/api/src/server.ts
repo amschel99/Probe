@@ -13,7 +13,7 @@ import { generateOpenApiDocument, createOpenApiExpressMiddleware } from "trpc-to
 import { apiReference } from "@scalar/express-api-reference";
 
 import { logger } from "@repo/logger";
-import { serverRouter, createContext, auth } from "@repo/trpc/server";
+import { serverRouter, createContext, auth, userFromApiKey } from "@repo/trpc/server";
 import { db, schema, eq, sql } from "@repo/database";
 import {
   sendEmail,
@@ -776,7 +776,8 @@ async function exportHandler(req: Request, res: ExpressResponse) {
 
   const headers = toWebHeaders(req.headers);
   const session = await auth.api.getSession({ headers }).catch(() => null);
-  if (!session?.user) return res.status(401).json({ error: "Unauthorized" });
+  const user = session?.user ?? (await userFromApiKey(headers).catch(() => null));
+  if (!user) return res.status(401).json({ error: "Unauthorized" });
 
   const formId = req.params.formId;
   if (!formId) return res.status(404).json({ error: "Not found" });
@@ -785,7 +786,7 @@ async function exportHandler(req: Request, res: ExpressResponse) {
     columns: { id: true, userId: true, slug: true },
   });
   // Ownership probe returns 404 (not 403) — consistent with the tRPC guards.
-  if (!form || form.userId !== session.user.id) {
+  if (!form || form.userId !== user.id) {
     return res.status(404).json({ error: "Not found" });
   }
 

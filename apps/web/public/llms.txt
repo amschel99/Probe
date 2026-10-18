@@ -6,9 +6,9 @@ Base URL: `https://probe.riftfi.com` (replace with your instance's origin if dif
 
 ## Which surface to use
 
-- You just need to **collect submissions from a site, script, or agent** → use an **endpoint form** + `POST /submit`. No session needed at submit time, only the public `access_key`.
-- You need a **hosted, themed form page** with typed fields, validation, analytics → use **hosted forms** via the tRPC API (needs a signed-in session).
-- You only need to **read results** → tRPC `responses.list` (session) or the export URL.
+- You just need to **collect submissions from a site, script, or agent** → use an **endpoint form** + `POST /submit`. No API key needed at submit time, only the public `access_key`.
+- You need a **hosted, themed form page** with typed fields, validation, analytics → use **hosted forms** via the tRPC API (needs an API key).
+- You only need to **read results** → tRPC `responses.list` (API key) or the export URL.
 
 ## 1. Endpoint forms — `POST /submit` (no auth)
 
@@ -41,23 +41,21 @@ Rules that commonly bite agents:
 - **Verification.** A new key starts unverified. Submissions are still stored and visible in the dashboard, but notification emails and webhooks only fire after the recipient clicks the verification link. (If the instance has no email provider configured, the link is printed in the server logs.)
 - **Webhooks.** If `endpointSettings.webhookUrl` is set, each verified submission is POSTed there as `{"formId","formTitle","payload"}` with header `X-Probe-Signature: sha256=<hex HMAC-SHA256 of the raw body>`. The signing secret is `endpointSettings.webhookSigningSecret` from `endpoint.get`.
 
-## 2. Authentication (for everything except `/submit` and public reads)
+## 2. Authentication — API key (for everything except `/submit` and public reads)
 
-Session cookies via Better Auth. Send an `Origin: https://probe.riftfi.com` header on auth calls.
+Use a personal API key. A human creates it once in **Dashboard → Settings → API keys** (it is shown only once) and gives it to the agent. Keys start with `probe_`.
 
-```bash
-# Register (the first account on a fresh instance becomes admin)
-curl -c jar.txt -X POST https://probe.riftfi.com/api/auth/sign-up/email \
-  -H "Content-Type: application/json" -H "Origin: https://probe.riftfi.com" \
-  -d '{"name":"Agent","email":"agent@example.com","password":"a-long-password"}'
-
-# Sign in (stores the session cookie in jar.txt)
-curl -c jar.txt -X POST https://probe.riftfi.com/api/auth/sign-in/email \
-  -H "Content-Type: application/json" -H "Origin: https://probe.riftfi.com" \
-  -d '{"email":"agent@example.com","password":"a-long-password"}'
+Send it on every request, either header works:
+```
+Authorization: Bearer probe_xxxxxxxxxxxxxxxx
+X-API-Key: probe_xxxxxxxxxxxxxxxx
 ```
 
-Reuse the cookie (`-b jar.txt`) on every tRPC call below. Sessions last 7 days.
+- The key acts as its owner: forms the agent creates appear in that user's dashboard.
+- Keys don't expire; they stop working when revoked in Settings. Treat them like passwords.
+- A missing or invalid key on a protected call returns tRPC error code `UNAUTHORIZED`.
+- API keys can't create or revoke API keys (`apiKeys.create` / `apiKeys.revoke` need a dashboard session). `apiKeys.list` works.
+- Fallback without a key: sign in with `POST /api/auth/sign-in/email` `{"email","password"}` (send `Origin: https://probe.riftfi.com`), keep the session cookie, and send it instead of the header.
 
 ## 3. tRPC over HTTP — `/trpc/<router>.<procedure>`
 
@@ -70,15 +68,20 @@ The API uses tRPC with the **superjson** transformer, so inputs and outputs are 
 
 ```bash
 # Query example
-curl -b jar.txt -G https://probe.riftfi.com/trpc/forms.list \
+curl -G https://probe.riftfi.com/trpc/forms.list \
+  -H "Authorization: Bearer $PROBE_API_KEY" \
   --data-urlencode 'input={"json":{"limit":20}}'
 
 # Mutation example
-curl -b jar.txt -X POST https://probe.riftfi.com/trpc/forms.publish \
-  -H "Content-Type: application/json" -d '{"json":{"id":"<form-uuid>"}}'
+curl -X POST https://probe.riftfi.com/trpc/forms.publish \
+  -H "Authorization: Bearer $PROBE_API_KEY" -H "Content-Type: application/json" \
+  -d '{"json":{"id":"<form-uuid>"}}'
 ```
 
 ### Recipe: create and publish a hosted form
+
+All calls below send `-H "Authorization: Bearer $PROBE_API_KEY"`.
+
 
 1. `themes.list` (query, no input, public) → pick a theme `id`.
 2. `forms.create` (mutation) `{"title":"Feedback","themeId":"<uuid>","visibility":"unlisted","description":"optional","slug":"optional-custom-slug"}` → returns the form (with `id`, `slug`).
@@ -109,13 +112,14 @@ Conditional display: `"conditionalLogic":{"showIf":[{"fieldId":"<uuid>","operato
 - `responses.list` (query) `{"formId":"<uuid>","limit":25,"from":"<ISO datetime>","to":"<ISO datetime>"}` → `{items:[...]}`. Hosted-form answers are in `items[].values[]` (`fieldId`, `value`). Endpoint submissions are in `items[].payload`.
 - `responses.get` (query) `{"id":"<response-uuid>"}`.
 - `forms.getAnalytics` (query) `{"id":"<form-uuid>"}` → views, starts, completion rate, daily series.
-- File export (cookie auth): `GET /forms/<formId>/export.csv` (also `.xlsx`, `.pdf`).
+- File export (API key or session): `GET /forms/<formId>/export.csv` (also `.xlsx`, `.pdf`), e.g. `curl -H "Authorization: Bearer $PROBE_API_KEY" -o out.csv https://probe.riftfi.com/forms/<formId>/export.csv`.
 
 ### Procedure index
 
 - `public` (no auth): `getForm`, `submitResponse`, `trackEvent`, `listPublicForms`
 - `themes` (no auth): `list`
 - `auth`: `me`, `status`
+- `apiKeys`: `list` (create/revoke require a dashboard session)
 - `forms`: `list`, `get`, `create`, `update`, `delete`, `publish`, `unpublish`, `duplicate`, `setPassword`, `getAnalytics`, `fieldDistribution`
 - `fields`: `list` `{formId}`, `create`, `update`, `delete` `{id}`, `reorder` `{formId, fields:[{id,order}]}`
 - `responses`: `list`, `get`, `delete`, `exportCsv`

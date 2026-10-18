@@ -1,5 +1,6 @@
 import { db, schema } from "@repo/database";
 
+import { userFromApiKey } from "./api-keys";
 import { auth } from "./auth";
 
 type SessionRow = typeof schema.sessions.$inferSelect;
@@ -42,12 +43,19 @@ export async function createContext({ req }: CreateContextOptions) {
   const headers = toHeaders(req.headers);
   const session = await auth.api.getSession({ headers }).catch(() => null);
 
+  // No browser session → fall back to a personal API key (agents, scripts).
+  const apiKeyUser = session?.user ? null : await userFromApiKey(headers).catch(() => null);
+
   return {
     db,
     req,
     headers,
     session: (session?.session ?? null) as SessionRow | null,
-    user: (session?.user ?? null) as UserRow | null,
+    user: (session?.user ?? apiKeyUser ?? null) as UserRow | null,
+    authMethod: (session?.user ? "session" : apiKeyUser ? "api_key" : null) as
+      | "session"
+      | "api_key"
+      | null,
   };
 }
 

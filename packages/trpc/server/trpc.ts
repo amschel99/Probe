@@ -31,15 +31,16 @@ export const router = t.router;
 export const middleware = t.middleware;
 export const publicProcedure = t.procedure;
 
+// Authenticated by either a browser session or a personal API key (see
+// context.ts). `ctx.session` is null for API-key requests.
 const isAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.user || !ctx.session) {
+  if (!ctx.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({
     ctx: {
       ...ctx,
       user: ctx.user,
-      session: ctx.session,
     },
   });
 });
@@ -62,6 +63,14 @@ const mapOwnershipError = t.middleware(async ({ next }) => {
 
 export const protectedProcedure = t.procedure.use(isAuthed).use(mapOwnershipError);
 
+/** Browser session only — API keys can't manage API keys. */
+export const sessionProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.authMethod !== "session") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Sign in to the dashboard to do this" });
+  }
+  return next();
+});
+
 /**
  * Verifies the current user is an admin by querying the `role` column directly
  * from the DB. We deliberately do NOT trust `ctx.user.role`: Better Auth may
@@ -69,7 +78,7 @@ export const protectedProcedure = t.procedure.use(isAuthed).use(mapOwnershipErro
  * `users` table. The verified role is passed down in ctx for convenience.
  */
 const isAdmin = t.middleware(async ({ ctx, next }) => {
-  if (!ctx.user || !ctx.session) {
+  if (!ctx.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   const row = await ctx.db.query.users.findFirst({
@@ -83,7 +92,6 @@ const isAdmin = t.middleware(async ({ ctx, next }) => {
     ctx: {
       ...ctx,
       user: ctx.user,
-      session: ctx.session,
       role: row.role,
     },
   });

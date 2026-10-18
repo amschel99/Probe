@@ -12,5 +12,6 @@ export * from "./models/endpoint-audit";
 export * from "./models/platform-settings";
 export * from "./models/form-integrations";
 export * from "./models/google-connections";
+export * from "./models/api-keys";
 export * from "./models/relations";
 export * from "./models/types";

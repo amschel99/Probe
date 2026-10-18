@@ -1,6 +1,7 @@
 import { router } from "./trpc";
 
 import { adminRouter } from "./routes/admin/route";
+import { apiKeysRouter } from "./routes/api-keys/route";
 import { aiRouter } from "./routes/ai/route";
 import { authRouter } from "./routes/auth/route";
 import { endpointRouter } from "./routes/endpoint/route";
@@ -26,10 +27,12 @@ export const serverRouter = router({
   ai: aiRouter,
   uploads: uploadsRouter,
   integrations: integrationsRouter,
+  apiKeys: apiKeysRouter,
 });
 
 export { createContext } from "./context";
 export { auth } from "./auth";
+export { userFromApiKey } from "./api-keys";
 export type { Context } from "./context";
 export type { Auth } from "./auth";
 

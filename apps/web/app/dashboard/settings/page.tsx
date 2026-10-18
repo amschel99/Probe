@@ -5,6 +5,8 @@ import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc";
 
+import { ApiKeysCard } from "./_components/api-keys-card";
+
 export default function SettingsPage() {
   const meQuery = trpc.auth.me.useQuery();
   const utils = trpc.useUtils();
@@ -161,14 +163,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="card">
-        <h3 className="font-bold mb-2">API access</h3>
-        <p className="text-sm text-probe-700">
-          All authenticated API calls go through cookie-based sessions over the same origin —
-          no API key needed. For endpoint forms, each form gets a public access key. See
-          /docs for the OpenAPI reference.
-        </p>
-      </div>
+      <ApiKeysCard />
     </div>
   );
 }
