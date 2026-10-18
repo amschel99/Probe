@@ -6,16 +6,26 @@ import { Toaster } from "sonner";
 
 import { Providers } from "./providers";
 
-// Fonts are committed (app/fonts, Latin subset, OFL) and loaded locally so the
-// build never depends on reaching Google Fonts. Instrument Serif for headlines,
-// Inter Tight for reading, JetBrains Mono for labels, buttons and readouts.
+// Fonts are committed (app/fonts, Latin subset, OFL/Apache) and loaded locally
+// so the build never depends on reaching Google Fonts.
+// Tinos (a Times New Roman twin) for headlines, Silkscreen for pixel words,
+// Inter Tight for reading, JetBrains Mono for labels and readouts.
 const display = localFont({
   src: [
-    { path: "./fonts/InstrumentSerif-Regular.woff2", weight: "400", style: "normal" },
-    { path: "./fonts/InstrumentSerif-Italic.woff2", weight: "400", style: "italic" },
+    { path: "./fonts/Tinos-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/Tinos-Italic.woff2", weight: "400", style: "italic" },
+    { path: "./fonts/Tinos-Bold.woff2", weight: "700", style: "normal" },
   ],
   display: "swap",
-  variable: "--font-instrument-serif",
+  variable: "--font-tinos",
+});
+const pixel = localFont({
+  src: [
+    { path: "./fonts/Silkscreen-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/Silkscreen-Bold.woff2", weight: "700", style: "normal" },
+  ],
+  display: "swap",
+  variable: "--font-silkscreen",
 });
 const sans = localFont({
   src: "./fonts/InterTight-Variable.woff2",
@@ -40,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      className={`${display.variable} ${pixel.variable} ${sans.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
       <body>

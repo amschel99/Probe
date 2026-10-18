@@ -80,9 +80,18 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         <div className="mx-auto max-w-6xl overflow-hidden px-5 sm:px-6">
           <div
             aria-hidden
-            className="select-none font-display text-[28vw] leading-[0.8] tracking-[-0.04em] text-probe-900 md:text-[17rem]"
+            className="select-none whitespace-nowrap font-display text-[28vw] leading-[0.8] tracking-[-0.04em] text-probe-900 md:text-[17rem]"
           >
-            Probe
+            Pro
+            <span
+              className="font-pixel text-[0.78em] font-bold tracking-normal text-transparent [background-clip:text] [-webkit-background-clip:text]"
+              style={{
+                backgroundImage: "radial-gradient(var(--color-probe-500) 52%, transparent 54%)",
+                backgroundSize: "6px 6px",
+              }}
+            >
+              be
+            </span>
           </div>
         </div>
         <div className="border-t border-probe-200">

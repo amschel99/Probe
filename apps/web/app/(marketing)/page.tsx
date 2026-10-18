@@ -62,6 +62,17 @@ export default async function LandingPage() {
 
   return (
     <>
+      {/* Halftone-filled type: dots instead of solid ink. */}
+      <style>{`
+        .ht-text {
+          background-image: radial-gradient(var(--ht, #0B0B0C) 44%, transparent 46%);
+          background-size: 4px 4px;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+        }
+      `}</style>
+
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-probe-900 focus:px-4 focus:py-2 focus:text-probe-50"
@@ -70,47 +81,108 @@ export default async function LandingPage() {
       </a>
 
       <div id="main-content" className="overflow-x-clip">
-        {/* ── Hero ─────────────────────────────────────────────────────── */}
-        <section
-          className="relative border-b border-probe-200 bg-probe-100"
-          style={{
-            backgroundImage:
-              "linear-gradient(color-mix(in srgb, var(--color-probe-900) 5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-probe-900) 5%, transparent) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-            backgroundPosition: "center top",
-          }}
-        >
-          <div className="mx-auto max-w-5xl px-5 pt-20 text-center sm:px-6 md:pt-28">
-            <p className="kicker anim-in">Self-hosted forms</p>
-            <h1
-              className="anim-in mx-auto mt-6 max-w-4xl text-[3.1rem] leading-[0.98] sm:text-7xl md:text-[5.6rem]"
-              style={{ animationDelay: "80ms" }}
-            >
-              Ask the question.
-              <br />
-              <em className="italic">Keep</em> the answers.
-            </h1>
-            <p
-              className="anim-in mx-auto mt-7 max-w-2xl text-lg font-light leading-relaxed text-[var(--color-body)] sm:text-xl"
-              style={{ animationDelay: "160ms" }}
-            >
-              Probe is a form builder you run yourself. Every response goes to your own
-              database, not someone else&apos;s, and there is no limit on how many you collect.
-            </p>
-            <div
-              className="anim-in mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center"
-              style={{ animationDelay: "240ms" }}
-            >
-              <Link href="/register" className="btn btn-primary px-6 py-3.5">
-                Create a form
-              </Link>
-              <Link href="/docs" className="btn btn-ghost px-6 py-3.5">
-                Read the docs
-              </Link>
+        {/* ── Hero: collage ────────────────────────────────────────────── */}
+        <section className="relative border-b border-probe-200 bg-[var(--color-surface)]">
+          {/* print grain */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.05]"
+            style={{
+              backgroundImage: "radial-gradient(#0B0B0C 30%, transparent 32%)",
+              backgroundSize: "4px 4px",
+            }}
+          />
+          <div className="relative mx-auto grid max-w-6xl gap-10 px-5 pb-20 pt-14 sm:px-6 md:pt-20 lg:grid-cols-[1.15fr_1fr] lg:gap-4">
+            <div className="relative z-10">
+              <p className="kicker anim-in">Self-hosted forms</p>
+              <h1
+                className="anim-in mt-6 text-[3.4rem] leading-[0.92] sm:text-[5.2rem] lg:text-[6.4rem]"
+                style={{ animationDelay: "60ms" }}
+              >
+                <span className="block">
+                  Ask{" "}
+                  <span
+                    className="pixel ht-text align-[0.08em] text-[0.66em] font-bold"
+                    style={{ ["--ht" as string]: "var(--color-probe-900)" }}
+                  >
+                    the
+                  </span>
+                </span>
+                <span className="block">
+                  questi
+                  <OrbitO />n.
+                </span>
+                <span className="mt-2 block">
+                  <span className="pixel text-[0.66em] font-bold text-probe-500">Keep</span>{" "}
+                  the answers.
+                </span>
+              </h1>
+
+              <div
+                className="anim-in mt-8 max-w-md space-y-3 font-display text-xl text-probe-900 sm:text-2xl"
+                style={{ animationDelay: "160ms" }}
+              >
+                <p>
+                  <Bouncy text="is it required?" />
+                </p>
+                <p className="pl-10">or optional?</p>
+                <p className="pl-4">
+                  welcome to your <em>own</em> database.
+                </p>
+              </div>
+
+              <p
+                className="anim-in mt-8 max-w-lg text-[17px] font-light leading-relaxed text-[var(--color-body)]"
+                style={{ animationDelay: "220ms" }}
+              >
+                Probe is a form builder you run yourself. Every response goes to your server, and
+                there&apos;s no limit on how many you collect.
+              </p>
+              <div
+                className="anim-in mt-8 flex flex-col gap-3 sm:flex-row"
+                style={{ animationDelay: "280ms" }}
+              >
+                <Link href="/register" className="btn btn-primary px-6 py-3.5">
+                  Create a form
+                </Link>
+                <Link href="/docs" className="btn btn-ghost px-6 py-3.5">
+                  Read the docs
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative mx-auto w-full max-w-[30rem] lg:mt-10" aria-hidden>
+              <RetroComputer />
+              <div className="win anim-pop absolute -left-2 top-4 w-[15.5rem] sm:-left-10" style={{ animationDelay: "900ms" }}>
+                <div className="win-title">
+                  <span>New Response</span>
+                  <span className="win-x">×</span>
+                </div>
+                <div className="win-body flex gap-3">
+                  <PixelEnvelope />
+                  <div>
+                    <div>1 new submission</div>
+                    <div className="mt-0.5 text-[12px] text-[#4A4A4A]">Site visit request</div>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 px-3 pb-3">
+                  <span className="win-btn">Open</span>
+                  <span className="win-btn">Later</span>
+                </div>
+              </div>
             </div>
           </div>
+        </section>
 
-          <div className="mt-12 overflow-hidden" aria-hidden>
+        {/* ── How it travels ───────────────────────────────────────────── */}
+        <section className="border-b border-probe-200 bg-probe-100">
+          <div className="mx-auto max-w-6xl px-5 pt-20 sm:px-6">
+            <p className="kicker">How it travels</p>
+            <h2 className="mt-5 max-w-3xl text-4xl sm:text-5xl">
+              Forms, pages and agents send answers in. Your server keeps them.
+            </h2>
+          </div>
+          <div className="mt-8 overflow-hidden" aria-hidden>
             <SignalDiagram />
           </div>
         </section>
@@ -121,16 +193,18 @@ export default async function LandingPage() {
             <div>
               <p className="kicker">What it does</p>
               <h2 className="mt-5 text-4xl sm:text-5xl">
-                A form builder, a form backend, and an API.
+                A form builder, a form backend, and an{" "}
+                <span className="pixel text-[0.8em] text-probe-500">API</span>.
               </h2>
             </div>
-            <div className="border-t border-probe-200">
-              {WHAT.map(([term, desc]) => (
+            <div className="border-t border-probe-900">
+              {WHAT.map(([term, desc], i) => (
                 <div
                   key={term}
-                  className="grid gap-1 border-b border-probe-200 py-6 sm:grid-cols-[11rem_1fr] sm:items-baseline sm:gap-8"
+                  className="grid gap-1 border-b border-probe-200 py-6 sm:grid-cols-[2.5rem_11.5rem_1fr] sm:items-baseline sm:gap-6"
                 >
-                  <div className="font-display text-[1.9rem] leading-none">{term}</div>
+                  <div className="pixel text-xs text-probe-500">{String(i + 1).padStart(2, "0")}</div>
+                  <div className="font-display text-[1.8rem] leading-none">{term}</div>
                   <p className="font-light leading-relaxed text-[var(--color-body)]">{desc}</p>
                 </div>
               ))}
@@ -183,10 +257,7 @@ export default async function LandingPage() {
                     className="aspect-[4/3] border p-3"
                     style={{ background: t.config.surface, borderColor: t.config.border }}
                   >
-                    <div
-                      className="h-1.5 w-2/3"
-                      style={{ background: t.config.text, opacity: 0.85 }}
-                    />
+                    <div className="h-1.5 w-2/3" style={{ background: t.config.text, opacity: 0.85 }} />
                     <div className="mt-3 h-4 border" style={{ borderColor: t.config.border }} />
                     <div className="mt-2 h-4 border" style={{ borderColor: t.config.border }} />
                     <div className="mt-3 h-3 w-10" style={{ background: t.config.accent }} />
@@ -200,41 +271,53 @@ export default async function LandingPage() {
         )}
 
         {/* ── Agents ───────────────────────────────────────────────────── */}
-        <section className="bg-[#111211] text-[#F2EDE5]">
-          <div className="mx-auto grid max-w-6xl gap-14 px-5 py-24 sm:px-6 md:grid-cols-2 md:items-center md:py-32">
+        <section className="relative overflow-hidden bg-[#0B0B0C] text-[#F2F2EE]">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.08]"
+            style={{ backgroundImage: "radial-gradient(#5C74FF 30%, transparent 32%)", backgroundSize: "6px 6px" }}
+          />
+          <div className="relative mx-auto grid max-w-6xl gap-14 px-5 py-24 sm:px-6 md:grid-cols-2 md:items-center md:py-32">
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[#C8963E]">
-                For agents
-              </p>
-              <h2 className="mt-5 text-4xl sm:text-5xl">Give your agent a key. It does the rest.</h2>
-              <p className="mt-6 max-w-md font-light leading-relaxed text-[#C9CCCA]">
+              <p className="pixel text-[12px] uppercase tracking-[0.06em] text-[#7D93FF]">For agents</p>
+              <h2 className="mt-5 text-4xl sm:text-5xl">
+                Give your agent a <span className="pixel text-[0.82em] text-[#7D93FF]">key</span>. It
+                does the rest.
+              </h2>
+              <p className="mt-6 max-w-md font-light leading-relaxed text-[#C8CAD0]">
                 An API key lets a script or an AI agent build a form, publish it and read what
                 comes back, without anyone opening the dashboard. Everything it needs to know is
                 in one plain-text file.
               </p>
               <a
                 href="/llms.txt"
-                className="mt-8 inline-block border-b border-[#C8963E] pb-0.5 font-mono text-sm text-[#F2EDE5] hover:text-[#C8963E]"
+                className="mt-8 inline-block border-b border-[#7D93FF] pb-0.5 font-mono text-sm text-[#F2F2EE] hover:text-[#7D93FF]"
               >
                 probe.riftfi.com/llms.txt
               </a>
             </div>
-            <pre className="overflow-x-auto border border-[#2C2F2D] bg-[#0B0C0B] p-6 font-mono text-[13px] leading-[1.75] text-[#C9CCCA]">
-              <code>
-                <span className="text-[#9AA09E]"># create a form</span>
-                {"\n"}curl -X POST https://probe.riftfi.com/trpc/forms.create \
-                {"\n"}  -H <span className="text-[#C8963E]">&quot;Authorization: Bearer probe_…&quot;</span> \
-                {"\n"}  -d <span className="text-[#C8963E]">&apos;{"{"}&quot;json&quot;:{"{"}&quot;title&quot;:&quot;Field survey&quot;{"}}"}&apos;</span>
-                {"\n\n"}
-                <span className="text-[#9AA09E]"># publish it</span>
-                {"\n"}curl -X POST …/trpc/forms.publish
-                {"\n\n"}
-                <span className="text-[#9AA09E]"># read the answers</span>
-                {"\n"}curl …/trpc/responses.list
-                {"\n"}
-                <span className="anim-blink inline-block h-[1.1em] w-[0.55em] translate-y-[0.2em] bg-[#C8963E]" />
-              </code>
-            </pre>
+            <div className="win">
+              <div className="win-title">
+                <span>C:\PROBE\agent.bat</span>
+                <span className="win-x">×</span>
+              </div>
+              <pre className="m-[3px] overflow-x-auto bg-black p-5 font-mono text-[12.5px] leading-[1.75] text-[#C0C0C0]">
+                <code>
+                  <span className="text-[#7D93FF]">REM create a form</span>
+                  {"\n"}curl -X POST https://probe.riftfi.com/trpc/forms.create \
+                  {"\n"}  -H &quot;Authorization: Bearer probe_…&quot; \
+                  {"\n"}  -d &apos;{"{"}&quot;json&quot;:{"{"}&quot;title&quot;:&quot;Field survey&quot;{"}}"}&apos;
+                  {"\n\n"}
+                  <span className="text-[#7D93FF]">REM publish it</span>
+                  {"\n"}curl -X POST …/trpc/forms.publish
+                  {"\n\n"}
+                  <span className="text-[#7D93FF]">REM read the answers</span>
+                  {"\n"}curl …/trpc/responses.list
+                  {"\n"}C:\PROBE&gt;
+                  <span className="anim-blink ml-1 inline-block h-[1em] w-[0.6em] translate-y-[0.15em] bg-[#C0C0C0]" />
+                </code>
+              </pre>
+            </div>
           </div>
         </section>
 
@@ -286,7 +369,7 @@ export default async function LandingPage() {
                     <span className="font-display text-2xl leading-tight">{f.q}</span>
                     <span
                       aria-hidden
-                      className="font-mono text-lg text-probe-500 transition-transform group-open:rotate-45"
+                      className="pixel text-lg text-probe-500 transition-transform group-open:rotate-45"
                     >
                       +
                     </span>
@@ -302,7 +385,9 @@ export default async function LandingPage() {
 
         {/* ── Close ────────────────────────────────────────────────────── */}
         <section className="mx-auto max-w-5xl px-5 py-24 text-center sm:px-6 md:py-32">
-          <h2 className="text-5xl sm:text-7xl">Start collecting.</h2>
+          <h2 className="text-5xl sm:text-7xl">
+            Start <span className="pixel text-[0.8em] font-bold text-probe-500">collecting</span>.
+          </h2>
           <p className="mx-auto mt-6 max-w-md font-light text-[var(--color-body)]">
             Making a form takes about a minute. On a new install, the first account becomes the
             admin.
@@ -320,36 +405,203 @@ export default async function LandingPage() {
 
 /* ───────────────────────────────────────────────────────────────────────── */
 
-/** A plain, believable form — what respondents actually see. */
+/** The "o" in "question": the Probe orbit mark, sized to the letter. */
+function OrbitO() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      aria-hidden
+      className="mx-[0.02em] inline-block h-[0.62em] w-[0.62em] align-baseline"
+      fill="none"
+    >
+      <circle cx="24" cy="26" r="13" fill="var(--color-probe-500)" />
+      <circle cx="24" cy="26" r="13" fill="url(#orbit-ht)" opacity="0.35" />
+      <defs>
+        <pattern id="orbit-ht" width="4" height="4" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1" fill="#fff" />
+        </pattern>
+      </defs>
+      <ellipse cx="24" cy="26" rx="23" ry="8" transform="rotate(-18 24 26)" stroke="currentColor" strokeWidth="2.6" />
+    </svg>
+  );
+}
+
+/** Letters on a wobbly baseline, like they were cut out and pasted. */
+function Bouncy({ text }: { text: string }) {
+  const offsets = [0, -6, 3, -10, 2, -4, 6, -8, 0, 4, -6, 2, -3, 5, -7, 1];
+  return (
+    <span aria-label={text}>
+      {Array.from(text).map((ch, i) => (
+        <span
+          key={i}
+          aria-hidden
+          className="inline-block"
+          style={{ transform: `translateY(${offsets[i % offsets.length]}px)` }}
+        >
+          {ch === " " ? "\u00A0" : ch}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function PixelEnvelope() {
+  // 12×10 pixel envelope, drawn cell by cell.
+  const rows = [
+    "111111111111",
+    "120000000021",
+    "102000000201",
+    "100200002001",
+    "100022220001",
+    "100000000001",
+    "100000000001",
+    "100000000001",
+    "111111111111",
+  ];
+  return (
+    <svg viewBox="0 0 12 9" className="h-7 w-9 shrink-0" shapeRendering="crispEdges">
+      {rows.flatMap((r, y) =>
+        Array.from(r).map((c, x) =>
+          c === "0" ? null : (
+            <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill={c === "1" ? "#0B0B0C" : "#1A3BFF"} />
+          ),
+        ),
+      )}
+      <rect x="1" y="5" width="10" height="3" fill="#FFF7C2" opacity="0.9" />
+    </svg>
+  );
+}
+
+/** Beige CRT with a form on screen, halftone-shaded, in a blue dither spray. */
+function RetroComputer() {
+  // Deterministic dither spray around the base.
+  const spray: { x: number; y: number; s: number; o: number }[] = [];
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+  for (let i = 0; i < 520; i++) {
+    const a = rnd() * Math.PI * 2;
+    const r = Math.sqrt(rnd());
+    const x = 230 + Math.cos(a) * r * 235;
+    const y = 400 + Math.sin(a) * r * 70;
+    spray.push({ x, y, s: rnd() < 0.3 ? 4 : 3, o: 1 - r * 0.85 });
+  }
+
+  const beige = "#E7E1D1";
+  const beige2 = "#D8D0BC";
+  const ink = "#0B0B0C";
+
+  return (
+    <svg viewBox="0 0 460 470" className="block h-auto w-full" fill="none">
+      <defs>
+        <pattern id="crt-dots" width="5" height="5" patternUnits="userSpaceOnUse">
+          <circle cx="2.5" cy="2.5" r="1.1" fill={ink} />
+        </pattern>
+        <pattern id="crt-scan" width="4" height="3" patternUnits="userSpaceOnUse">
+          <rect width="4" height="1" fill="#FFFFFF" opacity="0.12" />
+        </pattern>
+        <pattern id="crt-keys" width="18" height="12" patternUnits="userSpaceOnUse">
+          <rect x="1" y="1" width="15" height="9" fill="#EFEADC" stroke={ink} strokeOpacity="0.35" strokeWidth="0.8" />
+        </pattern>
+        <linearGradient id="crt-bar" x1="0" x2="1">
+          <stop offset="0" stopColor="#08158F" />
+          <stop offset="1" stopColor="#4E9BFF" />
+        </linearGradient>
+        <clipPath id="crt-body">
+          <rect x="55" y="20" width="350" height="268" rx="16" />
+        </clipPath>
+      </defs>
+
+      {/* spray */}
+      <g fill="#1A3BFF">
+        {spray.map((p, i) => (
+          <rect key={i} x={p.x.toFixed(1)} y={p.y.toFixed(1)} width={p.s} height={p.s} opacity={p.o.toFixed(2)} />
+        ))}
+      </g>
+
+      {/* monitor */}
+      <rect x="55" y="20" width="350" height="268" rx="16" fill={beige} stroke={ink} strokeWidth="1.6" />
+      <rect x="55" y="20" width="350" height="268" fill="url(#crt-dots)" opacity="0.13" clipPath="url(#crt-body)" style={{ mixBlendMode: "multiply" }} />
+      <rect x="78" y="40" width="304" height="212" rx="8" fill={beige2} stroke={ink} strokeWidth="1.2" />
+      <rect x="92" y="52" width="276" height="188" rx="6" fill="#0E1C7A" stroke={ink} strokeWidth="1.2" />
+
+      {/* on-screen form window */}
+      <g>
+        <rect x="112" y="68" width="236" height="156" fill="#ECEEF6" stroke={ink} strokeWidth="1" />
+        <rect x="113" y="69" width="234" height="13" fill="url(#crt-bar)" />
+        <rect x="118" y="73" width="70" height="4" fill="#FFFFFF" opacity="0.9" />
+        <rect x="124" y="94" width="110" height="7" fill={ink} opacity="0.85" />
+        <rect x="124" y="106" width="150" height="3" fill={ink} opacity="0.35" />
+        <rect x="124" y="120" width="40" height="3" fill={ink} opacity="0.6" />
+        <rect x="124" y="126" width="210" height="14" fill="#FFFFFF" stroke={ink} strokeOpacity="0.5" />
+        <rect x="124" y="148" width="50" height="3" fill={ink} opacity="0.6" />
+        <rect x="124" y="154" width="210" height="14" fill="#FFFFFF" stroke="#1A3BFF" strokeWidth="1.4" />
+        <rect x="128" y="158" width="64" height="6" fill={ink} opacity="0.55" />
+        <rect x="194" y="157" width="1.5" height="8" fill={ink} className="anim-blink" />
+        <rect x="124" y="180" width="62" height="16" fill="#1A3BFF" stroke={ink} strokeWidth="0.8" />
+        <rect x="136" y="186" width="38" height="4" fill="#FFFFFF" />
+      </g>
+      <rect x="92" y="52" width="276" height="188" rx="6" fill="url(#crt-scan)" />
+      <path d="M100 60 Q 230 48 360 60 L 360 92 Q 230 78 100 92 Z" fill="#FFFFFF" opacity="0.07" />
+
+      {/* badge + led */}
+      <rect x="96" y="262" width="40" height="7" fill={beige2} stroke={ink} strokeWidth="0.8" />
+      <circle cx="360" cy="266" r="3.2" fill="#1A3BFF" className="anim-pulse" />
+
+      {/* neck */}
+      <path d="M190 288 L 270 288 L 284 312 L 176 312 Z" fill={beige2} stroke={ink} strokeWidth="1.4" />
+
+      {/* case */}
+      <rect x="40" y="312" width="380" height="58" rx="5" fill={beige} stroke={ink} strokeWidth="1.6" />
+      <rect x="40" y="312" width="380" height="58" fill="url(#crt-dots)" opacity="0.1" />
+      <rect x="70" y="328" width="120" height="8" fill={beige2} stroke={ink} strokeWidth="1" />
+      <rect x="70" y="344" width="120" height="8" fill={beige2} stroke={ink} strokeWidth="1" />
+      <rect x="300" y="332" width="90" height="4" fill={ink} opacity="0.5" />
+      <rect x="300" y="340" width="90" height="4" fill={ink} opacity="0.5" />
+      <rect x="300" y="348" width="90" height="4" fill={ink} opacity="0.5" />
+
+      {/* keyboard */}
+      <path d="M30 388 L 430 388 L 412 452 L 48 452 Z" fill={beige} stroke={ink} strokeWidth="1.6" />
+      <path d="M52 396 L 408 396 L 394 444 L 66 444 Z" fill="url(#crt-keys)" />
+    </svg>
+  );
+}
+
+/** A plain, believable form inside a Win98 window. */
 function FormSpecimen() {
   return (
-    <div className="border border-probe-200 bg-[var(--color-surface)] p-8 sm:p-10" aria-hidden>
-      <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-probe-700">
-        probe.riftfi.com/f/site-visit
+    <div className="win" aria-hidden>
+      <div className="win-title">
+        <span>Site visit request — Probe</span>
+        <span className="win-x">×</span>
       </div>
-      <div className="mt-6 font-display text-[2rem] leading-tight">Site visit request</div>
-      <p className="mt-2 text-sm font-light text-[var(--color-body)]">
-        Tell us where and when. We reply within a day.
-      </p>
-      <div className="mt-8 space-y-5">
-        <Field label="Company" value="Kilima Solar Ltd" />
-        <Field label="Location" value="Naivasha, Nakuru County" />
-        <div>
-          <div className="mb-2 text-sm font-medium">Preferred week</div>
-          <div className="grid grid-cols-3 gap-2 text-sm">
-            {["12 May", "19 May", "26 May"].map((w, i) => (
-              <div
-                key={w}
-                className={`border px-3 py-2 text-center ${
-                  i === 1 ? "border-probe-900 bg-probe-900 text-probe-50" : "border-probe-200"
-                }`}
-              >
-                {w}
-              </div>
-            ))}
-          </div>
+      <div className="m-[3px] bg-white p-7 text-[#0B0B0C] sm:p-9">
+        <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#56585C]">
+          probe.riftfi.com/f/site-visit
         </div>
-        <div className="btn btn-primary w-full">Send request</div>
+        <div className="mt-5 font-display text-[2rem] leading-tight">Site visit request</div>
+        <p className="mt-2 text-sm font-light text-[#34363A]">
+          Tell us where and when. We reply within a day.
+        </p>
+        <div className="mt-7 space-y-5">
+          <Field label="Company" value="Kilima Solar Ltd" />
+          <Field label="Location" value="Naivasha, Nakuru County" />
+          <div>
+            <div className="mb-2 text-sm font-medium">Preferred week</div>
+            <div className="grid grid-cols-3 gap-2 text-sm">
+              {["12 May", "19 May", "26 May"].map((w, i) => (
+                <div
+                  key={w}
+                  className={`border px-3 py-2 text-center ${
+                    i === 1 ? "border-[#0B0B0C] bg-[#1A3BFF] text-white" : "border-[#BDBDB4]"
+                  }`}
+                >
+                  {w}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="btn btn-primary w-full">Send request</div>
+        </div>
       </div>
     </div>
   );
@@ -359,20 +611,18 @@ function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <div className="mb-2 text-sm font-medium">{label}</div>
-      <div className="border border-[#DCD3C3] bg-[var(--color-surface)] px-3 py-2.5 text-sm">
-        {value}
-      </div>
+      <div className="border border-[#BDBDB4] bg-white px-3 py-2.5 text-sm">{value}</div>
     </div>
   );
 }
 
 /**
  * Line-art map of a Probe install: forms, pages and agents orbit your server;
- * gold signals travel in, a webhook travels out. Pure SVG + SMIL, no images.
+ * blue signals travel in, a webhook travels out. Pure SVG + SMIL, no images.
  */
 function SignalDiagram() {
   const ink = "var(--color-probe-900)";
-  const gold = "var(--color-gold)";
+  const blue = "var(--color-signal)";
   const paper = "var(--color-probe-100)";
   const nodes: { x: number; y: number; label: string; sub: string; anchor: "start" | "end"; path: string; out?: boolean }[] = [
     { x: 190, y: 352, label: "form", sub: "launch-waitlist", anchor: "end", path: "M190 352 Q 360 210 600 150" },
@@ -387,6 +637,12 @@ function SignalDiagram() {
       className="relative left-1/2 block w-[max(100%,820px)] max-w-[1200px] -translate-x-1/2"
       fill="none"
     >
+      <defs>
+        <pattern id="sun-ht" width="7" height="7" patternUnits="userSpaceOnUse">
+          <circle cx="3.5" cy="3.5" r="2.2" fill={blue} />
+        </pattern>
+      </defs>
+
       {/* dome */}
       <path d="M120 500 A 480 480 0 0 1 1080 500" stroke={ink} strokeOpacity="0.35" strokeWidth="1" />
       <path d="M220 500 A 380 380 0 0 1 980 500" stroke={ink} strokeOpacity="0.18" strokeWidth="1" strokeDasharray="2 6" />
@@ -399,8 +655,8 @@ function SignalDiagram() {
         <line key={dx} x1={600 + dx * 0.5} y1="476" x2={600 + dx * 1.25} y2="560" stroke={ink} strokeOpacity="0.12" />
       ))}
 
-      {/* sun */}
-      <circle cx="600" cy="330" r="92" fill={gold} fillOpacity="0.85" />
+      {/* halftone sun */}
+      <circle cx="600" cy="330" r="96" fill="url(#sun-ht)" />
 
       {/* the server: a drawn database stack */}
       <g>
@@ -411,16 +667,16 @@ function SignalDiagram() {
         ))}
         {[284, 352, 420].map((y) => (
           <g key={y}>
-            <circle cx="566" cy={y} r="2.5" fill={y === 284 ? gold : ink} className="anim-pulse" />
+            <rect x="563" y={y - 3} width="6" height="6" fill={y === 284 ? blue : ink} className="anim-pulse" />
             <line x1="578" y1={y} x2="630" y2={y} stroke={ink} strokeOpacity="0.35" />
           </g>
         ))}
         {/* antenna */}
         <line x1="600" y1="236" x2="600" y2="156" stroke={ink} strokeWidth="1.4" />
-        <circle cx="600" cy="150" r="6" fill={ink} />
-        <circle cx="600" cy="150" r="18" stroke={ink} strokeOpacity="0.4" strokeDasharray="2 4" className="anim-spin-slow" />
-        <circle cx="600" cy="150" r="32" stroke={ink} strokeOpacity="0.2" />
-        <text x="616" y="214" fontFamily="var(--font-mono)" fontSize="11" fill={ink} fillOpacity="0.7" letterSpacing="1.5">
+        <rect x="594" y="144" width="12" height="12" fill={blue} stroke={ink} />
+        <circle cx="600" cy="150" r="20" stroke={ink} strokeOpacity="0.4" strokeDasharray="2 4" className="anim-spin-slow" />
+        <circle cx="600" cy="150" r="34" stroke={ink} strokeOpacity="0.2" />
+        <text x="616" y="214" fontFamily="var(--font-pixel)" fontSize="12" fill={ink} fillOpacity="0.75">
           YOUR SERVER
         </text>
       </g>
@@ -429,19 +685,19 @@ function SignalDiagram() {
       {nodes.map((n, i) => (
         <g key={n.label}>
           <path id={`sig-${i}`} d={n.path} stroke={ink} strokeOpacity="0.5" strokeDasharray="3 5" />
-          <circle r="4" fill={gold} stroke={ink} strokeWidth="1">
-            <animateMotion dur={`${4.2 + i * 0.7}s`} begin={`-${i * 0.9}s`} repeatCount="indefinite" rotate="auto">
+          <rect x="-4" y="-4" width="8" height="8" fill={blue} stroke={ink} strokeWidth="1">
+            <animateMotion dur={`${4.2 + i * 0.7}s`} begin={`-${i * 0.9}s`} repeatCount="indefinite">
               <mpath href={`#sig-${i}`} />
             </animateMotion>
-          </circle>
+          </rect>
           <circle cx={n.x} cy={n.y} r="9" fill={paper} stroke={ink} strokeWidth="1.4" />
-          <circle cx={n.x} cy={n.y} r="3" fill={n.out ? gold : ink} />
+          <circle cx={n.x} cy={n.y} r="3" fill={n.out ? blue : ink} />
           <text
             x={n.anchor === "end" ? n.x - 18 : n.x + 18}
             y={n.y - 4}
             textAnchor={n.anchor}
             fontFamily="var(--font-display)"
-            fontSize="26"
+            fontSize="28"
             fill={ink}
           >
             {n.label}

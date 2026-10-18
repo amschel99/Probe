@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 172 48" fill="none" role="img" aria-label="Probe">
-  <circle cx="24" cy="27" r="7" fill="#C8963E"/>
-  <ellipse cx="24" cy="27" rx="19" ry="7" transform="rotate(-18 24 27)" stroke="#111211" stroke-width="1.6"/>
-  <path d="M24 20V6" stroke="#111211" stroke-width="1.6"/>
-  <circle cx="24" cy="5" r="2.4" fill="#111211"/>
-  <circle cx="41.2" cy="21.6" r="2.2" fill="#111211"/>
-  <text x="54" y="35" font-family="'Instrument Serif', Georgia, serif" font-size="34" letter-spacing="-0.5" fill="#111211">Probe</text>
+  <circle cx="24" cy="27" r="7" fill="#1A3BFF"/>
+  <ellipse cx="24" cy="27" rx="19" ry="7" transform="rotate(-18 24 27)" stroke="#0B0B0C" stroke-width="1.6"/>
+  <path d="M24 20V6" stroke="#0B0B0C" stroke-width="1.6"/>
+  <circle cx="24" cy="5" r="2.4" fill="#0B0B0C"/>
+  <circle cx="41.2" cy="21.6" r="2.2" fill="#0B0B0C"/>
+  <text x="54" y="35" font-family="Tinos, 'Times New Roman', serif" font-size="34" letter-spacing="-0.5" fill="#0B0B0C">Probe</text>
 </svg>
