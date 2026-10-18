@@ -11,6 +11,25 @@ import { createFormSchema, type CreateFormInput } from "@repo/services/validator
 
 import { trpc } from "@/lib/trpc";
 
+const AI_EXAMPLES: { label: string; prompt: string }[] = [
+  {
+    label: "Event signup",
+    prompt: "An event registration form: name, email, phone, organisation, which day(s) they're attending, dietary requirements, and an optional note.",
+  },
+  {
+    label: "Customer feedback",
+    prompt: "A customer feedback form: overall rating out of 5, what they liked, what we should improve, how likely they are to recommend us (1-10), and an optional email for follow-up.",
+  },
+  {
+    label: "Job application",
+    prompt: "A job application for a software engineer role: full name, email, phone, LinkedIn URL, years of experience, preferred start date, salary expectation, and why they want to join.",
+  },
+  {
+    label: "Investor intake",
+    prompt: "An intake form for founders applying for funding: founder name, email, company, website, sector, stage, amount raising, monthly revenue, and a short description of the business.",
+  },
+];
+
 function NewFormForm() {
   const router = useRouter();
   const search = useSearchParams();
@@ -55,46 +74,78 @@ function NewFormForm() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="display text-3xl font-bold">New form</h1>
-        <p className="text-probe-700">Title + theme to start. You can change anything later.</p>
+        <h1 className="display text-4xl">New form</h1>
+        <p className="text-probe-700">
+          Describe it and let AI draft the questions, or set it up yourself below.
+        </p>
       </div>
 
-      {/* AI generation — shown only when the user has connected their Anthropic key */}
+      {/* AI-first, Tally-style: describe the form, get a draft in the builder. */}
       {aiStatus.data?.hasKey ? (
-        <div className="card space-y-3 ring-1 ring-probe-500/30">
-          <div className="font-bold flex items-center gap-2"><span className="text-probe-500">✦</span> Generate with AI</div>
-          <p className="help">
-            Describe your form in plain English — Claude drafts the fields. Uses your own
-            Anthropic key; you can tweak everything after.
-          </p>
+        <div className="card space-y-4 border-probe-900">
+          <div className="flex items-center justify-between gap-3">
+            <label htmlFor="ai-prompt" className="font-display text-2xl">
+              What do you want to ask?
+            </label>
+            <span className="font-mono text-[11px] text-probe-700">
+              {aiStatus.data.providerLabel} · {aiStatus.data.model}
+            </span>
+          </div>
           <textarea
-            className="input"
-            rows={3}
-            placeholder="A customer feedback form: a 1–5 star rating, what they liked, what to improve, and an optional email to follow up."
+            id="ai-prompt"
+            className="input text-[15px]"
+            rows={4}
+            maxLength={2000}
+            placeholder="e.g. A registration form for a 2-day founders' retreat in Nairobi: name, email, company, role, dietary needs, which sessions they'll attend, and how they heard about us."
             value={aiPrompt}
             onChange={(e) => setAiPrompt(e.target.value)}
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && aiPrompt.trim().length >= 3 && aiThemeId) {
+                generateMutation.mutate({ prompt: aiPrompt, themeId: aiThemeId });
+              }
+            }}
           />
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={generateMutation.isPending || aiPrompt.trim().length < 3 || !aiThemeId}
-            onClick={() => aiThemeId && generateMutation.mutate({ prompt: aiPrompt, themeId: aiThemeId })}
-          >
-            {generateMutation.isPending ? "Generating…" : "Generate form"}
-          </button>
-          <div className="text-xs text-probe-700">
-            Or fill in the details manually below.
+          <div className="flex flex-wrap gap-2">
+            {AI_EXAMPLES.map((ex) => (
+              <button
+                key={ex.label}
+                type="button"
+                onClick={() => setAiPrompt(ex.prompt)}
+                className="border border-probe-200 px-2.5 py-1 font-mono text-[12px] text-probe-700 hover:border-probe-900 hover:text-probe-900"
+              >
+                {ex.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={generateMutation.isPending || aiPrompt.trim().length < 3 || !aiThemeId}
+              onClick={() => aiThemeId && generateMutation.mutate({ prompt: aiPrompt, themeId: aiThemeId })}
+            >
+              {generateMutation.isPending ? "Drafting your form…" : "Generate form"}
+            </button>
+            <span className="text-xs text-probe-700">
+              Opens in the builder so you can edit everything.
+            </span>
           </div>
         </div>
       ) : aiStatus.isSuccess ? (
         <div className="card text-sm text-probe-700">
-          <span className="text-probe-500">✦</span> Want AI to draft your form?{" "}
+          Want AI to draft your forms?{" "}
           <Link href="/dashboard/settings" className="underline">
-            Add your Anthropic API key
+            Connect a provider in Settings
           </Link>{" "}
-          in settings — Probe never charges for AI.
+          — Claude, OpenAI, DeepSeek, Gemini and more.
         </div>
       ) : null}
+
+      <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.16em] text-probe-700">
+        <span className="h-px flex-1 bg-probe-200" />
+        or start from scratch
+        <span className="h-px flex-1 bg-probe-200" />
+      </div>
 
       <form className="card space-y-4" onSubmit={handleSubmit((v) => createMutation.mutate(v))}>
         <div>

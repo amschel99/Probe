@@ -1,31 +1,16 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { db, eq, schema } from "@repo/database";
 import { decryptSecret, encryptSecret, makeAutoSlug } from "@repo/services";
 import {
-  aiFieldTypeSchema,
-  aiGeneratedFormSchema,
+  aiProviderSchema,
   generateFormSchema,
-  setAiKeySchema,
+  setAiConfigSchema,
   type AiGeneratedField,
 } from "@repo/services/validators";
 import { TRPCError } from "@trpc/server";
 
+import { generateDraft, PROVIDERS, verifyConfig, type AiConfig } from "../../ai/providers";
+import { env } from "../../env";
 import { protectedProcedure, router } from "../../trpc";
-
-// Users bring their own key, so the model is the deployer's choice, not a cost
-// we bear. Opus 4.7 gives the best field choices; effort stays low because form
-// drafting is a short, scoped task and we want it fast/cheap for the user.
-const AI_MODEL = "claude-opus-4-7";
-
-const SYSTEM_PROMPT = `You are a form-building assistant for Probe. Given a short description, design a clean, sensible web form by calling the create_form tool exactly once.
-
-Guidelines:
-- Pick the most fitting field type for each question. Use single_select/multi_select (with options) over free text when the answer is from a known set.
-- Provide options ONLY for single_select and multi_select fields.
-- Mark a field required only when the form genuinely needs it.
-- Keep it focused: 3–10 fields for most forms. Order fields logically.
-- Write a short, human title and an optional one-line description.
-- Use email type for email addresses, phone for phone numbers, url for links, rating for satisfaction (1–5 stars), linear_scale for agreement/likelihood scales.`;
 
 const HOSTED_DEFAULT_SETTINGS = {
   allowMultipleSubmissions: true,
@@ -37,54 +22,12 @@ const HOSTED_DEFAULT_SETTINGS = {
   passwordHash: null,
 } as const;
 
-// Hand-written JSON Schema for the tool — mirrors aiGeneratedFormSchema. We
-// validate the model's output against the Zod schema regardless, so this only
-// needs to steer the model toward the right shape.
-const CREATE_FORM_TOOL: Anthropic.Tool = {
-  name: "create_form",
-  description: "Create a web form definition from the user's description.",
-  input_schema: {
-    type: "object",
-    properties: {
-      title: { type: "string", description: "Short, human form title" },
-      description: { type: "string", description: "Optional one-line description" },
-      fields: {
-        type: "array",
-        description: "The form's fields, in display order",
-        items: {
-          type: "object",
-          properties: {
-            type: { type: "string", enum: [...aiFieldTypeSchema.options] },
-            label: { type: "string", description: "The question / field label" },
-            required: { type: "boolean" },
-            placeholder: { type: "string" },
-            helpText: { type: "string" },
-            options: {
-              type: "array",
-              description: "Choices — ONLY for single_select and multi_select",
-              items: {
-                type: "object",
-                properties: {
-                  label: { type: "string" },
-                  value: { type: "string" },
-                },
-                required: ["label", "value"],
-              },
-            },
-          },
-          required: ["type", "label", "required"],
-        },
-      },
-    },
-    required: ["title", "fields"],
-  },
-};
-
 /** Build the per-type `config` jsonb for a generated field. */
 function configForField(field: AiGeneratedField): Record<string, unknown> {
   switch (field.type) {
     case "single_select":
     case "multi_select":
+    case "ranking":
       return { options: field.options ?? [] };
     case "rating":
       return { maxRating: 5, ratingStyle: "star" };
@@ -95,74 +38,106 @@ function configForField(field: AiGeneratedField): Record<string, unknown> {
   }
 }
 
-/** Map an Anthropic SDK error onto a tRPC error with a user-facing message. */
-function mapAnthropicError(err: unknown): TRPCError {
-  if (err instanceof Anthropic.AuthenticationError) {
-    return new TRPCError({
-      code: "BAD_REQUEST",
-      message: "Your Anthropic API key was rejected. Check it in Settings.",
-    });
-  }
-  if (err instanceof Anthropic.RateLimitError) {
-    return new TRPCError({
-      code: "TOO_MANY_REQUESTS",
-      message: "Anthropic rate-limited the request. Try again in a moment.",
-    });
-  }
-  if (err instanceof Anthropic.APIError) {
-    return new TRPCError({
-      code: "BAD_GATEWAY",
-      message: `Anthropic API error (${err.status ?? "?"}). Try again.`,
-    });
-  }
-  return new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Form generation failed." });
+/** The instance-wide AI config from env, if the deployer set one. */
+function instanceConfig(): AiConfig | null {
+  const provider = aiProviderSchema.safeParse(env.AI_PROVIDER);
+  if (!provider.success) return null;
+  const info = PROVIDERS[provider.data];
+  const model = env.AI_MODEL || info.defaultModel;
+  if (!model) return null;
+  if (provider.data === "custom" ? !env.AI_BASE_URL : !env.AI_API_KEY) return null;
+  return {
+    provider: provider.data,
+    apiKey: env.AI_API_KEY ?? null,
+    model,
+    baseUrl: env.AI_BASE_URL ?? null,
+  };
 }
 
-async function getUserApiKey(database: typeof db, userId: string) {
+/** The user's own AI config (their saved key), if any. */
+async function userConfig(database: typeof db, userId: string): Promise<AiConfig | null> {
   const row = await database.query.users.findFirst({
     where: eq(schema.users.id, userId),
-    columns: { aiApiKeyEnc: true },
+    columns: { aiApiKeyEnc: true, aiProvider: true, aiModel: true, aiBaseUrl: true },
   });
-  if (!row?.aiApiKeyEnc) {
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
-      message: "Add your Anthropic API key in Settings to use AI generation.",
-    });
-  }
-  return decryptSecret(row.aiApiKeyEnc);
+  if (!row) return null;
+  // Rows saved before multi-provider support have a key and no provider: Anthropic.
+  const provider = aiProviderSchema.safeParse(row.aiProvider ?? (row.aiApiKeyEnc ? "anthropic" : null));
+  if (!provider.success) return null;
+  if (provider.data !== "custom" && !row.aiApiKeyEnc) return null;
+  return {
+    provider: provider.data,
+    apiKey: row.aiApiKeyEnc ? decryptSecret(row.aiApiKeyEnc) : null,
+    model: row.aiModel || PROVIDERS[provider.data].defaultModel,
+    baseUrl: row.aiBaseUrl,
+  };
+}
+
+/** Which config a generation would use: the user's own key wins over the instance's. */
+async function resolveConfig(database: typeof db, userId: string) {
+  const own = await userConfig(database, userId);
+  if (own) return { cfg: own, source: "user" as const };
+  const inst = instanceConfig();
+  if (inst) return { cfg: inst, source: "instance" as const };
+  return null;
 }
 
 export const aiRouter = router({
-  /** Whether the signed-in user has an Anthropic key saved (feature gate for the UI). */
+  /** Whether AI generation is available to this user, and through what. */
   status: protectedProcedure.query(async ({ ctx }) => {
-    const row = await ctx.db.query.users.findFirst({
-      where: eq(schema.users.id, ctx.user.id),
-      columns: { aiApiKeyEnc: true },
-    });
-    return { hasKey: !!row?.aiApiKeyEnc, model: AI_MODEL };
+    const resolved = await resolveConfig(ctx.db, ctx.user.id);
+    return {
+      hasKey: !!resolved,
+      source: resolved?.source ?? null,
+      provider: resolved?.cfg.provider ?? null,
+      providerLabel: resolved ? PROVIDERS[resolved.cfg.provider].label : null,
+      model: resolved?.cfg.model ?? null,
+      baseUrl: resolved?.source === "user" ? resolved.cfg.baseUrl : null,
+      providers: Object.values(PROVIDERS).map((p) => ({
+        id: p.id,
+        label: p.label,
+        defaultModel: p.defaultModel,
+        keyUrl: p.keyUrl ?? null,
+      })),
+    };
   }),
 
-  /** Validate the key with a live auth probe, then store it encrypted. */
-  setKey: protectedProcedure.input(setAiKeySchema).mutation(async ({ ctx, input }) => {
-    const client = new Anthropic({ apiKey: input.apiKey });
-    try {
-      // Cheap, free auth check — 401s on a bad key without spending tokens.
-      await client.models.list({ limit: 1 });
-    } catch (err) {
-      throw mapAnthropicError(err);
+  /** Verify the key against the provider, then store it (encrypted) with provider + model. */
+  setKey: protectedProcedure.input(setAiConfigSchema).mutation(async ({ ctx, input }) => {
+    if (input.provider === "custom") {
+      // A custom base URL makes the server call an arbitrary address — admins only.
+      const row = await ctx.db.query.users.findFirst({
+        where: eq(schema.users.id, ctx.user.id),
+        columns: { role: true },
+      });
+      if (row?.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can use a custom AI endpoint." });
+      }
     }
+    const cfg: AiConfig = {
+      provider: input.provider,
+      apiKey: input.apiKey || null,
+      model: input.model || PROVIDERS[input.provider].defaultModel,
+      baseUrl: input.provider === "custom" ? input.baseUrl ?? null : null,
+    };
+    await verifyConfig(cfg);
     await ctx.db
       .update(schema.users)
-      .set({ aiApiKeyEnc: encryptSecret(input.apiKey) })
+      .set({
+        aiApiKeyEnc: cfg.apiKey ? encryptSecret(cfg.apiKey) : null,
+        aiProvider: cfg.provider,
+        aiModel: input.model || null,
+        aiBaseUrl: cfg.baseUrl,
+      })
       .where(eq(schema.users.id, ctx.user.id));
     return { ok: true };
   }),
 
-  /** Forget the stored key. */
+  /** Forget the user's own AI settings (the instance default, if any, takes over). */
   clearKey: protectedProcedure.mutation(async ({ ctx }) => {
     await ctx.db
       .update(schema.users)
-      .set({ aiApiKeyEnc: null })
+      .set({ aiApiKeyEnc: null, aiProvider: null, aiModel: null, aiBaseUrl: null })
       .where(eq(schema.users.id, ctx.user.id));
     return { ok: true };
   }),
@@ -171,41 +146,14 @@ export const aiRouter = router({
   generateForm: protectedProcedure
     .input(generateFormSchema)
     .mutation(async ({ ctx, input }) => {
-      const apiKey = await getUserApiKey(ctx.db, ctx.user.id);
-      const client = new Anthropic({ apiKey });
-
-      let message: Anthropic.Message;
-      try {
-        message = await client.messages.create({
-          model: AI_MODEL,
-          max_tokens: 4096,
-          system: SYSTEM_PROMPT,
-          tools: [CREATE_FORM_TOOL],
-          tool_choice: { type: "tool", name: "create_form" },
-          messages: [{ role: "user", content: input.prompt }],
-        });
-      } catch (err) {
-        throw mapAnthropicError(err);
-      }
-
-      const toolUse = message.content.find(
-        (b): b is Anthropic.ToolUseBlock => b.type === "tool_use",
-      );
-      if (!toolUse) {
+      const resolved = await resolveConfig(ctx.db, ctx.user.id);
+      if (!resolved) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "The model didn't return a form. Try rephrasing your prompt.",
+          code: "PRECONDITION_FAILED",
+          message: "Connect an AI provider in Settings to generate forms.",
         });
       }
-
-      const parsed = aiGeneratedFormSchema.safeParse(toolUse.input);
-      if (!parsed.success) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "The generated form was malformed. Try again.",
-        });
-      }
-      const draft = parsed.data;
+      const draft = await generateDraft(resolved.cfg, input.prompt);
 
       // Persist: form + fields in one transaction, owned by the user.
       const form = await ctx.db.transaction(async (tx) => {

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Validators for AI form generation. Users bring their own Anthropic API key;
+ * Validators for AI form generation. Users bring their own provider API key;
  * the model returns a form draft which we validate against these schemas before
  * persisting. The field-type subset excludes layout/markers and types that need
  * bespoke config the model can't reliably produce (signature, page_break, etc.).
@@ -20,6 +20,8 @@ export const aiFieldTypeSchema = z.enum([
   "phone",
   "url",
   "linear_scale",
+  "ranking",
+  "time",
 ]);
 export type AiFieldType = z.infer<typeof aiFieldTypeSchema>;
 
@@ -46,23 +48,50 @@ export const aiGeneratedFormSchema = z.object({
 });
 export type AiGeneratedForm = z.infer<typeof aiGeneratedFormSchema>;
 
-/** Anthropic keys look like `sk-ant-...`. We only do a shape check; validity is confirmed by a live auth probe. */
-export const setAiKeySchema = z.object({
-  apiKey: z
-    .string()
-    .trim()
-    .min(20, "That doesn't look like an Anthropic API key")
-    .max(200)
-    .regex(/^sk-ant-/, "Anthropic keys start with “sk-ant-”"),
-});
-export type SetAiKeyInput = z.infer<typeof setAiKeySchema>;
+/**
+ * Providers a user can bring a key for. Everything except `anthropic` speaks the
+ * OpenAI-compatible chat-completions API. `custom` takes a base URL (e.g. a local
+ * Ollama at http://localhost:11434/v1) and is restricted to admins.
+ */
+export const aiProviderSchema = z.enum([
+  "anthropic",
+  "openai",
+  "deepseek",
+  "gemini",
+  "openrouter",
+  "groq",
+  "mistral",
+  "custom",
+]);
+export type AiProvider = z.infer<typeof aiProviderSchema>;
+
+/** Save the user's AI settings. The key is verified live before it's stored. */
+export const setAiConfigSchema = z
+  .object({
+    provider: aiProviderSchema,
+    apiKey: z.string().trim().max(400).optional(),
+    model: z.string().trim().max(120).optional(),
+    baseUrl: z.string().trim().url("Enter a full URL like http://localhost:11434/v1").max(300).optional(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.provider !== "custom" && (!v.apiKey || v.apiKey.length < 8)) {
+      ctx.addIssue({ code: "custom", path: ["apiKey"], message: "Paste your API key" });
+    }
+    if (v.provider === "custom" && !v.baseUrl) {
+      ctx.addIssue({ code: "custom", path: ["baseUrl"], message: "A base URL is required" });
+    }
+    if (v.provider === "custom" && !v.model) {
+      ctx.addIssue({ code: "custom", path: ["model"], message: "Name the model to use" });
+    }
+  });
+export type SetAiConfigInput = z.infer<typeof setAiConfigSchema>;
 
 export const generateFormSchema = z.object({
   prompt: z
     .string()
     .trim()
     .min(3, "Describe the form you want")
-    .max(1000, "Keep the description under 1000 characters"),
+    .max(2000, "Keep the description under 2000 characters"),
   themeId: z.string().uuid(),
 });
 export type GenerateFormInput = z.infer<typeof generateFormSchema>;

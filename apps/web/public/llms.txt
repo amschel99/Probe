@@ -95,6 +95,11 @@ Field `type` values: `short_text`, `long_text`, `email`, `number`, `single_selec
 Useful `config` keys: `options[{label,value}]`, `maxRating`, `ratingStyle` (`star|number|emoji`), `min`, `max`, `step`, `minLength`, `maxLength`, `scaleMin`, `scaleMax`, `scaleMinLabel`, `scaleMaxLabel`, `hidden`, `prefillKey`. Unknown config keys are rejected.
 Conditional display: `"conditionalLogic":{"showIf":[{"fieldId":"<uuid>","operator":"equals|not_equals|contains|is_filled|is_empty","value":"..."}]}` (all rules must pass).
 
+### Recipe: let AI draft the form
+
+If `ai.status` reports `hasKey: true`, one call creates a full draft (title + fields) from plain words:
+`ai.generateForm` (mutation) `{"prompt":"A feedback form with a 1-5 rating, what they liked, and an optional email","themeId":"<uuid>"}` → `{id, slug, fieldCount}`. Review or tweak fields with `fields.*`, then `forms.publish`.
+
 ### Recipe: submit to a hosted form (public, no auth)
 
 1. `public.getForm` (query) `{"slug":"<slug>"}` → `{form, fields, theme}`; field ids are the answer keys.
@@ -125,7 +130,7 @@ Conditional display: `"conditionalLogic":{"showIf":[{"fieldId":"<uuid>","operato
 - `responses`: `list`, `get`, `delete`, `exportCsv`
 - `endpoint`: `list`, `get`, `create`, `update`, `rotateKey`, `resendVerification`, `delete`, `auditLog`
 - `integrations`: Discord and Google Sheets forwarding per form (`listForForm`, `upsertForForm`, `deleteForForm`)
-- `ai`: `generateForm` (needs the user's own Anthropic key saved in settings)
+- `ai`: `status`, `generateForm` `{"prompt":"describe the form","themeId":"<uuid>"}` → `{id, slug, fieldCount}` (needs an AI provider connected in Settings, or an instance default)
 - `admin` (admin role only): `getStats`, `listForms`, `listUsers`, `setFormStatus`, `setFormVisibility`, `deleteForm`, `setUserRole`
 
 ## Links

@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+/** Optional string: blank (how unset secrets arrive from Railway/Kamal) = absent. */
+const optional = z.preprocess(
+  (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+  z.string().trim().optional(),
+);
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
@@ -14,6 +20,15 @@ const envSchema = z.object({
   // Sheets integration is "unavailable" (never breaks boot).
   GOOGLE_OAUTH_CLIENT_ID: z.string().optional(),
   GOOGLE_OAUTH_CLIENT_SECRET: z.string().optional(),
+
+  // Instance-wide AI for form generation. OPTIONAL — when set, every user can
+  // generate forms without adding their own key (a user's own key still wins).
+  // AI_PROVIDER: anthropic | openai | deepseek | gemini | openrouter | groq |
+  // mistral | custom. AI_BASE_URL is only used by `custom`.
+  AI_PROVIDER: optional,
+  AI_API_KEY: optional,
+  AI_MODEL: optional,
+  AI_BASE_URL: optional,
 });
 
 const parsed = envSchema.safeParse(process.env);
