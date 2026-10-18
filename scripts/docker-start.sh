@@ -27,8 +27,8 @@ API_PID=$!
 # Give the API a moment so the web app's proxy + healthcheck succeed on boot.
 sleep 2
 
-echo "🌐 starting web on :3000…"
-PORT=3000 pnpm --filter web start &
+echo "🌐 starting web on :${PORT:-3000}…"
+pnpm --filter web exec next start -p "${PORT:-3000}" &
 WEB_PID=$!
 
 # If either process exits, tear the container down so Kamal restarts it.
