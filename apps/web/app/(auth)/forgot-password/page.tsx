@@ -19,7 +19,7 @@ export default function ForgotPasswordPage() {
         credentials: "include",
         body: JSON.stringify({
           email: email.trim(),
-          redirectTo: `${window.location.origin}/reset-password`,
+          redirectTo: "/reset-password",
         }),
       });
       if (res.status === 429) {

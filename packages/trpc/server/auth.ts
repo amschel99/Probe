@@ -10,6 +10,9 @@ function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
+/** The app's public origin. PUBLIC_APP_URL wins: it's what every other link uses. */
+const APP_ORIGIN = new URL(env.PUBLIC_APP_URL || env.BETTER_AUTH_URL).origin;
+
 /** Email the reset link — or, with no email provider, print it to the server log. */
 async function sendPasswordResetEmail(user: { email: string; name: string }, url: string) {
   if (!isEmailConfigured()) {
@@ -44,6 +47,9 @@ export const auth = betterAuth({
   }),
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
+  // Accept both configured URLs, so a BETTER_AUTH_URL that drifts from the real
+  // domain doesn't break sign-in or password-reset redirects.
+  trustedOrigins: [...new Set([new URL(env.BETTER_AUTH_URL).origin, APP_ORIGIN])],
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
@@ -56,7 +62,10 @@ export const auth = betterAuth({
     // that lands on /reset-password?token=…; the new password is set there.
     resetPasswordTokenExpiresIn: 60 * 60,
     revokeSessionsOnPasswordReset: true,
-    sendResetPassword: async ({ user, url }) => {
+    sendResetPassword: async ({ user, token }) => {
+      // Link straight to our page on the public domain; it posts the token
+      // back to /api/auth/reset-password.
+      const url = `${APP_ORIGIN}/reset-password?token=${encodeURIComponent(token)}`;
       // Not awaited, so response time doesn't reveal whether the email exists.
       void sendPasswordResetEmail(user, url).catch((err) =>
         console.error("[auth] password reset email failed:", err),
