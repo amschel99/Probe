@@ -12,12 +12,21 @@ set -e
 # deploy action instead of relying on this.
 echo "🔎 Probe — applying database schema (drizzle push) in background…"
 (
-  pnpm --filter @repo/database exec drizzle-kit push --force \
-    && echo "✅ schema push complete" \
-    || echo "⚠️  schema push failed — run the 'migrate' action (DB may already be current)"
-  # Built-in themes (idempotent upsert). The builder needs at least one theme,
-  # so a fresh database works without running the demo seed.
-  pnpm --filter @repo/database db:themes || echo "⚠️  theme load failed — run 'pnpm db:themes'"
+  # drizzle-kit can exit 0 even when it couldn't connect, so success is judged
+  # by the theme load (a real query). Retry while Postgres boots or while its
+  # credentials are being sorted out, instead of giving up on the first try.
+  ok=0
+  for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+    pnpm --filter @repo/database exec drizzle-kit push --force
+    if pnpm --filter @repo/database db:themes; then
+      echo "✅ schema + themes applied (attempt $attempt)"
+      ok=1
+      break
+    fi
+    echo "⏳ database not ready (attempt $attempt/12) — retrying in 10s"
+    sleep 10
+  done
+  [ "$ok" = 1 ] || echo "❌ schema push FAILED — check DATABASE_URL, then restart the service"
 ) &
 
 echo "🚀 starting API on :8000…"
