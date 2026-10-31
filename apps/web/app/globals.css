@@ -176,7 +176,9 @@
 /* fieldset wrappers for grouped controls — strip the UA chrome. */
 [data-probe-form] .probe-field {
   border: 0;
-  margin: 0;
+  /* Only the fieldset's side margins: vertical spacing comes from the form's
+     space-y utility, which an unlayered `margin: 0` here would override. */
+  margin-inline: 0;
   padding: 0;
   min-width: 0;
 }

@@ -348,7 +348,7 @@ export function FormRenderer(props: FormRendererProps) {
       )}
 
       {/* Navigation */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 pt-4">
         {isMultiPage && safePageIndex > 0 && (
           <button type="button" className="probe-btn-secondary" onClick={() => goTo(safePageIndex - 1)}>
             Back
