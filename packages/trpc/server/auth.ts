@@ -1,9 +1,36 @@
 import { count, db, eq, schema } from "@repo/database";
+import { isEmailConfigured, sendEmail } from "@repo/services/email";
 import bcrypt from "bcryptjs";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
 import { env } from "./env";
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+
+/** Email the reset link — or, with no email provider, print it to the server log. */
+async function sendPasswordResetEmail(user: { email: string; name: string }, url: string) {
+  if (!isEmailConfigured()) {
+    console.warn(`[auth] email not configured — password reset link for ${user.email}: ${url}`);
+    return;
+  }
+  await sendEmail({
+    to: user.email,
+    subject: "Reset your Probe password",
+    html: `
+      <div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:480px;color:#0B0B0C">
+        <p>Hi ${escapeHtml(user.name || "there")},</p>
+        <p>Someone asked to reset the password for your Probe account. If it was you, choose a new one here:</p>
+        <p style="margin:28px 0">
+          <a href="${url}" style="background:#1A3BFF;color:#fff;padding:12px 20px;text-decoration:none;font-family:ui-monospace,Menlo,monospace;font-size:14px;display:inline-block">Choose a new password</a>
+        </p>
+        <p style="color:#56585C;font-size:13px">The link works once and expires in 1 hour. If you didn't ask for this, ignore this email — your password won't change.</p>
+      </div>
+    `,
+  });
+}
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -24,6 +51,16 @@ export const auth = betterAuth({
     password: {
       hash: async (password) => bcrypt.hash(password, 10),
       verify: async ({ hash, password }) => bcrypt.compare(password, hash),
+    },
+    // Forgot-password flow: POST /api/auth/request-password-reset emails a link
+    // that lands on /reset-password?token=…; the new password is set there.
+    resetPasswordTokenExpiresIn: 60 * 60,
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user, url }) => {
+      // Not awaited, so response time doesn't reveal whether the email exists.
+      void sendPasswordResetEmail(user, url).catch((err) =>
+        console.error("[auth] password reset email failed:", err),
+      );
     },
   },
   databaseHooks: {

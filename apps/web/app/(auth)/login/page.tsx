@@ -45,7 +45,7 @@ function LoginForm() {
   return (
     <div className="card">
       <h1 className="display text-2xl font-bold mb-2">Welcome back.</h1>
-      <p className="text-probe-700 text-sm mb-6">Steep into your account.</p>
+      <p className="text-probe-700 text-sm mb-6">Log in to your forms.</p>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="label">Email</label>
@@ -53,7 +53,12 @@ function LoginForm() {
           {errors.email && <p className="error">{errors.email.message}</p>}
         </div>
         <div>
-          <label className="label">Password</label>
+          <div className="mb-1.5 flex items-baseline justify-between">
+            <label className="label mb-0">Password</label>
+            <Link href="/forgot-password" className="font-mono text-[12px] text-probe-500 hover:underline">
+              Forgot password?
+            </Link>
+          </div>
           <input className="input" type="password" autoComplete="current-password" {...register("password")} />
           {errors.password && <p className="error">{errors.password.message}</p>}
         </div>
