@@ -1,10 +1,56 @@
 import type { RouterOutputs } from "@repo/trpc/client";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { api } from "@/lib/trpc-server";
 import { FormFiller } from "./form-filler";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Link-preview text for the form (WhatsApp, Slack, X…). The preview image is
+ * ./opengraph-image.tsx. metadataBase comes from the request host so preview
+ * URLs are absolute on whatever domain the link was shared from.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const h = headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const proto = host.startsWith("localhost") ? "http" : "https";
+
+  let title = "A form on Probe";
+  let description = "Takes a minute to fill in.";
+  try {
+    const result = await api.public.getForm.query({ slug: params.slug });
+    if (result.passwordRequired || !result.form) {
+      title = "A private form";
+      description = "You'll need the password to open it.";
+    } else {
+      title = result.form.title;
+      description = result.form.description || "Takes a minute to fill in.";
+    }
+  } catch {
+    // Missing or closed forms keep the generic preview.
+  }
+
+  return {
+    metadataBase: new URL(`${proto}://${host}`),
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `/f/${params.slug}`,
+      siteName: "Probe",
+      type: "website",
+    },
+    twitter: { card: "summary_large_image", title, description },
+  };
+}
 
 export default async function PublicFormPage({
   params,

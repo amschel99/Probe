@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { QRCodeCanvas } from "qrcode.react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc";
@@ -15,6 +15,16 @@ export default function SharePage() {
   const formQuery = trpc.forms.get.useQuery({ id });
   const form = formQuery.data;
   const qrWrapRef = useRef<HTMLDivElement>(null);
+  const [message, setMessage] = useState("");
+
+  // Default WhatsApp message: title, description, link. Editable before sending.
+  useEffect(() => {
+    if (!form || message) return;
+    const link = `${window.location.origin}/f/${form.slug}`;
+    setMessage(
+      [form.title, form.description, `Fill it in here: ${link}`].filter(Boolean).join("\n\n"),
+    );
+  }, [form, message]);
 
   if (!form) return <p className="text-probe-700">Loading…</p>;
 
@@ -68,6 +78,48 @@ export default function SharePage() {
             <Link href={`/f/${form.slug}`} target="_blank" className="btn btn-ghost text-sm shrink-0">
               Open
             </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* WhatsApp: preview + ready-to-send message */}
+      <div className="card space-y-4">
+        <div className="text-xs font-bold uppercase text-probe-700">Share on WhatsApp</div>
+        <div className="grid gap-4 md:grid-cols-[240px_1fr]">
+          <div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/f/${form.slug}/opengraph-image`}
+              alt="Link preview"
+              className="w-full border border-probe-200"
+            />
+            <p className="help">This card shows under your link in chats.</p>
+          </div>
+          <div className="space-y-3">
+            <textarea
+              className="input text-sm"
+              rows={6}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              aria-label="WhatsApp message"
+            />
+            <div className="flex flex-wrap gap-2">
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(message)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-primary text-sm"
+              >
+                Share on WhatsApp
+              </a>
+              <button type="button" onClick={() => copy(message)} className="btn btn-ghost text-sm">
+                Copy message
+              </button>
+            </div>
+            <p className="help">
+              Opens WhatsApp so you can pick a chat or group. Keep the link on its own line so
+              the preview appears.
+            </p>
           </div>
         </div>
       </div>
