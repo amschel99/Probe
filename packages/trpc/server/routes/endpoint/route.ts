@@ -36,7 +36,7 @@ async function sendVerificationEmail(opts: {
   formTitle: string;
   token: string;
 }) {
-  const verifyUrl = `${env.PUBLIC_APP_URL}/api/verify-access-key/${opts.token}`;
+  const verifyUrl = `${env.PUBLIC_APP_URL}/verify-access-key/${opts.token}`;
   // Without email configured nobody could ever verify the key, so surface the
   // link in the server logs — the instance owner can open it directly.
   if (!isEmailConfigured()) {

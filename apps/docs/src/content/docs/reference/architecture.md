@@ -1,363 +1,215 @@
 ---
-title: "Architecture"
-description: "How Probe is built: request lifecycle, auth, integrations, uploads, and more."
+title: Architecture
+description: How Probe is built. The container, the request flow, auth, API keys, AI providers, link previews, and where data lives.
 ---
 
-How Probe is put together: the monorepo, the request flow, the auth model, and the way it ships.
+This page explains how Probe fits together: the monorepo, the container, how a request flows, and where data lives.
 
----
+## Deployment shape
 
-## High-level
-
+```text
+Browser ──HTTPS──▶ Railway edge (TLS, your domain)
+                        │
+                        ▼
+        ┌──────────── one container ─────────────┐
+        │  web   Next.js on $PORT                 │
+        │    pages, /f/<slug>, link previews      │
+        │    proxies /trpc, /api/auth, /submit,   │
+        │    /docs, /api/docs, /openapi.json,     │
+        │    /forms/<id>/export.* ─────┐          │
+        │                              ▼          │
+        │  api   Express on :8000                 │
+        │    tRPC, Better Auth, /submit, exports  │
+        └──────────────────┬──────────────────────┘
+                           ▼
+                Postgres (separate Railway service)
 ```
-┌──────────────┐    ┌──────────────────────────────────────┐    ┌──────────┐
-│   Browser    │ ⇄ HTTP /, /api/trpc/*, /api/auth/*, etc. ⇄ │   Next.js   │ ⇄ │ Postgres │
-│ React + RSC  │                                            │   process   │   └──────────┘
-└──────────────┘                                            │   + Hono    │
-                                                            │   mount     │
-                                                            └─────────────┘
-```
 
-In **dev**: `next dev` serves both pages and API routes on `:3000`. Browser sees one origin.
+| Layer | What is there |
+|---|---|
+| Edge | Railway terminates TLS for your domain and routes to the container's `$PORT`. |
+| Container | One image built from the `Dockerfile`. `scripts/docker-start.sh` runs the API and the web app. If either exits, the container exits and Railway restarts it. |
+| Database | Postgres as its own Railway service, reached through `DATABASE_URL`. |
+| Health | `GET /health` is proxied from the web app to the API, so a pass means both are up. It does not touch the database. |
+| Origin | Single origin. The browser only ever talks to the web app. There is no CORS for first-party calls in production. |
 
-In **prod**: `next start` serves the SPA pages, RSC payloads, and API routes (which dispatch into Hono) — same origin, same port, same process.
-
-## Deployment shape at a glance
-
-| Layer       | What's there                                                            |
-| ----------- | ----------------------------------------------------------------------- |
-| DNS         | One A record → `probe.jahazi.city`                         |
-| TLS + proxy | `kamal-proxy` on the host; Let's Encrypt cert; routes by `Host:` header |
-| Container   | One Docker image. One Node process. Next.js on port 3000.              |
-| Inside it   | Next.js pages + `/api/[[...path]]` catch-all forwards to Hono           |
-| DB          | Neon (serverless Postgres) over HTTPS, or a `postgres:17` accessory     |
-| CORS        | None for first-party calls — single origin. CORS only on `/api/submit` (public endpoint forms surface). |
-| Cookies     | `sameSite: lax`, `secure: true` in prod, set by Better Auth             |
-
-This is the single-origin pattern: one DNS record, one TLS cert, one container, one origin. Browser fetches `/api/trpc/forms.list` and the same Next.js process resolves it via the Hono mount. No second port. No `SameSite: none` cross-origin gymnastics for first-party calls.
+On boot the schema is applied in the background: `drizzle-kit push`, then `db:ensure`, then `db:themes`, retried for about two minutes. See [What happens on boot](/docs/guides/deployment/#what-happens-on-boot).
 
 ## Repo layout
 
-```
-probe/
-├── apps/
-│   └── web/                         Next.js 14 App Router
-│       ├── app/
-│       │   ├── (marketing)/          /, /open-source, /explore, /templates, /docs
-│       │   ├── (auth)/               /login, /register
-│       │   ├── dashboard/            protected creator surface
-│       │   ├── f/[slug]/             public hosted-form fill + success/closed/locked screens
-│       │   └── api/
-│       │       └── [[...path]]/      catch-all → Hono.fetch(req)
-│       ├── middleware.ts             session check → /login redirect
-│       └── next.config.mjs
-│
-├── packages/
-│   ├── db/                          Drizzle + Neon · schema · seed · types
-│   ├── validators/                  Zod schemas — single source of truth
-│   ├── server/                      Hono app · tRPC routers · Better Auth · rate limiter
-│   ├── trpc-client/                 typed React hooks (tRPC v11 + TanStack Query)
-│   ├── ui/                          shadcn/ui + custom components
-│   └── email/                       Resend wrapper + React Email templates
-│
-├── Dockerfile                       multi-stage; one image
-├── config/deploy.yml                Kamal — service, proxy, db accessory
-├── turbo.json
-└── pnpm-workspace.yaml
+```text
+apps/
+  web/          Next.js App Router: marketing, auth, dashboard, /f/<slug>
+  api/          Express server: tRPC, Better Auth, /submit, exports, docs
+  docs/         This site (Astro + Starlight), built to static files
+packages/
+  database/     Drizzle schema (models/), seed, themes, ensure-schema, reset-password
+  trpc/         tRPC routers, Better Auth config, API keys, AI providers, client
+  services/     Email, rate limiting, captcha, crypto, IP hashing, storage,
+                integrations, validators (Zod)
+  logger/       Shared logger
+scripts/
+  docker-start.sh   Container entrypoint
 ```
 
-`packages/server` is a **library**, not a server. It exports the Hono `app`, the tRPC `appRouter` type, the Better Auth instance, and helpers. The web app's catch-all route handler is the only place that calls `serve()`-style boot logic, and it does so by delegating each incoming request to `app.fetch(req)`.
+The web app reaches the API through Next.js rewrites to `API_INTERNAL_URL` (`http://localhost:8000` in the container). The API serves the built docs at `/docs` and the Scalar API reference at `/api/docs`.
 
-## Request lifecycle
+## Request flow
 
-Every request hitting `/api/*` flows through the same chain:
+The API mounts, in order:
 
+```text
+/api/auth/*              Better Auth (before body parsing; needs the raw body)
+/submit                  endpoint-form handler (reads its own capped body)
+/health
+/verify-access-key/:t    recipient verification
+/api/integrations/google/callback
+/forms/:id/export.:fmt   CSV, XLSX, PDF
+/openapi.json, /api/docs
+/docs                    static Starlight build
+/api/*                   REST mapping of tRPC procedures (trpc-to-openapi)
+/trpc/*                  tRPC
 ```
-Next.js route handler  (/api/[[...path]]/route.ts)
-   → Hono app.fetch(req)
-   → secureHeaders()
-   → cors()  (only enabled on /submit; first-party routes don't need it)
-   → logger()
-   → branch:
-       /auth/*    → auth.handler(req.raw)             (Better Auth)
-       /trpc/*    → trpcServer({ router, createContext })
-       /submit    → endpoint-form submission handler  (public + rate-limited)
-       /docs      → Scalar UI
-       /openapi.json → hand-rolled spec
-```
 
-For **tRPC procedures** the inner chain is:
+A tRPC call goes through:
 
-```
+```text
 createContext(req)
-   → session lookup (Better Auth cookie)
-   → procedure.input(zod).query/mutation(handler)
-   → ownership guard (forms / fields / responses procedures)
-   → Drizzle query
-   → JSON (superjson-encoded) response
+  → browser session cookie, or API key header
+  → procedure: public, protected (session or key), session-only, or admin
+  → Zod input validation
+  → ownership check (forms, fields, responses)
+  → Drizzle query
+  → superjson response
 ```
 
 ## Authentication
 
-Better Auth owns sessions and persists them in the same Postgres database via the Drizzle adapter. The `users` and `sessions` tables are in `packages/db` and Better Auth is wired to them.
+Better Auth handles accounts and sessions, stored in Postgres through the Drizzle adapter.
 
-| Surface              | Mechanism                                                          |
-| -------------------- | ------------------------------------------------------------------ |
-| Email + password     | Better Auth `emailAndPassword` — bcrypt cost 12, autoSignIn enabled |
-| Session cookie       | `probe.session_token`, `HttpOnly`, `SameSite: lax`, `Secure` in prod |
-| Session length       | 7-day sliding window, refreshed on activity                       |
-| Logout               | DELETE `/api/auth/sign-out` clears the row + cookie                |
-| Server-side guard    | tRPC `protectedProcedure` reads ctx.user; throws `UNAUTHORIZED`    |
-| Next.js middleware   | `middleware.ts` consults the session cookie and redirects to `/login` for `/dashboard/*` |
+| What | How |
+|---|---|
+| Sign-in | Email and password. Minimum 8 characters. bcrypt, cost 10. |
+| Session cookie | Prefix `probe`. `HttpOnly`, `Secure` in production. Host-only unless `COOKIE_DOMAIN` is set. |
+| Session length | 7 days, refreshed once a day of use. |
+| First account | Becomes `admin` on a fresh instance. |
+| Password reset | A one-hour link to `/reset-password`. Emailed, or logged if email is off. Resetting revokes every session. |
+| Trusted origins | The origins of `BETTER_AUTH_URL` and `PUBLIC_APP_URL`. |
+| Dashboard guard | `middleware.ts` redirects `/dashboard/*` to `/login` without a session cookie. The server checks the session on every call. |
 
-There is no JWT, no refresh token, no localStorage-stored auth state. Cookies do all the work. Same single-origin advantage as everything else — the cookie is set by the same host that reads it.
+### API keys
 
-## Authorization (ownership guard)
+Users create personal keys in **Settings → API keys**. A key is `probe_` plus random bytes. Only its SHA-256 hash is stored, with a prefix for display and a last-used time. A key is shown once.
 
-Every mutation on `forms`, `fields`, `responses` calls `assertFormOwner(db, formId, userId)` before touching data. The guard returns `NOT_FOUND` (intentionally — not `FORBIDDEN`) when the resource exists but isn't owned by the caller, so a probe can't distinguish "doesn't exist" from "you can't see it".
+Requests send it as `Authorization: Bearer probe_…` or `X-API-Key`. The context resolves the key to its owner, so a key can do whatever its owner can, except manage API keys. Those procedures need a browser session. Export URLs accept a key too.
 
-## Public form guard chain (`/api/trpc/public.getForm`)
+See [API and agents](/docs/guides/api-and-agents/).
 
-For the public renderer at `/f/[slug]`, the loader runs this chain in order, failing fast:
+## Authorization
 
+Every procedure on forms, fields and responses checks that the caller owns the form. A form you do not own returns `NOT_FOUND`, not `FORBIDDEN`, so callers cannot tell whether it exists. Admin procedures also check the `admin` role.
+
+## Public form checks
+
+`public.getForm` runs these checks in order for `/f/<slug>`:
+
+```text
+form exists and is a hosted form?   no  → NOT_FOUND
+status is published?                no  → NOT_FOUND (drafts stay hidden)
+expiresAt in the past?              yes → PRECONDITION_FAILED "Form has closed"
+responseCount ≥ maxResponses?       yes → PRECONDITION_FAILED "Form is full"
+password set?                       yes → ask for it; bcrypt compare; wrong → FORBIDDEN
+→ form, fields, theme
 ```
-form in DB?                           No  → NOT_FOUND
-status === "published"?              No  → NOT_FOUND  (don't reveal drafts exist)
-expiresAt < now?                     Yes → PRECONDITION_FAILED "Form has closed"
-responseCount >= maxResponses?       Yes → PRECONDITION_FAILED "Form is full"
-settings.passwordHash set?           Yes → return { passwordRequired: true }
-                                            client renders gate, posts attempt
-                                            server bcrypt.compare; wrong → FORBIDDEN
-→ sanitized form + fields ✓
-```
 
-`visibility === "unlisted"` doesn't block direct access — it only excludes the form from `/explore` listings. Listings use:
+`public.submitResponse` repeats the same checks, applies the rate limit, then validates the answers against the form's fields. Fields hidden by conditional logic are not required.
 
-```sql
-WHERE status = 'published' AND visibility = 'public'
-```
+Unlisted forms are reachable by link. Only public forms appear on `/explore`.
 
-`getForm` doesn't check visibility because someone with the link is allowed to view it. The listing query is the only gatekeeper for `unlisted`.
+## Endpoint forms
 
-## CSRF
+`POST /submit` reads at most 64 KB and 50 keys. It looks up the access key, checks the origin allowlist (or the server-side opt-in when there is no `Origin` or `Referer`), applies the rate limit, the honeypot and the captcha, then stores the submission.
 
-Better Auth ships double-submit CSRF protection for its own endpoints. tRPC mutations rely on the same-origin cookie + `Origin` header check, plus a custom `x-trpc-source: web` header that the tRPC client sets — a cross-origin attacker can't set custom headers without a CORS preflight that we never grant.
+Discord and Sheets forwarding runs for every stored submission. Email and the signed webhook only run once the recipient email is verified. The webhook body is signed with HMAC-SHA256 and sent as `X-Probe-Signature: sha256=<hex>`.
 
-For first-party calls this is sufficient. For the public **endpoint-forms** `/api/submit` route (which intentionally accepts cross-origin POSTs from any allowed origin), see the dedicated security model in `plan/todo.md`.
+See [Endpoint forms](/docs/guides/endpoint-forms/).
 
 ## Rate limiting
 
-Upstash Redis (sliding window) with three named limiters in `packages/server/src/lib/ratelimit.ts`:
+| Limiter | Key | Limit |
+|---|---|---|
+| Submissions | form + IP | 5 per hour |
+| Analytics events | IP | 60 per minute |
 
-| Limiter        | Key                                  | Limit         |
-| -------------- | ------------------------------------ | ------------- |
-| `submitLimiter` | `submit:${formId}:${ip}`             | 5 / 1 hour    |
-| `eventLimiter`  | `event:${ip}`                        | 60 / 1 minute |
-| `authLimiter`   | `auth:${ip}`                         | 10 / 5 minutes |
+They apply to hosted and endpoint submissions. With Upstash configured, counters live in Redis. Without it, they live in process memory, which is enough for one container. Rate-limited `/submit` responses carry `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`.
 
-If `UPSTASH_REDIS_REST_URL` is unset in dev, the limiter degrades to a permissive no-op (logs a warning). In prod, missing config logs an error and falls back to permissive — so a misconfigured Upstash never takes the site down, just removes the protection.
+Better Auth limits its own sign-in and reset endpoints separately.
 
-`X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` are returned on every rate-limited response.
+## Secrets and privacy
 
-## Security headers
+- **Encryption.** Captcha secrets, AI keys and Google tokens are encrypted with AES-256-GCM. The key is derived from `BETTER_AUTH_SECRET` with HKDF-SHA256. Rotating the secret makes them unreadable.
+- **IP addresses.** Raw IPs are never stored. Probe stores `SHA-256(ip + secret)` for rate-limit keys and duplicate detection. It is never shown in the dashboard.
+- **Headers.** Every page sends `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` and a `Permissions-Policy` that blocks camera, microphone and location. Everything except `/f/*` sends `X-Frame-Options: SAMEORIGIN` and `frame-ancestors 'self'`. Hosted forms send `frame-ancestors *` so they can be embedded anywhere.
 
-`secureHeaders()` middleware applies the standard set; `next.config.mjs` adds the rest at the framework layer:
+## AI providers
 
-| Header                            | Value                                  |
-| --------------------------------- | -------------------------------------- |
-| `X-Frame-Options`                 | `SAMEORIGIN`                            |
-| `X-Content-Type-Options`          | `nosniff`                               |
-| `Referrer-Policy`                 | `strict-origin-when-cross-origin`       |
-| `Permissions-Policy`              | `camera=(), microphone=(), geolocation=()` |
-| `Strict-Transport-Security`       | `max-age=15552000; includeSubDomains` (prod only) |
-| `Content-Security-Policy`         | self + Google Fonts + Razorpay link host |
+`packages/trpc/server/ai/providers.ts` lists the providers and their default models. Anthropic goes through its SDK. Every other provider, including custom endpoints, goes through one OpenAI-compatible chat-completions client.
 
-Embedding the public form via iframe is supported on a per-form basis via a future `embedAllowed` setting; that flow will downgrade `X-Frame-Options` to `ALLOWALL` for the embed route only.
+A request is configured from the user's own saved provider first, then the instance's `AI_*` variables. Keys are checked against the provider before saving. The model returns JSON matching a fixed schema of title, description and fields. Probe validates it, creates an unlisted draft form, and returns its ID.
 
-## IP handling
+Custom base URLs are admin-only, because they make the server call an arbitrary address.
 
-Raw client IPs are **never** persisted. The helper in `packages/server/src/lib/ip.ts` reads `x-forwarded-for` / `cf-connecting-ip` / `x-real-ip`, hashes the result with `SHA-256(ip + BETTER_AUTH_SECRET)`, and stores the hash on `responses.ipHash`. Rotating `BETTER_AUTH_SECRET` invalidates all hashes.
+See [AI form generation](/docs/guides/ai-generation/).
 
-The hash is used for ballot-stuffing heuristics and rate limit keys only — never surfaced in the dashboard UI.
+## Link previews
 
-## Validation
-
-All Zod schemas live in `packages/validators` and are imported by both server and client. There is exactly one definition per shape — DB types come from Drizzle, API types come from Zod, frontend form types come from both. No drift.
-
-The two interesting ones:
-
-- `buildResponseSchema(fields)` — constructs a Zod object at runtime from the form's actual field definitions. Used on the server in `public.submitResponse` and on the client for inline validation. Conditional-logic-hidden fields are not required even if `field.required === true`.
-- `formSettingsSchema` — full FormSettings shape (used on read); `updateFormSettingsSchema` omits `passwordHash` and is `.partial()` (used on write — password set via dedicated `setPassword` mutation that bcrypts server-side).
+Each `/f/<slug>` page sets Open Graph and Twitter card metadata from the form's title and description. `opengraph-image.tsx` renders a 1200 by 630 PNG with Next.js `ImageResponse`, using fonts committed in `apps/web/assets/og`. WhatsApp, Slack, X and iMessage show it when the link is pasted. The Share tab previews the same card next to the WhatsApp message.
 
 ## Database
 
-Single Postgres database. Drizzle ORM. Schema split into one file per table under `packages/db/src/schema/`.
+One Postgres database, managed with Drizzle. Each table has its own file in `packages/database/models/`.
 
-| Table              | Purpose                                                          |
-| ------------------ | ---------------------------------------------------------------- |
-| `users`            | Account + bcrypt hash. Better Auth owns the column shape.        |
-| `sessions`         | Better Auth — token, expiry, IP, UA.                             |
-| `themes`           | 10 seeded built-in themes + custom (future). `config` is jsonb.  |
-| `forms`            | One row per form. `status`/`visibility`/`settings` columns; jsonb settings. |
-| `fields`           | Field definitions. Cascades on form delete.                     |
-| `responses`        | One row per submission. `ipHash` only. Cascades on form delete.  |
-| `response_values`  | One row per (response, field). `value` is jsonb (string/number/array/bool). |
-| `analytics_events` | Append-only `view`/`start`/`submit`/`abandon`. Cascades.         |
+| Table | Holds |
+|---|---|
+| `users`, `sessions`, `accounts`, `verification` | Better Auth accounts and sessions. `users` also holds the role and the encrypted AI settings. |
+| `api_keys` | Hashed personal API keys. |
+| `themes` | Built-in themes. `config` is JSON: colors, fonts, radius. |
+| `forms` | Hosted and endpoint forms: status, visibility, settings, limits, access key, endpoint settings. |
+| `fields` | Field definitions, ordered, with config and conditional logic. |
+| `responses` | One row per submission. Endpoint submissions keep their `payload` here. |
+| `response_values` | One row per answer for hosted forms. |
+| `analytics_events` | Append-only view, start, submit and abandon events. |
+| `access_key_verifications`, `endpoint_audit` | Endpoint-form verification tokens and audit log. |
+| `form_integrations`, `google_connections`, `platform_settings` | Per-form Discord and Sheets settings, Google tokens, and admin switches. |
 
-`ON DELETE CASCADE` is everywhere — deleting a form removes its fields, responses, response values, and analytics events in one statement. Application code does a single `.delete()` and trusts the cascade.
+Deleting a form cascades to its fields, responses, answers and events. `forms.response_count` is updated in the same transaction as each submission.
 
-`responses.response_count` is materialized on the parent `forms` row, incremented in the same transaction as the submission. Lets explore/list views render without a count query per form.
+The schema is applied with `drizzle-kit push`, plus `ensure-schema.ts` for additions that must exist. There are no migration files yet.
 
 ## Analytics
 
-`analytics_events` is append-only. Aggregations happen at read time via Drizzle `groupBy + count` — there's no streaming pipeline, no separate analytics DB. React Query caches the result with `staleTime: 5 minutes`.
+Events are appended as respondents view, start, submit and abandon a form. The dashboard counts them at read time. It shows views, starts, completions, completion rate, average completion time, a 30-day submission chart, and the top drop-off field.
 
-Per-form metrics surfaced on the dashboard:
+## Themes
 
-- Views · starts · submissions · completion rate · avg completion time
-- Submissions over time (daily, last 30 days) — line chart
-- Per-field response distribution — bar chart, only for select/rating fields
-- Top drop-off field — the field id most common in `abandon` events
+A theme is data: a row in `themes` with colors, fonts and radius. The renderer applies it as CSS custom properties on the form, so switching themes needs no extra JavaScript. `pnpm db:themes` upserts the 11 built-in themes, including Paper.
 
-## Theme system
+## Integrations
 
-Themes are pure data — a row in `themes` with a jsonb `config` carrying colors, fonts, border radius, and optional pattern/logo emoji. The renderer applies the config as CSS custom properties on the form container:
+Discord and Google Sheets each have two switches:
 
-```css
-:root[data-form-id="…"] {
-  --form-bg: var(--theme-background);
-  --form-surface: var(--theme-surface);
-  /* … */
-}
-```
+| State | Condition |
+|---|---|
+| Unavailable | Required variables missing. Sheets needs the Google OAuth client. Discord needs none. |
+| Available, off | An admin has not enabled it. |
+| Enabled | An admin enabled it in **Admin → Integrations**. Owners can set it up per form. |
 
-Switching themes is a single CSS variable swap — no rerender required, SSR-safe, instant in the builder preview.
+Delivery runs after the submission is stored and never blocks it. Failures are logged.
 
-## Embedding & external use
+## File uploads
 
-Two surfaces:
+The file upload field uses Cloudflare R2. The browser asks the API for a presigned URL, uploads straight to R2, and stores the resulting public URL as the answer. Files never pass through the Probe server. Without all five `R2_*` variables, the field is disabled. Endpoint forms do not take files.
 
-1. **Hosted forms** at `/f/[slug]` — full Probe UI, themed. Iframe-embeddable on a per-form basis.
-2. **Endpoint forms** — no UI; the user POSTs to `/api/submit` from their own HTML. Designed for freelance client sites that already have a form and just want a "form to email" backend. Full security model and abuse mitigations are documented in `plan/todo.md` under "Endpoint forms".
+## Credits
 
-## Performance budget
-
-| Surface                              | Target            |
-| ------------------------------------ | ----------------- |
-| Initial JS for `/f/[slug]` (gzip)    | < 70 KB           |
-| Initial JS for landing (gzip)        | < 90 KB           |
-| TTFB on `/f/[slug]`                  | < 200ms (warm)    |
-| Submit roundtrip                     | < 400ms p95       |
-| `getForm` cached                     | revalidated 60s   |
-
-Achieved via:
-
-- Route-level code-splitting. The form builder is its own dynamic import; respondents never download it.
-- Theme CSS variables — no per-theme JS bundle.
-- RSC for the public form page — the field components are server components by default; only the interactive ones opt in to `"use client"`.
-- React Email templates rendered on the server at send time, never shipped to the browser.
-
-## Files involved in deploy
-
-| Path                                | Role                                                   |
-| ----------------------------------- | ------------------------------------------------------ |
-| `Dockerfile`                        | Multi-stage; one image; pnpm install + build           |
-| `.dockerignore`                     | Excludes `node_modules`, `.git`, `.env`, `.next`       |
-| `config/deploy.yml`                 | Kamal config — service, proxy, env, Postgres accessory |
-| `.kamal/secrets`                    | Env-var template; committed (only `$VAR` refs, no literals) |
-| `.github/workflows/deploy.yml`      | Manual-dispatch deploy workflow                        |
-| `apps/web/next.config.mjs`          | Security headers, public env exposure                  |
-
-## Migrations
-
-`drizzle-kit push` for hackathon-speed iteration (drops then re-creates as the schema evolves; we don't carry migration history yet). Before opening for real users, switch to `drizzle-kit generate` + check-in SQL files and run them at container start via the Dockerfile `CMD`.
-
-The seed (`pnpm db:seed`) is idempotent — wipes the demo user's forms and re-creates them. Faker is seeded with `42` for reproducibility.
-
----
-
-## AI form generation
-
-Users bring their own Anthropic API key — Probe bears no AI cost.
-
-**Key management**: The key is submitted via Dashboard → Settings → AI form generation. On save, it is encrypted with AES-256-GCM (key derived via HKDF-SHA256 from `BETTER_AUTH_SECRET` + a per-user salt) and stored on the `users` table. The plaintext key is only decrypted server-side at generation time and is never logged or returned to the client. Clearing the key wipes the ciphertext.
-
-**Generation flow**: The `trpc.ai.generateForm` mutation sends the user's prompt to the Anthropic API via forced tool-use (model: `claude-opus-4-7`). The model returns a structured list of fields that the mutation persists directly into the database as a new form, then returns the form ID for redirect. The user can edit all fields after generation.
-
-**UI**: `trpc.ai.status` returns `{ hasKey: boolean, model?: string }`. The "✨ Generate with AI" panel on the new-form page (`/dashboard/forms/new`) is rendered only when `hasKey` is true. When false, a prompt to add a key in Settings is shown instead.
-
-**No server env var needed**: AI generation is entirely user-key-driven. There is no `ANTHROPIC_API_KEY` server env var.
-
----
-
-## Admin-gated integrations (Discord + Google Sheets)
-
-Integrations follow a two-level model: **availability** (configured env) and **enabled** (admin flag).
-
-### Availability vs enabled
-
-| State | Condition | Admin UI |
-|---|---|---|
-| Unavailable | Required env vars absent | Toggle disabled; "Configure … to enable" shown |
-| Available but off | Env vars present, admin has not enabled | Toggle is off |
-| Enabled | Env vars present, admin toggled on | Toggle is on; form owners can configure per form |
-
-This prevents admins from enabling integrations that are not actually configured, and lets operators ship new integration support without it being visible until the credentials are in place.
-
-### Discord
-
-No global env var. Each form owner pastes a Discord webhook URL in the form builder (Dashboard → Forms → [form] → Integrations → Discord). The webhook URL is stored per form in the form's settings jsonb.
-
-### Google Sheets
-
-Requires `GOOGLE_OAUTH_CLIENT_ID` + `GOOGLE_OAUTH_CLIENT_SECRET` in the server env. The OAuth flow uses redirect URI `https://<domain>/api/integrations/google/callback` with scope `https://www.googleapis.com/auth/spreadsheets`. The access and refresh tokens are stored per form owner (not per form). Each form is then linked to a specific spreadsheet ID.
-
-### Delivery
-
-Both integrations deliver asynchronously and non-blockingly. A failed Discord webhook or Sheets write never causes a form submission to fail or return an error to the respondent. Delivery errors are logged server-side.
-
----
-
-## File uploads (Cloudflare R2)
-
-A `file_upload` field type backed by presigned R2 uploads.
-
-**Flow**:
-1. The form renderer requests a presigned upload URL from the API (`trpc.public.presignUpload`).
-2. The browser uploads the file directly to R2 using the presigned URL (PUT request) — the file never transits the Probe server.
-3. On successful upload, the browser stores the resulting `R2_PUBLIC_BASE_URL/<key>` in the field value.
-4. On form submit, the URL is stored in `response_values` like any other field value.
-
-**Configuration**: Requires five env vars (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE_URL`). If any are absent, the `file_upload` field type is hidden in the builder UI with the message "Configure R2 storage to enable file uploads". Existing forms with no file upload fields are completely unaffected.
-
-**Scope**: File uploads apply to hosted forms only. Endpoint forms (`/submit`) do not accept file uploads.
-
----
-
-## Donation nudges
-
-Contextual "buy me a chai" prompts that appear in the dashboard footer and as toasts after publish and export actions.
-
-**Gate**: Controlled entirely by the build-time variable `NEXT_PUBLIC_ENABLE_CHAI_NUDGE`. When `false` (the default), no nudge UI is rendered — the code paths are present but the component returns null. When `true`, the nudge is shown with a link to `NEXT_PUBLIC_RAZORPAY_DONATE_LINK`.
-
-**Self-host behaviour**: Self-hosters who clone the repo get `NEXT_PUBLIC_ENABLE_CHAI_NUDGE=false` by default, so their users will never see a donate link pointing at the original author's account. The hosted instance at `probe.jahazi.city` sets it to `true` via a build arg in `config/deploy.yml`.
-
-**Build-time note**: Because this is a `NEXT_PUBLIC_*` variable, changing it requires a new Docker build, not just a container restart. In `config/deploy.yml`, `builder.args` passes it through to the Dockerfile `ARG`/`ENV` declarations so Kamal handles this automatically on each `deploy`.
-
----
-
-## HTML template gallery
-
-Static, self-contained HTML pages available at `/templates/html` for download.
-
-**Files**: Four templates live in `apps/web/public/form-templates/` — `contact.html`, `newsletter.html`, `waitlist.html`, `feedback.html`. They are plain HTML files with inline CSS and a `<form>` pointing at `https://probe.jahazi.city/api/submit`. The access key placeholder (`YOUR_ACCESS_KEY`) must be replaced by the user after downloading.
-
-**No account required to download**: The gallery page is public. Users only need an account when they want to generate an access key (Dashboard → Endpoint Forms → New) so submissions actually deliver.
-
-**Pre-wired security**: Each template includes the honeypot field (`<input name="botcheck" style="display:none">`). Origin checking is handled server-side by the endpoint form's `allowedOrigins` setting.
-
-**Relation to the endpoint-form surface**: The HTML template gallery is a discoverability and onboarding feature layered on top of the existing endpoint-forms backend. Technically it is just a static file download — no new backend logic.
-
----
-
-— *Probe is based on [ChaiForm](https://github.com/developedbysaad) by Saad (MIT).*
+Probe started from the MIT-licensed ChaiForm project.

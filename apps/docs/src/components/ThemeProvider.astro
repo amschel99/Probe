@@ -1,0 +1,9 @@
+---
+// Probe docs are light-only, like the app. Replaces Starlight's ThemeProvider
+// (which picks light/dark from storage or the OS) with a fixed light theme.
+---
+
+<script is:inline>
+	document.documentElement.dataset.theme = 'light';
+	window.StarlightThemeProvider = { updatePickers() {} };
+</script>

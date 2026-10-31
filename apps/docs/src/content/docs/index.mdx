@@ -1,17 +1,17 @@
 ---
 title: Probe
-description: Open source form builder. Self-hosted. Yours.
+description: Probe is a self-hosted form builder. Hosted forms, a form backend for your own HTML, and an API for agents.
 template: splash
 hero:
-  tagline: Open-source form builder — beautiful hosted forms and a form-to-email endpoint backend. Free, self-hostable, and yours to own.
+  tagline: A form builder you run yourself. Build hosted forms, point your own HTML at it, or drive it from an agent. One container and a Postgres database.
   actions:
-    - text: Get started locally
-      link: /docs/guides/local-development/
+    - text: Get started
+      link: /docs/guides/getting-started/
       icon: right-arrow
       variant: primary
-    - text: Deploy to production
+    - text: Deploy on Railway
       link: /docs/guides/deployment/
-      icon: rocket
+      variant: secondary
     - text: API reference
       link: /api/docs
       icon: external
@@ -20,26 +20,44 @@ hero:
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Documentation
+## Guides
 
-<CardGrid stagger>
+<CardGrid>
+  <Card title="Getting started" icon="rocket">
+    Create the admin account, build a form, publish it, share it, and read the responses.
+    [Read the guide](/docs/guides/getting-started/)
+  </Card>
+  <Card title="Endpoint forms" icon="document">
+    Keep your own HTML form. Post it to `/submit` and Probe stores it, emails it, and signs a webhook.
+    [Read the guide](/docs/guides/endpoint-forms/)
+  </Card>
+  <Card title="AI form generation" icon="pencil">
+    Describe a form in plain words and get a draft in the builder. Bring a key from any of eight providers.
+    [Read the guide](/docs/guides/ai-generation/)
+  </Card>
+  <Card title="API and agents" icon="seti:json">
+    Personal API keys, tRPC over HTTP, and `/llms.txt`, the contract agents read.
+    [Read the guide](/docs/guides/api-and-agents/)
+  </Card>
+  <Card title="Deployment" icon="setting">
+    Run Probe on Railway with a Postgres service, a custom domain and email. Troubleshooting included.
+    [Read the guide](/docs/guides/deployment/)
+  </Card>
   <Card title="Local development" icon="laptop">
-    Install, run Postgres, seed demo data, and boot both apps. Plus how to switch
-    on AI generation, Discord/Sheets integrations, and R2 uploads locally.
-    [Read the guide →](/docs/guides/local-development/)
+    Postgres in Docker, schema push, demo data, and both apps on your machine.
+    [Read the guide](/docs/guides/local-development/)
   </Card>
-  <Card title="Deployment" icon="rocket">
-    Ship the single-container image with Kamal + GitHub Actions, wire secrets the
-    right way, and enable integrations after deploy.
-    [Read the guide →](/docs/guides/deployment/)
-  </Card>
-  <Card title="Environment variables" icon="setting">
-    Every variable — scope, required vs optional, and exactly what it gates.
-    [Browse the reference →](/docs/reference/environment/)
+</CardGrid>
+
+## Reference
+
+<CardGrid>
+  <Card title="Environment variables" icon="list-format">
+    Every variable, what it does, and what happens when it is unset.
+    [Browse the reference](/docs/reference/environment/)
   </Card>
   <Card title="Architecture" icon="puzzle">
-    Request lifecycle, auth, the public-form guard chain, admin-gated
-    integrations, presigned uploads, and AI generation.
-    [Read the reference →](/docs/reference/architecture/)
+    How the container is laid out, how a request flows, and where data lives.
+    [Read the reference](/docs/reference/architecture/)
   </Card>
 </CardGrid>

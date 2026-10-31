@@ -1,271 +1,214 @@
 ---
-title: "Deployment Guide"
-description: "Ship Probe to production with Kamal + GitHub Actions, secrets, and integrations."
+title: Deployment
+description: Run Probe on Railway with a Postgres service, a custom domain and email. What happens on boot, updating, and troubleshooting.
 ---
 
-Probe ships as a single Docker image deployed via **Kamal** onto a single VPS. GitHub Actions handles CI and all deploy operations through a manual `workflow_dispatch` workflow — no code push triggers deploys automatically.
+Probe runs as one container and a Postgres database. The live instance at [probe.jahazi.city](https://probe.jahazi.city) runs on Railway, deployed from the [GitHub repo](https://github.com/amschel99/Probe). This guide sets up the same thing.
 
-For local development, see [`SETUP.md`](/docs/guides/local-development/). For architecture, see [`ARCHITECTURE.md`](/docs/reference/architecture/). For the complete env-var reference, see [`ENVIRONMENT.md`](/docs/reference/environment/).
+## What you are deploying
 
----
+One container runs two processes:
 
-## How it works
+- **API** on port 8000: Express, tRPC and Better Auth. Internal only.
+- **Web** on Railway's `$PORT`: Next.js. It serves the pages and proxies `/trpc`, `/api/auth`, `/submit`, `/docs`, `/api/docs`, `/openapi.json` and the export URLs to the API.
 
-One Docker image runs two Node processes inside one container:
+Everything is on one origin, so there is one domain, one certificate and no CORS for the dashboard.
 
-- `apps/api` — Express + tRPC + Scalar on `:8000` (internal only)
-- `apps/web` — Next.js on `:3000` (public); reverse-proxies `/trpc`, `/api/auth`, `/submit`, and `/docs` to the API
+Postgres runs as a separate Railway service.
 
-`kamal-proxy` on the host terminates TLS (Let's Encrypt) and routes all traffic to port 3000 in the container. Postgres runs as a Kamal accessory on the same host.
+The repo has a `Dockerfile` and a `railway.toml`. Railway builds the image from the Dockerfile and checks `/health` before sending traffic.
 
-The result is a single-origin app: one DNS record, one cert, one container, one port.
+## 1. Create the project
 
----
+1. Fork [amschel99/Probe](https://github.com/amschel99/Probe), or use your own copy.
+2. In Railway, click **New project → Deploy from GitHub repo** and pick the repo.
+3. Railway finds `railway.toml` and builds with the Dockerfile. The first build fails or crash-loops until the variables are set. That is expected.
 
-## GitHub Actions workflow
+## 2. Add Postgres
 
-**Actions → Deploy → Run workflow** is the only way to deploy.
+In the same project, click **New → Database → PostgreSQL**. Railway creates a service called `Postgres`.
 
-| Input | Options | Notes |
-|---|---|---|
-| `action` | `deploy`, `redeploy`, `rollback`, `setup`, `migrate`, `seed`, `logs`, `logs-errors`, `proxy-reboot`, `prune` | Default: `deploy` |
-| `ref` | branch, tag, or SHA | Default: `main` |
+You do not need to create tables. Probe applies its schema on every boot.
 
-What each action does:
+## 3. Set the variables
 
-| Action | Effect |
+Open the Probe service, go to **Variables**, and add:
+
+| Variable | Value |
 |---|---|
-| `setup` | Provisions the host: installs Docker, boots `kamal-proxy`, starts Postgres accessory, deploys app container for the first time |
-| `deploy` | Builds a new image, pushes to Docker Hub, rolls it out with zero-downtime swap |
-| `redeploy` | Re-deploys the same image (useful after env-var-only changes that don't need a new build) |
-| `rollback` | Rolls back to the previous container image |
-| `migrate` | Runs `drizzle-kit push --force` inside the live container |
-| `seed` | Runs `pnpm db:seed` inside the live container (idempotent; wipes and recreates the demo account only) |
-| `logs` | Streams the last 500 container log lines via SSH |
-| `logs-errors` | Streams only error-level log lines from the last 24 hours |
-| `proxy-reboot` | Reboots `kamal-proxy` (TLS renewal issues, proxy config changes) |
-| `prune` | Prunes old images and stopped containers on the host |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
+| `BETTER_AUTH_SECRET` | A random string of 32 or more characters. Run `openssl rand -base64 32`. |
+| `BETTER_AUTH_URL` | Your public origin, such as `https://forms.example.com` |
+| `PUBLIC_APP_URL` | The same origin |
+| `NODE_ENV` | `production` |
 
----
+`DATABASE_URL` must be the reference `${{Postgres.DATABASE_URL}}`, typed exactly like that. Do not paste the connection string by hand. The reference keeps working if Railway changes the database's host or password.
 
-## First-time setup
+Do not set `NEXT_PUBLIC_API_URL` in production. Without it, the browser calls `/trpc` on the same origin and the web app proxies it. With it, the browser tries to reach the API directly and fails.
 
+Keep `BETTER_AUTH_SECRET` safe and do not change it. It signs sessions and is the key for every stored secret: captcha secrets, AI keys and Google tokens. Changing it signs everyone out and makes those secrets unreadable.
+
+Optional variables for email, AI, file uploads, Google Sheets and rate limiting are covered below and in [Environment variables](/docs/reference/environment/).
+
+Railway redeploys when you save variables.
+
+## 4. Add your domain
+
+1. In the Probe service, go to **Settings → Networking**.
+2. Click **Generate domain** to get a `*.up.railway.app` address, or **Custom domain** to use your own.
+3. For a custom domain, Railway shows a CNAME target. At your DNS provider, add a `CNAME` record from your subdomain (for example `forms`) to that target.
+4. Wait for Railway to show the domain as active. It issues the certificate.
+
+Then set `BETTER_AUTH_URL` and `PUBLIC_APP_URL` to the new `https://` origin. They must match the address people type. Sign-in, password reset and email links are built from them.
+
+## 5. Set up email
+
+Without email, Probe still works. Verification and password-reset links are printed in the server logs instead of being sent. Set up email before you invite anyone.
+
+Probe sends email through [Resend](https://resend.com). It is used for:
+
+- Endpoint-form recipient verification.
+- Response notifications and confirmation emails.
+- Password reset.
+
+To set it up:
+
+1. Create a Resend account.
+2. Go to **Domains → Add domain** and enter the domain you will send from, such as `example.com`.
+3. Add the DNS records Resend shows (SPF and DKIM, plus the optional DMARC record) at your DNS provider.
+4. Wait for Resend to mark the domain **Verified**. Until then it will not send from that domain.
+5. Go to **API keys** and create a key with sending access.
+6. In Railway, set:
+
+| Variable | Value |
+|---|---|
+| `RESEND_API_KEY` | `re_…` |
+| `RESEND_FROM` | `Probe <noreply@example.com>`, on the domain you verified |
+
+Change `RESEND_FROM`. The default address is on a domain you do not own, so Resend will reject it.
+
+## 6. Sign in
+
+Open your domain and go to `/register`. The first account registered becomes the admin. Register yourself straight away, before you share the address.
+
+Do not run `pnpm db:seed` on a public instance. It creates demo accounts with known passwords.
+
+## What happens on boot
+
+`scripts/docker-start.sh` starts the API and the web app at once, so the health check passes quickly. In the background it applies the database schema, retrying every 10 seconds for about two minutes:
+
+1. `drizzle-kit push` brings the tables in line with the code.
+2. `pnpm db:ensure` adds any newer columns and tables that must exist, and checks them with a real query.
+3. `pnpm db:themes` loads the built-in themes.
+
+Look for one of these lines in the deploy logs:
+
+```text
+✅ schema + themes applied (attempt 1)
+❌ schema push FAILED — check DATABASE_URL, then restart the service
 ```
-1. Configure all GitHub Environment secrets (see next section).
-2. Actions → Deploy → action: setup   # provisions host, boots Postgres + app
-3. Actions → Deploy → action: seed    # loads demo user, themed forms, responses
-4. Visit https://<your-domain>        # should show the landing page
+
+Retries while Postgres is starting show as `⏳ database not ready`. If you see the failure line, fix `DATABASE_URL` and restart the service.
+
+`/health` does not touch the database. A green health check means both processes are up, not that the schema applied. Check the log line.
+
+## Updating
+
+Push to the branch Railway deploys from. Railway builds a new image and swaps it in when `/health` passes. The schema is applied again on boot, so new columns appear without a manual step.
+
+To redeploy without a code change, open the latest deployment in Railway and click **Redeploy**.
+
+## Optional features
+
+Each optional feature stays off until its variables are set. Nothing breaks without them.
+
+| Feature | Variables | Then |
+|---|---|---|
+| AI for everyone | `AI_PROVIDER`, `AI_API_KEY`, `AI_MODEL`, `AI_BASE_URL` | See [AI form generation](/docs/guides/ai-generation/). |
+| File uploads | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE_URL` | The file upload field becomes available. |
+| Google Sheets | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | Enable it in **Admin → Integrations**. |
+| Discord | none | Enable it in **Admin → Integrations**. |
+| Shared rate limits | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Only needed with more than one replica. |
+
+### Google Sheets
+
+1. In [Google Cloud Console](https://console.cloud.google.com), create or pick a project.
+2. Under **APIs & Services → Library**, enable the **Google Sheets API**. Without it, the first row append fails with a 403.
+3. Configure the **OAuth consent screen**. Choose **External** and add the scope `https://www.googleapis.com/auth/spreadsheets`. While the app is in **Testing**, only the test users you list can connect. Add yourself, or publish the app.
+4. Under **Credentials**, create an **OAuth client ID** of type **Web application**.
+5. Add the redirect URI `https://<your-domain>/api/integrations/google/callback`.
+6. Set `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET` in Railway.
+7. Sign in as admin, open **Admin → Integrations** and enable Google Sheets.
+
+### File uploads with Cloudflare R2
+
+1. In Cloudflare, go to **R2** and create a bucket. Note its name and your account ID.
+2. Create an R2 API token with **Object Read & Write** on that bucket.
+3. Give the bucket a public URL: turn on the `r2.dev` address or connect a custom domain.
+4. Add a CORS policy to the bucket. Browsers upload straight to R2, so it must allow `PUT` from your domain:
+
+```json
+[
+  {
+    "AllowedOrigins": ["https://<your-domain>"],
+    "AllowedMethods": ["PUT", "GET"],
+    "AllowedHeaders": ["content-type"],
+    "MaxAgeSeconds": 3600
+  }
+]
 ```
 
-After setup, `deploy` ships code changes and `seed` re-loads demo data whenever needed.
+5. Set the five `R2_*` variables in Railway.
 
----
+## Reset a password from the command line
 
-## GitHub Environment secrets
+If the admin is locked out and email is not set up, set a new password directly against the database. Run this on your own machine, from a clone of the repo with dependencies installed:
 
-All secrets live under **Settings → Environments → `production`** in your GitHub repository. The workflow exports them as env vars; Kamal reads them through `.kamal/secrets` (which only contains `$VAR` references and is safe to commit).
+```bash
+DATABASE_URL="postgresql://…" pnpm reset-password you@example.com 'a-new-password'
+```
 
-### Required — deploy will fail without these
+Use the Postgres service's `DATABASE_PUBLIC_URL` from Railway. The internal `DATABASE_URL` only works inside Railway's network. The password must be at least 8 characters. The command also signs that account out everywhere.
 
-| Secret | What it is |
-|---|---|
-| `SSH_PRIVATE_KEY` | Private key matching a public key on the deploy host (root or deploy user) |
-| `KAMAL_SERVER_HOST` | IP address or hostname of the target VPS |
-| `KAMAL_DEPLOY_HOST` | Public domain, e.g. `probe.yourdomain.com` — drives TLS, `BETTER_AUTH_URL`, `PUBLIC_APP_URL` |
-| `KAMAL_REGISTRY_USERNAME` | Docker Hub username |
-| `KAMAL_REGISTRY_PASSWORD` | Docker Hub PAT starting with `dckr_pat_` (not your account password) |
-| `POSTGRES_PASSWORD` | Password for the Postgres accessory |
-| `BETTER_AUTH_SECRET` | 32+ char random string (`openssl rand -base64 32`). Also the master key for AES-GCM encryption and IP-hash salt — rotating it logs everyone out. |
+## Troubleshooting
 
-### Required for full functionality
+### `password authentication failed for user "postgres"` (28P01)
 
-| Secret | What it is |
-|---|---|
-| `DATABASE_URL` | Composed automatically in `.kamal/secrets` from `KAMAL_SERVER_HOST` + `POSTGRES_PASSWORD`; do not set this separately |
-| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST URL — rate limiting (omit to run without rate limiting) |
-| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST token |
-| `RESEND_API_KEY` | Resend API key — email delivery (omit and email becomes a no-op) |
+Probe cannot log in to Postgres.
 
-### NEXT_PUBLIC_* — build-time client config
+1. Check that `DATABASE_URL` on the Probe service is exactly `${{Postgres.DATABASE_URL}}`, not a pasted string.
+2. If it is, the password variable on the Postgres service was probably changed after the database was created. Postgres keeps the password it was created with. Open the Postgres service, connect to the database (for example with **Data → Query**, or `psql` with `DATABASE_PUBLIC_URL`) and run:
 
-> **Important:** `NEXT_PUBLIC_*` variables are inlined into the JavaScript bundle at `next build` time. They are not read at container startup. Kamal passes them as Docker build args (declared in `config/deploy.yml → builder.args` and in the `Dockerfile` as `ARG`/`ENV`). Changing them requires a new `deploy` (which triggers a rebuild), not just a `redeploy`.
+```sql
+ALTER USER postgres PASSWORD '<the value of POSTGRES_PASSWORD>';
+```
 
-> The build args actually wired into the image are `NEXT_PUBLIC_RAZORPAY_DONATE_LINK`, `NEXT_PUBLIC_GITHUB_URL`, `NEXT_PUBLIC_TWITTER_URL`, `NEXT_PUBLIC_LINKEDIN_URL`, and `NEXT_PUBLIC_ENABLE_CHAI_NUDGE` (see `config/deploy.yml → builder.args` and the `Dockerfile`). The app's public origin is read **server-side** from `PUBLIC_APP_URL` / `BETTER_AUTH_URL` (derived from `KAMAL_DEPLOY_HOST`) — there is no `NEXT_PUBLIC_APP_URL`; the browser reaches the API same-origin through the Next reverse-proxy.
+3. Restart the Probe service.
 
-| Secret | Default | What it does |
-|---|---|---|
-| `NEXT_PUBLIC_RAZORPAY_DONATE_LINK` | — | Static Razorpay payment link for donations |
-| `NEXT_PUBLIC_ENABLE_CHAI_NUDGE` | `true` (hosted instance) | Show "buy me a chai" prompts. Set `false` for your own self-hosted fork so users never see our donate link. |
-| `NEXT_PUBLIC_GITHUB_URL` | — | GitHub link shown on `/open-source` |
-| `NEXT_PUBLIC_TWITTER_URL` | — | X / Twitter link shown on `/open-source` |
-| `NEXT_PUBLIC_LINKEDIN_URL` | — | LinkedIn link shown on `/open-source` |
+### `column "…" does not exist`
 
-### Optional integrations
+The code is newer than the database schema. Restart or redeploy the Probe service. Boot applies the schema again. Check for the `✅ schema + themes applied` line.
 
-| Secret | What it is |
-|---|---|
-| `GOOGLE_OAUTH_CLIENT_ID` | Google Cloud OAuth 2.0 client ID (for Google Sheets integration) |
-| `GOOGLE_OAUTH_CLIENT_SECRET` | Google Cloud OAuth 2.0 client secret |
-| `R2_ACCOUNT_ID` | Cloudflare account ID (for file upload field) |
-| `R2_ACCESS_KEY_ID` | R2 API token access key ID |
-| `R2_SECRET_ACCESS_KEY` | R2 API token secret |
-| `R2_BUCKET` | R2 bucket name |
-| `R2_PUBLIC_BASE_URL` | Public base URL for the bucket, e.g. `https://files.yourdomain.com` |
+### "Invalid redirectURL" or sign-in fails with an origin error
 
----
+`BETTER_AUTH_URL` and `PUBLIC_APP_URL` do not match the domain you are using. Set both to the public origin, with `https://` and no trailing slash, and redeploy.
 
-## Secrets & Kamal masking
+### "Too many requests" when resetting a password
 
-Kamal **masks every secret value in its log output** (replacing it with `[REDACTED]`). That gives a sharp rule for what goes where, and a couple of traps to avoid:
+Auth endpoints are rate-limited by IP. Wait a minute and try again.
 
-- **Only true secrets go in `env.secret` (and `.kamal/secrets`).** These are written to an env file on the host and never printed. Public, build-time values — every `NEXT_PUBLIC_*` — are **not** secrets: they're inlined into the client bundle at build and are passed as `builder.args` in `config/deploy.yml`. Listing a public value as a secret is pointless (it ships to the browser anyway) **and** risks the masker redacting that exact string where it legitimately appears in clear log output. (We removed `NEXT_PUBLIC_*` from `env.secret` for this reason — they remain GitHub *secrets* only so the values aren't committed, but Kamal treats them as build args, not runtime secrets.)
-- **Don't let a clear variable's value duplicate a secret's value.** Because masking is a literal string replace across all output, a clear var that happens to contain a secret's value will show up `[REDACTED]` and can confuse debugging. Keep secrets high-entropy and distinct (random tokens, not words).
-- **Optional secrets must be empty-safe.** Unset optional integrations (`GOOGLE_OAUTH_*`, `R2_*`) are referenced in `.kamal/secrets` as `${VAR:-}`, so an unset one resolves to an empty string and the deploy still succeeds — the feature simply reports "unavailable".
-- **`POSTGRES_PASSWORD` must be URL-safe.** It is interpolated into `DATABASE_URL` (`postgres://user:PASSWORD@host/db`), so characters like `@ : / # ? %` or spaces will break the connection string. Generate a safe one with `openssl rand -hex 32` (hex is always URL-safe). This is the most common "a secret value broke the deploy" footgun.
+### No emails arrive
 
-`.kamal/secrets` is committed **by design**: it contains only `$VAR` indirections (no literal values). The real values come from GitHub Environment secrets, which the workflow exports as env vars before `kamal deploy`.
+- Check that `RESEND_API_KEY` is set.
+- Check that `RESEND_FROM` is on a domain verified in Resend.
+- Look in the server logs. Without email, Probe prints verification and reset links there.
 
----
+### The build fails while loading fonts
 
-## Enabling integrations after deploy
+Older versions downloaded fonts from Google during `next build`, which could fail. The fonts are now committed to the repo. Pull the latest code.
 
-Optional integrations follow a two-step pattern: set env vars + redeploy, then enable in the admin dashboard.
+## Other hosts and Kamal
 
-### Enabling Google Sheets
+Probe runs anywhere that can build the Dockerfile and give it a Postgres database. Set the same variables. The container listens on `$PORT`, or 3000 if it is unset, and answers `/health`.
 
-After the env vars are set and the app is redeployed:
-
-1. Log in as an admin user.
-2. Dashboard → Admin → Integrations tab.
-3. Toggle Google Sheets to **Enabled**.
-
-Form owners can then connect their Google account (Dashboard → Forms → [form] → Integrations → Google Sheets → Connect).
-
-If `GOOGLE_OAUTH_CLIENT_ID` is missing, the admin toggle shows "Configure Google OAuth to enable" and cannot be activated.
-
-### Enabling Discord
-
-Discord requires no global env var — the webhook URL is per-form.
-
-1. Log in as admin, Dashboard → Admin → Integrations → enable Discord.
-2. Form owners go to their form builder → Integrations → Discord → paste the webhook URL.
-
-### Enabling file uploads (R2)
-
-After R2 env vars are set and the app is redeployed, the `file_upload` field type automatically appears in the form builder for all users. No admin toggle is needed.
-
----
-
-## Step-by-step: creating a Google Cloud OAuth client
-
-1. Go to [console.cloud.google.com](https://console.cloud.google.com) and create (or pick) a project.
-2. **Enable the Sheets API** — APIs & Services → **Library** → search "Google Sheets API" → **Enable**. *(Skipping this is the #1 cause of a 403 on the first row append, even when OAuth itself succeeds.)*
-3. **Configure the OAuth consent screen** — APIs & Services → OAuth consent screen:
-   - User type: **External**.
-   - Add the scope `https://www.googleapis.com/auth/spreadsheets`.
-   - **Publishing status matters:** while the app is in **Testing**, only Google accounts you add under **Test users** can connect — anyone else hits `Error 403: access_denied`. Add the email(s) you'll connect with, or click **Publish app** to allow any account.
-4. APIs & Services → **Credentials** → Create Credentials → **OAuth client ID** → Application type **Web application**.
-5. **Authorised redirect URIs** — add both the ones you'll use:
-   - Production: `https://<your-domain>/api/integrations/google/callback`
-   - Local dev: `http://localhost:3000/api/integrations/google/callback`
-   (The app derives the redirect from `PUBLIC_APP_URL`, which defaults to `http://localhost:3000` locally.)
-6. Copy the **Client ID** and **Client Secret**. Locally, put them in `.env` (`GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`) and run `./setup.sh`; in production add them as GitHub Environment secrets.
-7. Restart the API (local) or run `deploy` (prod) so the values are picked up at startup, then Admin → Integrations → enable Google Sheets, and connect your account in Settings.
-
----
-
-## Step-by-step: creating a Cloudflare R2 bucket + API token
-
-1. Log in to [dash.cloudflare.com](https://dash.cloudflare.com) → R2 Object Storage → Create bucket. Note the **bucket name**. Your **Account ID** (`R2_ACCOUNT_ID`) is shown on the R2 overview / Account Home page.
-2. R2 → Manage R2 API tokens → Create API token. Permissions: **Object Read & Write** on that bucket. Copy the **Access Key ID** and **Secret Access Key**.
-3. For a public base URL (`R2_PUBLIC_BASE_URL`), either enable public access on the bucket (Cloudflare gives a `*.r2.dev` URL) or connect a custom domain under R2 → Settings → Custom Domain.
-4. **Configure bucket CORS (required).** The browser uploads files **directly** to a presigned R2 URL from your app's origin, so the bucket must allow cross-origin `PUT`. R2 → your bucket → **Settings → CORS policy** → add:
-   ```json
-   [
-     {
-       "AllowedOrigins": ["https://<your-domain>", "http://localhost:3000"],
-       "AllowedMethods": ["PUT", "GET"],
-       "AllowedHeaders": ["content-type"],
-       "MaxAgeSeconds": 3600
-     }
-   ]
-   ```
-   *(Without this, the upload PUT fails in the browser with a CORS error even though presigning succeeds. Include `http://localhost:3000` only while testing locally.)*
-5. Set the five vars — locally in `.env` then `./setup.sh`; in production as GitHub Environment secrets: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE_URL`.
-6. Restart the API (local) or run `deploy` (prod). The `file_upload` field type then appears automatically in the builder (no admin toggle).
-
----
-
-## Security notes & known follow-ups
-
-- **Google OAuth `state` is not signed.** The OAuth callback carries the user id in the `state` parameter to associate the returned tokens with the right account; the callback re-verifies that user exists before storing tokens, but `state` is not an HMAC-signed CSRF nonce. Hardening follow-up: sign `state` (e.g. HMAC with `BETTER_AUTH_SECRET`) and verify it on callback before exchanging the code. Low risk for a single-tenant hosted instance; worth doing before opening Google connect to untrusted users.
-- **OAuth tokens & captcha/AI secrets are encrypted at rest** (AES-256-GCM, key derived from `BETTER_AUTH_SECRET` via HKDF). Rotating `BETTER_AUTH_SECRET` makes all of them unreadable — users must reconnect Google / re-enter their AI key. See `/docs/reference/environment/`.
-- **Integration delivery is fire-and-forget.** A failing Discord webhook or Sheets append is logged and never blocks (or fails) the form submission.
-
----
-
-## Kamal config files
-
-| File | Role |
-|---|---|
-| `config/deploy.yml` | Kamal service definition — image, host, proxy, env, build args, Postgres accessory |
-| `.kamal/secrets` | Env-var template (only `$VAR` references, no literal values — safe to commit) |
-| `.github/workflows/deploy.yml` | GitHub Actions workflow — all deploy operations |
-| `Dockerfile` | Multi-stage build: deps → Next.js build → runtime |
-| `scripts/docker-start.sh` | Container entrypoint: starts the API then Next.js |
-
----
-
-## Pre-deploy checklist
-
-Probe is designed so that **every optional feature degrades gracefully when its keys are absent.** The only secrets that are truly mandatory are the two below; everything else is optional and the app boots and runs core flows without it.
-
-### Minimum required (core works with just these)
-
-- [ ] `DATABASE_URL` — Postgres connection string (in production, composed automatically in `.kamal/secrets` from `POSTGRES_PASSWORD`).
-- [ ] `BETTER_AUTH_SECRET` — 32+ char random string (`openssl rand -base64 32`). Also the master key for AES-GCM encryption and the IP-hash salt.
-- [ ] `BETTER_AUTH_URL` / `PUBLIC_APP_URL` — the public origin (in production, derived from `KAMAL_DEPLOY_HOST`). They default to `http://localhost:3000`, so local dev needs nothing.
-
-With only those set, **all of these work**: register/login, create/edit/reorder/delete fields, publish/unpublish, fill + submit a public form (`/f/[slug]`), view responses, CSV/Excel/PDF export, endpoint forms (`/submit`), and the admin dashboard.
-
-### Optional (each degrades safely when unset)
-
-| Feature | Key(s) | Behavior when unset |
-|---|---|---|
-| Rate limiting | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Permissive no-op limiter — site stays up, rate limits off (warns in prod). |
-| Email | `RESEND_API_KEY` | `sendEmail()` is a no-op — submissions still store + show in the dashboard. |
-| File uploads | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE_URL` | `file_upload` field hidden in the builder; `uploads.presign` throws `PRECONDITION_FAILED` only if called. Forms without file fields unaffected. |
-| Google Sheets | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | Integration reported "unavailable"; admin can't enable; delivery is a no-op. Never throws at boot. |
-| Discord | (none — per-form webhook) | Admin-gated; delivery is fire-and-forget. |
-| AI generation | (none — per-user BYO Anthropic key) | Builder hides the AI panel; `ai.generateForm` throws `PRECONDITION_FAILED` only if called. |
-| Donation nudge | `NEXT_PUBLIC_ENABLE_CHAI_NUDGE`, `NEXT_PUBLIC_RAZORPAY_DONATE_LINK` (build-time) | No nudges shown. |
-
-### Verify "core works with no optional keys"
-
-Before shipping, prove the graceful-degradation contract holds:
-
-1. In a scratch environment set **only** `DATABASE_URL` + `BETTER_AUTH_SECRET` (leave every optional key empty).
-2. Boot the API and web app — both should start with **no thrown errors** (rate-limiting / Sheets / R2 just log "unavailable" / "disabled").
-3. Register a user, create a form, add/reorder/delete fields, publish it.
-4. Open `/f/<slug>`, submit a response — it should save (no email is sent; that's expected).
-5. View responses and export CSV / Excel / PDF.
-6. Create an endpoint form and POST to `/submit` — the submission stores even with no `RESEND_API_KEY`.
-7. Confirm the builder does **not** offer the file-upload field type and Settings does **not** show AI generation until keys are added.
-
-If any of these throw because an optional key is missing, that's a bug — optional features must never break a core path.
-
----
-
-## Health check
-
-Kamal polls `GET /health` every 5 seconds with a 3-second timeout. The route returns `200 OK` when the Next.js server is up. The app is only promoted to live traffic once the health check passes.
-
----
-
-## Notes on `drizzle-kit push` vs migrations
-
-The current setup uses `pnpm db:push` (via the `migrate` action), which drops and recreates schema objects. This is appropriate for early-stage development. Before onboarding real users with production data you care about, switch to `drizzle-kit generate` + committed SQL migration files run at container start.
-
----
-
-— *Probe is based on [ChaiForm](https://github.com/developedbysaad) by Saad (MIT).*
+The repo also keeps a Kamal setup as an alternative for a single VPS: `config/deploy.yml`, `.kamal/secrets` and a manual GitHub Actions workflow in `.github/workflows/deploy.yml`. It runs Postgres as a Kamal accessory on the same host and uses `kamal-proxy` for TLS. Railway is the supported path. Read those files before using Kamal.
