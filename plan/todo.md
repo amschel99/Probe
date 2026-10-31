@@ -2,7 +2,7 @@
 
 Single source of truth for what we're building, the order we're building it in, and the architectural patterns we've committed to. Everything in this file is internal — kept under version control so future-me (or anyone else) can pick up exactly where we left off.
 
----
+
 
 ## Product summary
 

@@ -6,7 +6,7 @@ import { defineConfig } from "astro/config";
 // build at /docs (the Scalar API reference moved to /api/docs). `base: "/docs"`
 // makes every asset + link resolve under that prefix.
 export default defineConfig({
-  site: process.env.PUBLIC_APP_URL || "https://probe.riftfi.com",
+  site: process.env.PUBLIC_APP_URL || "https://probe.jahazi.city",
   base: "/docs",
   integrations: [
     starlight({

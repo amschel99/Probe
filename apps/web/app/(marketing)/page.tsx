@@ -203,13 +203,13 @@ export default async function LandingPage() {
                 href="/llms.txt"
                 className="mt-8 inline-block border-b border-[#C8963E] pb-0.5 font-mono text-sm text-[#F2EDE5] hover:text-[#C8963E]"
               >
-                probe.riftfi.com/llms.txt
+                probe.jahazi.city/llms.txt
               </a>
             </div>
             <pre className="overflow-x-auto border border-[#2C2F2D] bg-[#0B0C0B] p-6 font-mono text-[13px] leading-[1.75] text-[#C9CCCA]">
               <code>
                 <span className="text-[#9AA09E]"># create a form</span>
-                {"\n"}curl -X POST https://probe.riftfi.com/trpc/forms.create \
+                {"\n"}curl -X POST https://probe.jahazi.city/trpc/forms.create \
                 {"\n"}  -H <span className="text-[#C8963E]">&quot;Authorization: Bearer probe_…&quot;</span> \
                 {"\n"}  -d <span className="text-[#C8963E]">&apos;{"{"}&quot;json&quot;:{"{"}&quot;title&quot;:&quot;Field survey&quot;{"}}"}&apos;</span>
                 {"\n\n"}
@@ -310,7 +310,7 @@ function FormSpecimen() {
   return (
     <div className="border border-probe-200 bg-[var(--color-surface)] p-8 sm:p-10" aria-hidden>
       <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-probe-700">
-        probe.riftfi.com/f/site-visit
+        probe.jahazi.city/f/site-visit
       </div>
       <div className="mt-6 font-display text-[2rem] leading-tight">Site visit request</div>
       <p className="mt-2 text-sm font-light text-[var(--color-body)]">

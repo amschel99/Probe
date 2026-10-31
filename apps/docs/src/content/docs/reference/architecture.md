@@ -26,7 +26,7 @@ In **prod**: `next start` serves the SPA pages, RSC payloads, and API routes (wh
 
 | Layer       | What's there                                                            |
 | ----------- | ----------------------------------------------------------------------- |
-| DNS         | One A record → `probe.riftfi.com`                         |
+| DNS         | One A record → `probe.jahazi.city`                         |
 | TLS + proxy | `kamal-proxy` on the host; Let's Encrypt cert; routes by `Host:` header |
 | Container   | One Docker image. One Node process. Next.js on port 3000.              |
 | Inside it   | Next.js pages + `/api/[[...path]]` catch-all forwards to Hono           |
@@ -340,7 +340,7 @@ Contextual "buy me a chai" prompts that appear in the dashboard footer and as to
 
 **Gate**: Controlled entirely by the build-time variable `NEXT_PUBLIC_ENABLE_CHAI_NUDGE`. When `false` (the default), no nudge UI is rendered — the code paths are present but the component returns null. When `true`, the nudge is shown with a link to `NEXT_PUBLIC_RAZORPAY_DONATE_LINK`.
 
-**Self-host behaviour**: Self-hosters who clone the repo get `NEXT_PUBLIC_ENABLE_CHAI_NUDGE=false` by default, so their users will never see a donate link pointing at the original author's account. The hosted instance at `probe.riftfi.com` sets it to `true` via a build arg in `config/deploy.yml`.
+**Self-host behaviour**: Self-hosters who clone the repo get `NEXT_PUBLIC_ENABLE_CHAI_NUDGE=false` by default, so their users will never see a donate link pointing at the original author's account. The hosted instance at `probe.jahazi.city` sets it to `true` via a build arg in `config/deploy.yml`.
 
 **Build-time note**: Because this is a `NEXT_PUBLIC_*` variable, changing it requires a new Docker build, not just a container restart. In `config/deploy.yml`, `builder.args` passes it through to the Dockerfile `ARG`/`ENV` declarations so Kamal handles this automatically on each `deploy`.
 
@@ -350,7 +350,7 @@ Contextual "buy me a chai" prompts that appear in the dashboard footer and as to
 
 Static, self-contained HTML pages available at `/templates/html` for download.
 
-**Files**: Four templates live in `apps/web/public/form-templates/` — `contact.html`, `newsletter.html`, `waitlist.html`, `feedback.html`. They are plain HTML files with inline CSS and a `<form>` pointing at `https://probe.riftfi.com/api/submit`. The access key placeholder (`YOUR_ACCESS_KEY`) must be replaced by the user after downloading.
+**Files**: Four templates live in `apps/web/public/form-templates/` — `contact.html`, `newsletter.html`, `waitlist.html`, `feedback.html`. They are plain HTML files with inline CSS and a `<form>` pointing at `https://probe.jahazi.city/api/submit`. The access key placeholder (`YOUR_ACCESS_KEY`) must be replaced by the user after downloading.
 
 **No account required to download**: The gallery page is public. Users only need an account when they want to generate an access key (Dashboard → Endpoint Forms → New) so submissions actually deliver.
 

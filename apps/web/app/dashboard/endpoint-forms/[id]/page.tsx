@@ -44,7 +44,7 @@ export default function EndpointFormDetail() {
   if (!formQuery.data) return <p className="text-probe-700">Loading…</p>;
 
   const form = formQuery.data;
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://probe.riftfi.com";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://probe.jahazi.city";
   const endpoint = `${origin}/submit`;
 
   return (

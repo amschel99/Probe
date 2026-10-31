@@ -1,8 +1,8 @@
 # Probe
 
-> Probe is a self-hosted form builder (a Tally / Typeform alternative) running at https://probe.riftfi.com. It has two surfaces: **hosted forms** (themed pages at `/f/<slug>` built in a dashboard) and **endpoint forms** (a form-to-email/webhook backend: POST any HTML form or JSON to `/submit` with an access key). Everything is same-origin on one domain.
+> Probe is a self-hosted form builder (a Tally / Typeform alternative) running at https://probe.jahazi.city. It has two surfaces: **hosted forms** (themed pages at `/f/<slug>` built in a dashboard) and **endpoint forms** (a form-to-email/webhook backend: POST any HTML form or JSON to `/submit` with an access key). Everything is same-origin on one domain.
 
-Base URL: `https://probe.riftfi.com` (replace with your instance's origin if different).
+Base URL: `https://probe.jahazi.city` (replace with your instance's origin if different).
 
 ## Which surface to use
 
@@ -13,7 +13,7 @@ Base URL: `https://probe.riftfi.com` (replace with your instance's origin if dif
 ## 1. Endpoint forms — `POST /submit` (no auth)
 
 ```
-POST https://probe.riftfi.com/submit
+POST https://probe.jahazi.city/submit
 Content-Type: application/json | application/x-www-form-urlencoded | multipart/form-data
 ```
 
@@ -29,7 +29,7 @@ Body fields:
 
 Example (server-side / agent):
 ```bash
-curl -X POST https://probe.riftfi.com/submit \
+curl -X POST https://probe.jahazi.city/submit \
   -H "Content-Type: application/json" \
   -d '{"access_key":"YOUR_ACCESS_KEY","name":"Ada","email":"ada@example.com","message":"Hello"}'
 ```
@@ -55,7 +55,7 @@ X-API-Key: probe_xxxxxxxxxxxxxxxx
 - Keys don't expire; they stop working when revoked in Settings. Treat them like passwords.
 - A missing or invalid key on a protected call returns tRPC error code `UNAUTHORIZED`.
 - API keys can't create or revoke API keys (`apiKeys.create` / `apiKeys.revoke` need a dashboard session). `apiKeys.list` works.
-- Fallback without a key: sign in with `POST /api/auth/sign-in/email` `{"email","password"}` (send `Origin: https://probe.riftfi.com`), keep the session cookie, and send it instead of the header.
+- Fallback without a key: sign in with `POST /api/auth/sign-in/email` `{"email","password"}` (send `Origin: https://probe.jahazi.city`), keep the session cookie, and send it instead of the header.
 
 ## 3. tRPC over HTTP — `/trpc/<router>.<procedure>`
 
@@ -68,12 +68,12 @@ The API uses tRPC with the **superjson** transformer, so inputs and outputs are 
 
 ```bash
 # Query example
-curl -G https://probe.riftfi.com/trpc/forms.list \
+curl -G https://probe.jahazi.city/trpc/forms.list \
   -H "Authorization: Bearer $PROBE_API_KEY" \
   --data-urlencode 'input={"json":{"limit":20}}'
 
 # Mutation example
-curl -X POST https://probe.riftfi.com/trpc/forms.publish \
+curl -X POST https://probe.jahazi.city/trpc/forms.publish \
   -H "Authorization: Bearer $PROBE_API_KEY" -H "Content-Type: application/json" \
   -d '{"json":{"id":"<form-uuid>"}}'
 ```
@@ -89,7 +89,7 @@ All calls below send `-H "Authorization: Bearer $PROBE_API_KEY"`.
    `{"formId":"<uuid>","type":"short_text","label":"Your name","required":true,"order":0,"config":{}}`
    Select-type example: `{"formId":"<uuid>","type":"single_select","label":"Plan","order":1,"config":{"options":[{"label":"Free","value":"free"},{"label":"Pro","value":"pro"}]}}`
 4. `forms.publish` (mutation) `{"id":"<uuid>"}`.
-5. Share `https://probe.riftfi.com/f/<slug>`.
+5. Share `https://probe.jahazi.city/f/<slug>`.
 
 Field `type` values: `short_text`, `long_text`, `email`, `number`, `single_select`, `multi_select`, `checkbox`, `rating`, `date`, `phone`, `url`, `linear_scale`, `ranking`, `address`, `time`, `signature`, `file_upload` (only if storage is configured), `page_break`.
 Useful `config` keys: `options[{label,value}]`, `maxRating`, `ratingStyle` (`star|number|emoji`), `min`, `max`, `step`, `minLength`, `maxLength`, `scaleMin`, `scaleMax`, `scaleMinLabel`, `scaleMaxLabel`, `hidden`, `prefillKey`. Unknown config keys are rejected.
@@ -117,7 +117,7 @@ If `ai.status` reports `hasKey: true`, one call creates a full draft (title + fi
 - `responses.list` (query) `{"formId":"<uuid>","limit":25,"from":"<ISO datetime>","to":"<ISO datetime>"}` → `{items:[...]}`. Hosted-form answers are in `items[].values[]` (`fieldId`, `value`). Endpoint submissions are in `items[].payload`.
 - `responses.get` (query) `{"id":"<response-uuid>"}`.
 - `forms.getAnalytics` (query) `{"id":"<form-uuid>"}` → views, starts, completion rate, daily series.
-- File export (API key or session): `GET /forms/<formId>/export.csv` (also `.xlsx`, `.pdf`), e.g. `curl -H "Authorization: Bearer $PROBE_API_KEY" -o out.csv https://probe.riftfi.com/forms/<formId>/export.csv`.
+- File export (API key or session): `GET /forms/<formId>/export.csv` (also `.xlsx`, `.pdf`), e.g. `curl -H "Authorization: Bearer $PROBE_API_KEY" -o out.csv https://probe.jahazi.city/forms/<formId>/export.csv`.
 
 ### Procedure index
 
@@ -135,7 +135,7 @@ If `ai.status` reports `hasKey: true`, one call creates a full draft (title + fi
 
 ## Links
 
-- [OpenAPI spec](https://probe.riftfi.com/openapi.json)
-- [API reference (Scalar)](https://probe.riftfi.com/api/docs)
-- [Docs](https://probe.riftfi.com/docs)
-- [Health](https://probe.riftfi.com/health)
+- [OpenAPI spec](https://probe.jahazi.city/openapi.json)
+- [API reference (Scalar)](https://probe.jahazi.city/api/docs)
+- [Docs](https://probe.jahazi.city/docs)
+- [Health](https://probe.jahazi.city/health)

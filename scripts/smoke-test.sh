@@ -5,7 +5,7 @@
 # and the DB has been seeded (`pnpm db:seed`).
 #
 # Run with:    bash scripts/smoke-test.sh
-# Set BASE_URL=https://probe.riftfi.com to target prod.
+# Set BASE_URL=https://probe.jahazi.city to target prod.
 
 set -u
 BASE_URL="${BASE_URL:-http://localhost:3000}"

@@ -10,10 +10,10 @@ Google Forms has the design sense of a tax return. Typeform costs more than your
 
 | | |
 |---|---|
-| **App** | https://probe.riftfi.com |
-| **Docs** | https://probe.riftfi.com/docs |
-| **API reference (Scalar)** | https://probe.riftfi.com/api/docs |
-| **For AI agents** | https://probe.riftfi.com/llms.txt (source: [`apps/web/public/llms.txt`](./apps/web/public/llms.txt)) |
+| **App** | https://probe.jahazi.city |
+| **Docs** | https://probe.jahazi.city/docs |
+| **API reference (Scalar)** | https://probe.jahazi.city/api/docs |
+| **For AI agents** | https://probe.jahazi.city/llms.txt (source: [`apps/web/public/llms.txt`](./apps/web/public/llms.txt)) |
 
 ## Minimum to self-host
 
@@ -23,7 +23,7 @@ Only three env vars are required; everything else is optional and degrades grace
 |---|---|
 | `DATABASE_URL` | Postgres connection string (the Kamal deploy runs its own Postgres accessory and composes this for you) |
 | `BETTER_AUTH_SECRET` | 32+ chars (`openssl rand -base64 32`). Signs sessions and encrypts stored secrets |
-| `BETTER_AUTH_URL` + `PUBLIC_APP_URL` | Your public origin, e.g. `https://probe.riftfi.com` (Kamal sets both from `KAMAL_DEPLOY_HOST`) |
+| `BETTER_AUTH_URL` + `PUBLIC_APP_URL` | Your public origin, e.g. `https://probe.jahazi.city` (Kamal sets both from `KAMAL_DEPLOY_HOST`) |
 
 On boot the container pushes the schema and loads the built-in themes (`pnpm db:themes`). **The first account you register becomes the admin.** No demo seed is needed — don't run `pnpm db:seed` on a public instance, it creates demo accounts with well-known passwords.
 
@@ -138,14 +138,14 @@ wipes and re-seeds the demo account only).
 | `KAMAL_REGISTRY_USERNAME` / `KAMAL_REGISTRY_PASSWORD` | Docker Hub username + **PAT** (`dckr_pat_…`) |
 | `SSH_PRIVATE_KEY` | key for the deploy host |
 | `KAMAL_SERVER_HOST` | server IP / hostname |
-| `KAMAL_DEPLOY_HOST` | public domain — `probe.riftfi.com` |
+| `KAMAL_DEPLOY_HOST` | public domain — `probe.jahazi.city` |
 | `POSTGRES_PASSWORD` | Postgres password (also composes `DATABASE_URL`) |
 | `BETTER_AUTH_SECRET`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `RESEND_API_KEY` | app secrets |
 | `NEXT_PUBLIC_*` | GitHub / X / LinkedIn / Razorpay links, nudge flag — **baked at build time** |
 | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | Google Sheets integration (optional) |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE_URL` | Cloudflare R2 file uploads (optional) |
 
-`KAMAL_DEPLOY_HOST` drives the domain, SSL, `PUBLIC_APP_URL`, and `BETTER_AUTH_URL` — set it to `probe.riftfi.com`. The Kamal deploy boots one container + one Postgres accessory on a single VPS. See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) for the full production guide and [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for the deployment shape table.
+`KAMAL_DEPLOY_HOST` drives the domain, SSL, `PUBLIC_APP_URL`, and `BETTER_AUTH_URL` — set it to `probe.jahazi.city`. The Kamal deploy boots one container + one Postgres accessory on a single VPS. See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) for the full production guide and [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for the deployment shape table.
 
 ## License
 
