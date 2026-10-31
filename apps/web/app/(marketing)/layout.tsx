@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 
-import { ThemeToggle } from "@/components/theme-toggle";
-
 const NAV: [string, string][] = [
   ["/explore", "Explore"],
   ["/templates", "Templates"],
@@ -13,31 +11,30 @@ const NAV: [string, string][] = [
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-30 border-b border-probe-200 bg-[var(--color-surface)]/90 backdrop-blur">
-        <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between gap-4 px-5 sm:px-6">
+      <header className="sticky top-0 z-30 border-b border-probe-200 bg-white">
+        <div className="flex h-[76px] items-center justify-between gap-4 px-5 sm:h-[88px] sm:px-10">
           <Link href="/" className="text-probe-900" aria-label="Probe home">
             <Logo />
           </Link>
-          <nav className="flex items-center gap-1 sm:gap-2" aria-label="Main">
+          <nav className="flex items-center gap-3 sm:gap-8" aria-label="Main">
             {NAV.map(([href, label]) => (
               <Link
                 key={href}
                 href={href}
-                className="hidden px-3 py-2 font-mono text-[12.5px] text-probe-900 hover:text-probe-500 md:inline"
+                className="hidden py-2 font-mono text-[13px] text-probe-900 hover:text-probe-500 md:inline"
               >
                 {label}
               </Link>
             ))}
             <Link
               href="/login"
-              className="hidden px-3 py-2 font-mono text-[12.5px] text-probe-900 hover:text-probe-500 sm:inline"
+              className="hidden py-2 font-mono text-[13px] text-probe-900 hover:text-probe-500 sm:inline"
             >
               Log in
             </Link>
-            <Link href="/register" className="btn btn-primary ml-1 whitespace-nowrap">
+            <Link href="/register" className="btn btn-primary whitespace-nowrap font-bold">
               Get started
             </Link>
-            <ThemeToggle className="ml-1" />
           </nav>
         </div>
       </header>
@@ -80,18 +77,9 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         <div className="mx-auto max-w-6xl overflow-hidden px-5 sm:px-6">
           <div
             aria-hidden
-            className="select-none whitespace-nowrap font-display text-[28vw] leading-[0.8] tracking-[-0.04em] text-probe-900 md:text-[17rem]"
+            className="select-none font-display text-[28vw] leading-[0.8] tracking-[-0.04em] text-probe-900 md:text-[17rem]"
           >
-            Pro
-            <span
-              className="font-pixel text-[0.78em] font-bold tracking-normal text-transparent [background-clip:text] [-webkit-background-clip:text]"
-              style={{
-                backgroundImage: "radial-gradient(var(--color-probe-500) 52%, transparent 54%)",
-                backgroundSize: "6px 6px",
-              }}
-            >
-              be
-            </span>
+            Probe
           </div>
         </div>
         <div className="border-t border-probe-200">

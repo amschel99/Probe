@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 
@@ -60,7 +59,6 @@ export function DashboardNav() {
       >
         Log out
       </button>
-      <ThemeToggle />
     </nav>
   );
 }

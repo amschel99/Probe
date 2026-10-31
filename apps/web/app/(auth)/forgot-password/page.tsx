@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
   if (sent) {
     return (
       <div className="card">
-        <h1 className="display mb-2 text-3xl">Check your inbox.</h1>
+        <h1 className="display mb-2 text-4xl">Check your inbox.</h1>
         <p className="text-sm text-probe-700">
           If an account exists for <strong className="text-probe-900">{email}</strong>, we&apos;ve
           sent a link to reset its password. It expires in 1 hour.
@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="card">
-      <h1 className="display mb-2 text-3xl">Forgot your password?</h1>
+      <h1 className="display mb-2 text-4xl">Forgot your password?</h1>
       <p className="mb-6 text-sm text-probe-700">
         Enter your account email and we&apos;ll send you a link to choose a new one.
       </p>

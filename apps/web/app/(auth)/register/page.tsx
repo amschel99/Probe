@@ -43,7 +43,7 @@ export default function RegisterPage() {
 
   return (
     <div className="card">
-      <h1 className="display text-2xl font-bold mb-2">Make an account.</h1>
+      <h1 className="display text-4xl mb-2">Make an account.</h1>
       <p className="text-probe-700 text-sm mb-6">Takes 5 seconds. No credit card. Honest.</p>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>

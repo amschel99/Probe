@@ -20,7 +20,7 @@ function ResetPasswordForm() {
   if (linkError || !token) {
     return (
       <div className="card">
-        <h1 className="display mb-2 text-3xl">This link doesn&apos;t work.</h1>
+        <h1 className="display mb-2 text-4xl">This link doesn&apos;t work.</h1>
         <p className="text-sm text-probe-700">
           Reset links expire after an hour and can only be used once. Ask for a new one.
         </p>
@@ -63,7 +63,7 @@ function ResetPasswordForm() {
 
   return (
     <div className="card">
-      <h1 className="display mb-2 text-3xl">Choose a new password.</h1>
+      <h1 className="display mb-2 text-4xl">Choose a new password.</h1>
       <p className="mb-6 text-sm text-probe-700">
         At least 8 characters. You&apos;ll be signed out everywhere else.
       </p>
