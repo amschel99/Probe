@@ -28,6 +28,7 @@ import { FormRenderer } from "@/components/form-renderer";
 import { nudgeChai } from "@/lib/chai";
 import { trpc } from "@/lib/trpc";
 
+import { AiEditPanel } from "./_components/ai-edit-panel";
 import { FormTabs } from "./_components/form-tabs";
 import { IntegrationsPanel } from "./_components/integrations-panel";
 
@@ -108,6 +109,7 @@ export default function BuilderPage() {
 
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [aiEditOpen, setAiEditOpen] = useState(false);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -186,6 +188,9 @@ export default function BuilderPage() {
           responseCount={form.responseCount}
           action={
             <>
+              <button onClick={() => setAiEditOpen((v) => !v)} className="btn btn-ghost text-sm">
+                Edit with AI
+              </button>
               <button onClick={() => setPreviewOpen((v) => !v)} className="btn btn-ghost text-sm">
                 {previewOpen ? "Builder" : "Preview"}
               </button>
@@ -198,6 +203,10 @@ export default function BuilderPage() {
           }
         />
       </div>
+
+      {aiEditOpen && (
+        <AiEditPanel formId={id} status={form.status} onClose={() => setAiEditOpen(false)} />
+      )}
 
       {previewOpen ? (
         // Render the preview on the theme's own page background — exactly like the

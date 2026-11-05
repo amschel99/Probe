@@ -1,7 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import {
+  aiEditDraftSchema,
   aiFieldTypeSchema,
   aiGeneratedFormSchema,
+  fieldTypeSchema,
+  type AiEditDraft,
   type AiGeneratedForm,
   type AiProvider,
 } from "@repo/services/validators";
@@ -85,10 +88,7 @@ export interface AiConfig {
   baseUrl: string | null;
 }
 
-const SYSTEM_PROMPT = `You design web forms for Probe, a form builder. Given a short description, return one clean, sensible form.
-
-Guidelines:
-- Pick the most fitting field type for each question. Prefer single_select / multi_select (with options) over free text when the answer comes from a known set.
+const FIELD_GUIDELINES = `- Pick the most fitting field type for each question. Prefer single_select / multi_select (with options) over free text when the answer comes from a known set.
 - Give options only for single_select, multi_select and ranking; use an empty array for every other type.
 - Mark a field required only when the form genuinely needs it.
 - Keep it focused: 3-10 fields for most forms, in a logical order.
@@ -97,8 +97,26 @@ Guidelines:
 - placeholder and helpText may be "" when not useful.
 - Write the form in the same language as the description.`;
 
+const SYSTEM_PROMPT = `You design web forms for Probe, a form builder. Given a short description, return one clean, sensible form.
+
+Guidelines:
+${FIELD_GUIDELINES}`;
+
+const EDIT_SYSTEM_PROMPT = `You edit an existing web form in Probe, a form builder. You get the current form as JSON and the changes the owner wants. Return the complete updated form.
+
+Rules for editing:
+- Return every field that should remain, in the order it should appear. To remove a question, leave it out.
+- Keep each existing field's id exactly as given. Give every new field an id of "".
+- Leave fields the instructions don't mention exactly as they are: same type, label, required, placeholder, helpText and options.
+- When changing the options of an existing select, keep the value of every option that stays. Only new options get new values.
+- Never change a field to or from signature, file_upload, address or page_break, and never add new fields of those types.
+- Keep the title and description unless asked to change them.
+
+Guidelines for new or changed fields:
+${FIELD_GUIDELINES}`;
+
 /** The draft shape, as JSON Schema. Every property required so it also works as a strict schema. */
-const FORM_JSON_SCHEMA = {
+const FORM_JSON_SCHEMA: Record<string, unknown> = {
   type: "object",
   additionalProperties: false,
   properties: {
@@ -132,7 +150,50 @@ const FORM_JSON_SCHEMA = {
   required: ["title", "description", "fields"],
 } as const;
 
+/** The edit shape: the create shape plus an id on each field ("" for new ones). */
+const EDIT_JSON_SCHEMA: Record<string, unknown> = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    title: { type: "string" },
+    description: { type: "string" },
+    fields: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          id: { type: "string" },
+          type: { type: "string", enum: [...fieldTypeSchema.options] },
+          label: { type: "string" },
+          required: { type: "boolean" },
+          placeholder: { type: "string" },
+          helpText: { type: "string" },
+          options: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              properties: { label: { type: "string" }, value: { type: "string" } },
+              required: ["label", "value"],
+            },
+          },
+        },
+        required: ["id", "type", "label", "required", "placeholder", "helpText", "options"],
+      },
+    },
+  },
+  required: ["title", "description", "fields"],
+};
+
 const TIMEOUT_MS = 90_000;
+
+/** One model call: a system prompt, a user message and the JSON Schema the reply must match. */
+interface DraftRequest {
+  system: string;
+  user: string;
+  schema: Record<string, unknown>;
+}
 
 /** Validate + tidy a raw model draft: blanks become absent, options only where they belong. */
 function normalizeDraft(raw: unknown): AiGeneratedForm {
@@ -151,6 +212,29 @@ function normalizeDraft(raw: unknown): AiGeneratedForm {
       ...f,
       placeholder: f.placeholder?.trim() || undefined,
       helpText: f.helpText?.trim() || undefined,
+      options: ["single_select", "multi_select", "ranking"].includes(f.type) ? f.options : undefined,
+    })),
+  };
+}
+
+/** Validate + tidy a raw edit: blank ids mean "new field", blank text becomes absent. */
+function normalizeEditDraft(raw: unknown): AiEditDraft {
+  const parsed = aiEditDraftSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "The edited form was malformed. Try again or rephrase.",
+    });
+  }
+  const d = parsed.data;
+  return {
+    title: d.title,
+    description: d.description?.trim() || null,
+    fields: d.fields.map((f) => ({
+      ...f,
+      id: f.id?.trim() || null,
+      placeholder: f.placeholder?.trim() || null,
+      helpText: f.helpText?.trim() || null,
       options: ["single_select", "multi_select", "ranking"].includes(f.type) ? f.options : undefined,
     })),
   };
@@ -197,10 +281,10 @@ function mapAnthropicError(err: unknown): TRPCError {
   if (err instanceof Anthropic.APIError) {
     return new TRPCError({ code: "BAD_GATEWAY", message: `Anthropic API error (${err.status ?? "?"}). Try again.` });
   }
-  return new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Form generation failed." });
+  return new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "The AI request failed. Try again." });
 }
 
-async function generateWithAnthropic(cfg: AiConfig, prompt: string): Promise<AiGeneratedForm> {
+async function completeWithAnthropic(cfg: AiConfig, req: DraftRequest): Promise<unknown> {
   const client = new Anthropic({ apiKey: cfg.apiKey ?? undefined, timeout: TIMEOUT_MS });
   try {
     const response = await client.beta.messages.create({
@@ -210,11 +294,11 @@ async function generateWithAnthropic(cfg: AiConfig, prompt: string): Promise<AiG
       // request on its default fallback model inside the same call.
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: prompt }],
+      system: req.system,
+      messages: [{ role: "user", content: req.user }],
       output_config: {
         ...(supportsEffort(cfg.model) ? { effort: "low" as const } : {}),
-        format: { type: "json_schema", schema: FORM_JSON_SCHEMA },
+        format: { type: "json_schema", schema: req.schema },
       },
     });
     if (response.stop_reason === "refusal") {
@@ -223,7 +307,7 @@ async function generateWithAnthropic(cfg: AiConfig, prompt: string): Promise<AiG
     const text = response.content
       .map((b) => (b.type === "text" ? b.text : ""))
       .join("");
-    return normalizeDraft(extractJson(text));
+    return extractJson(text);
   } catch (err) {
     throw mapAnthropicError(err);
   }
@@ -277,15 +361,15 @@ async function providerError(res: Response, label: string): Promise<TRPCError> {
   return new TRPCError({ code: "BAD_GATEWAY", message: `${label} error (${res.status})${suffix}` });
 }
 
-async function generateWithOpenAiCompatible(cfg: AiConfig, prompt: string): Promise<AiGeneratedForm> {
+async function completeWithOpenAiCompatible(cfg: AiConfig, req: DraftRequest): Promise<unknown> {
   const label = PROVIDERS[cfg.provider].label;
   const url = `${baseUrlFor(cfg)}/chat/completions`;
   const messages = [
     {
       role: "system",
-      content: `${SYSTEM_PROMPT}\n\nReply with a single JSON object only, matching this JSON Schema:\n${JSON.stringify(FORM_JSON_SCHEMA)}`,
+      content: `${req.system}\n\nReply with a single JSON object only, matching this JSON Schema:\n${JSON.stringify(req.schema)}`,
     },
-    { role: "user", content: prompt },
+    { role: "user", content: req.user },
   ];
 
   const call = (jsonMode: boolean) =>
@@ -312,7 +396,7 @@ async function generateWithOpenAiCompatible(cfg: AiConfig, prompt: string): Prom
 
   const body = (await res.json()) as { choices?: { message?: { content?: string | null } }[] };
   const content = body.choices?.[0]?.message?.content ?? "";
-  return normalizeDraft(extractJson(content));
+  return extractJson(content);
 }
 
 async function verifyOpenAiCompatible(cfg: AiConfig) {
@@ -332,10 +416,37 @@ async function verifyOpenAiCompatible(cfg: AiConfig) {
 
 /* ── Public API ────────────────────────────────────────────────────────── */
 
-export function generateDraft(cfg: AiConfig, prompt: string): Promise<AiGeneratedForm> {
-  return cfg.provider === "anthropic"
-    ? generateWithAnthropic(cfg, prompt)
-    : generateWithOpenAiCompatible(cfg, prompt);
+function complete(cfg: AiConfig, req: DraftRequest): Promise<unknown> {
+  return cfg.provider === "anthropic" ? completeWithAnthropic(cfg, req) : completeWithOpenAiCompatible(cfg, req);
+}
+
+export async function generateDraft(cfg: AiConfig, prompt: string): Promise<AiGeneratedForm> {
+  return normalizeDraft(await complete(cfg, { system: SYSTEM_PROMPT, user: prompt, schema: FORM_JSON_SCHEMA }));
+}
+
+/** The form as the model sees it when editing: ids, content and options, no internal config. */
+export interface EditableForm {
+  title: string;
+  description: string | null;
+  fields: {
+    id: string;
+    type: string;
+    label: string;
+    required: boolean;
+    placeholder: string | null;
+    helpText: string | null;
+    options: { label: string; value: string }[];
+  }[];
+}
+
+/** Ask the model for the whole form after applying the owner's instructions. */
+export async function generateEditDraft(
+  cfg: AiConfig,
+  current: EditableForm,
+  instruction: string,
+): Promise<AiEditDraft> {
+  const user = `Current form:\n${JSON.stringify(current, null, 2)}\n\nChanges to make:\n${instruction}`;
+  return normalizeEditDraft(await complete(cfg, { system: EDIT_SYSTEM_PROMPT, user, schema: EDIT_JSON_SCHEMA }));
 }
 
 export function verifyConfig(cfg: AiConfig): Promise<void> {

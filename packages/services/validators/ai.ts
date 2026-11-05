@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { fieldTypeSchema } from "./field";
+
 /**
  * Validators for AI form generation. Users bring their own provider API key;
  * the model returns a form draft which we validate against these schemas before
@@ -95,3 +97,44 @@ export const generateFormSchema = z.object({
   themeId: z.string().uuid(),
 });
 export type GenerateFormInput = z.infer<typeof generateFormSchema>;
+
+/**
+ * AI edits of an existing form. The model returns the whole revised form: fields
+ * it keeps carry their existing id (so their answers survive), new fields have
+ * none. Ids are checked against the form on the server, never trusted.
+ */
+export const aiEditFieldSchema = z.object({
+  id: z.string().max(64).nullish(),
+  type: fieldTypeSchema,
+  label: z.string().trim().min(1).max(200),
+  required: z.boolean().default(false),
+  placeholder: z.string().max(200).nullish(),
+  helpText: z.string().max(500).nullish(),
+  options: z.array(aiGeneratedOptionSchema).max(50).optional(),
+});
+export type AiEditField = z.infer<typeof aiEditFieldSchema>;
+
+export const aiEditDraftSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+  description: z.string().max(2000).nullish(),
+  fields: z.array(aiEditFieldSchema).min(1).max(100),
+});
+export type AiEditDraft = z.infer<typeof aiEditDraftSchema>;
+
+export const proposeFormEditSchema = z.object({
+  formId: z.string().uuid(),
+  instruction: z
+    .string()
+    .trim()
+    .min(3, "Describe the changes you want")
+    .max(2000, "Keep the instructions under 2000 characters"),
+});
+export type ProposeFormEditInput = z.infer<typeof proposeFormEditSchema>;
+
+/** Apply a proposal the user reviewed. Publishing keeps the form's slug, so the link doesn't change. */
+export const applyFormEditSchema = z.object({
+  formId: z.string().uuid(),
+  draft: aiEditDraftSchema,
+  publish: z.boolean().default(false),
+});
+export type ApplyFormEditInput = z.infer<typeof applyFormEditSchema>;
